@@ -1,0 +1,21 @@
+# A GitHub Actions workflow for your capstone repository (copy it to .github/workflows/).
+# It runs the smoke evaluation on every pull request and fails the check when the pass rate drops below the gate.
+# Add the secret OPENROUTER_API_KEY in Settings > Secrets and variables > Actions. This course repository does not
+# run it: the file is here as a template.
+name: Smoke evaluation
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Smoke evaluation (gate 0.8)
+        working-directory: labs
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: uv run ci/smoke_eval.py --min-rate 0.8

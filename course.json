@@ -549,162 +549,161 @@
     {
       "id": "day4",
       "kind": "day",
-      "title": "Graph Engineering & Production",
+      "title": "Graph and Production",
       "deck": "slides/day4.html",
       "sessions": [
         {
-          "title": "Graph engineering",
+          "title": "State graphs with checkpoints",
+          "summary": "Explicit steps, saved state, and a person at a defined risk threshold",
           "outcomes": [
-            "Decide when a process should be a graph rather than an agent",
-            "Draw the five workflow patterns as graphs",
-            "Build typed state, rule nodes, model nodes and a router in LangGraph",
-            "Pause for a human, survive a crash, and resume"
+            "Model a booking flow as a state graph with checkpoints",
+            "Pause at an approval interrupt and resume after approval or rejection",
+            "Survive a restart without repeating work"
+          ],
+          "lo": [
+            "LO4"
           ],
           "lab": {
             "id": "4.1",
-            "title": "A permit-review graph",
+            "title": "A booking graph with an approval gate",
             "minutes": 25,
-            "summary": "Intake → document check → fee check → risk → officer gate or info request → letter → record, checkpointed to SQLite.",
-            "href": "D4_1_review_graph.ipynb",
+            "summary": "Rebuild the booking-change flow as a state graph that pauses for the duty harbour master at the TC-06 threshold, resumes after a decision, survives a restart, with a test per path.",
+            "href": "D4_1_booking_graph.ipynb",
             "steps": [
               {
-                "text": "State and the rule nodes (fees from POL-02)",
+                "text": "State and the fact-finding node",
                 "minutes": 6
               },
               {
-                "text": "Model nodes and the router",
+                "text": "The risk node and the router",
                 "minutes": 6
               },
               {
-                "text": "The officer's gate: interrupt and resume",
+                "text": "The gate: interrupt, approve or reject, a test per path",
                 "minutes": 7
               },
               {
-                "text": "Crash, restart, resume without repeating model calls",
+                "text": "Crash, restart, resume without repeating work",
                 "minutes": 6
               }
             ],
-            "stretch": "Run the two checks in parallel"
-          },
-          "lo": [
-            "LO4"
-          ]
+            "stretch": "Would an approver notice a bad change?"
+          }
         },
         {
-          "title": "Multi-agent systems",
+          "title": "Several agents and delegation",
+          "summary": "When a second agent pays, and what is lost at the handover",
           "outcomes": [
-            "Tell when splitting work across agents pays off",
-            "Build agents-as-tools and handoffs, and measure them against one agent",
-            "Publish and call an agent over A2A"
+            "Split a task between a researcher and a drafter",
+            "Compare quality and cost of two agents against one",
+            "Decide when delegation pays"
+          ],
+          "lo": [
+            "LO4",
+            "LO5"
           ],
           "lab": {
             "id": "4.2",
-            "title": "Orchestrator and workers",
+            "title": "Two agents or one?",
             "minutes": 25,
-            "summary": "Three specialists, three designs, one metered comparison; then the policy worker as a separate A2A service.",
+            "summary": "Split research and drafting between two agents and compare quality and cost with one agent on the same tasks.",
             "href": "D4_2_multi_agent.ipynb",
             "steps": [
               {
-                "text": "Workers and an HTTP-level meter",
+                "text": "The researcher: read tools, notes out",
+                "minutes": 6
+              },
+              {
+                "text": "The drafter: notes in, reply out, no tools",
                 "minutes": 5
               },
               {
-                "text": "Agents as tools vs. one agent",
-                "minutes": 8
+                "text": "Pair against single: quality and tokens on six tasks",
+                "minutes": 9
               },
               {
-                "text": "Handoffs: who answered?",
+                "text": "When does a second agent pay?",
                 "minutes": 5
-              },
-              {
-                "text": "The policy worker over A2A, called as a tool",
-                "minutes": 7
               }
             ],
-            "stretch": "Parallel fan-out with asyncio.gather"
-          },
-          "lo": [
-            "LO4"
-          ]
+            "stretch": "Delegation as a task with a status"
+          }
         },
         {
           "title": "Securing agents",
+          "summary": "Private data, untrusted content, an exit path: remove one leg",
           "outcomes": [
-            "Name the main agentic threats, with OWASP's list",
-            "Find the lethal trifecta in a design",
-            "Defend in layers that don't depend on the model obeying",
-            "Prove it with a red-team suite that also checks utility"
+            "Map the three legs of an injection risk for every tool",
+            "Reproduce a seeded prompt injection that leaks Restricted data",
+            "Contain it by removing one leg, and log the failed attempt"
+          ],
+          "lo": [
+            "LO5"
           ],
           "lab": {
             "id": "4.3",
-            "title": "Attack and defend",
+            "title": "A planted instruction, one leg removed",
             "minutes": 25,
-            "summary": "A staff inbox assistant with all three legs; the injected emails; layered defences; a red-team suite that measures both safety and utility.",
+            "summary": "Plant an instruction in a circular, watch a booking list with contact data leak, then remove one leg until the attack fails, with a logged injection run.",
             "href": "D4_3_security.ipynb",
             "steps": [
               {
-                "text": "Map the trifecta for every tool",
+                "text": "Map the three legs for every tool",
                 "minutes": 4
               },
               {
-                "text": "Attack with the injected emails; read the outbox",
-                "minutes": 5
+                "text": "The attack: watch the booking list leave",
+                "minutes": 6
               },
               {
-                "text": "Approval on sensitive reads and an egress guard",
-                "minutes": 10
+                "text": "Remove one leg, then another",
+                "minutes": 9
               },
               {
-                "text": "Red-team suite: attack success vs. benign replies",
+                "text": "The logged injection run, and the benign task still works",
                 "minutes": 6
               }
             ],
-            "stretch": "Quarantine the email (dual LLM)"
-          },
-          "lo": [
-            "LO5"
-          ]
+            "stretch": "Quarantine: read untrusted text with a model that has no tools"
+          }
         },
         {
-          "title": "Agents in production",
+          "title": "Production",
+          "summary": "An API with a key and a budget, traces, and a smoke evaluation that gates a release",
           "outcomes": [
-            "Serve an agent behind an API with keys, sessions and budgets",
-            "Survive provider failures with fallbacks",
-            "Trace every request with OpenTelemetry's GenAI conventions",
-            "Gate releases on a smoke eval; plan your capstone"
+            "Serve an agent behind an API with keys and budgets",
+            "Trace requests and tool calls with spans",
+            "Gate a release with a smoke evaluation that fails on a seeded regression"
+          ],
+          "lo": [
+            "LO6"
           ],
           "lab": {
             "id": "4.4",
-            "title": "Ship it",
+            "title": "Behind an API, traced, gated in CI",
             "minutes": 25,
-            "summary": "Rafeeq behind FastAPI, built and tested in-process; then the reference service started with uv run.",
+            "summary": "Serve Bosla behind an API with tracing, and gate it with a smoke evaluation that passes on the baseline and fails on a seeded regression.",
             "href": "D4_4_ship_it.ipynb",
             "steps": [
               {
-                "text": "The endpoint: key, session, budget, queued writes",
+                "text": "The endpoint: key, budget, a fresh port per session",
                 "minutes": 8
               },
               {
-                "text": "Fallbacks across models",
-                "minutes": 4
+                "text": "Spans: one per request, one per tool call",
+                "minutes": 7
               },
               {
-                "text": "GenAI spans: where does a request spend its time?",
-                "minutes": 6
+                "text": "The smoke gate: baseline passes, seeded regression fails",
+                "minutes": 7
               },
               {
-                "text": "A smoke eval with a gate",
-                "minutes": 5
-              },
-              {
-                "text": "Run the real service; open the capstone kit",
-                "minutes": 2
+                "text": "The README lines: tools, permissions, operating limits",
+                "minutes": 3
               }
-            ]
-          },
-          "lo": [
-            "LO6"
-          ]
+            ],
+            "stretch": "Run the service for real with uvicorn"
+          }
         }
       ]
     },

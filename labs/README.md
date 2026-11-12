@@ -1,6 +1,6 @@
-# Agentic AI Systems Engineering: labs
+# Agentic Systems Engineering: labs
 
-Hands-on notebooks for the SDAIA Academy **Agentic AI Systems Engineering (هندسة أنظمة الذكاء الاصطناعي التوكيلي)** course (AI Engineering track). Every lab builds a piece of **Rafeeq (رفيق)**, the digital assistant of **Madar Municipal Services**, a fictional municipality that issues building, renovation, signage, food-truck and event permits. The labs start from a single API call and end with an evaluated, secured agent service.
+Hands-on notebooks for the SDAIA Academy course **AE-302 Agentic Systems Engineering: Loops, Context and Harnesses (هندسة الأنظمة الوكيلة: الحلقات والسياق والأُطر)**. Every lab builds a piece of **Bosla (بوصلة)**, the booking assistant of **Marsa Ports Authority**, a fictional Red Sea port with a berth schedule, bilingual tariff circulars and a booking service with write actions. Each lab starts from a supplied reference state, so none depends on an earlier one.
 
 All labs use **free models over an API**. Nothing runs a model on your machine, and a laptop CPU or a Colab CPU runtime is enough.
 
@@ -11,7 +11,7 @@ All labs use **free models over an API**. Nothing runs a model on your machine, 
 **2a · Google Colab**
 1. Open a notebook from the [course page](https://sdaiaacademy.github.io/agentic-ai/), or directly: `https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/<notebook>.ipynb`.
 2. In the 🔑 **Secrets** panel add `OPENROUTER_API_KEY` and turn on notebook access.
-3. Run the first cell. It clones this repository, installs `requirements-colab.txt` and generates the data.
+3. Run the first cell. It clones this repository and installs `requirements-colab.txt`.
 
 **2b · Local**
 ```bash
@@ -19,15 +19,12 @@ git clone https://github.com/SDAIAAcademy/agentic-ai
 cd agentic-ai/labs
 cp .env.example .env           # then paste your key into .env
 uv sync                        # creates .venv from pyproject.toml (uv.lock pins every version)
-uv run python port_data.py     # rebuilds data/port.sqlite (Marsa Ports Authority; committed, so optional)
-uv run python prepare_data.py  # Days 2 to 4 until they are re-cased: data/madar.sqlite and data/inbox.jsonl
+uv run python port_data.py     # optional: rebuilds data/port.sqlite (committed)
 uv run jupyter lab
 ```
-Run `00_setup_check.ipynb` once before Day 1. It checks your key against all three API shapes, downloads the Day 2 embedding model and checks `uv` and Node.js.
+Run `00_setup_check.ipynb` once before Day 1. It checks your key against all three API shapes and checks `uv`.
 
-**Standalone programs** (the MCP server, the loop runner, the capstone starter) are single-file [PEP 723](https://peps.python.org/pep-0723/) scripts that declare their own dependencies. Run them with `uv run <file>.py`; no `pip install` needed.
-
-**Lab 3.1** runs [Pi](https://github.com/earendil-works/pi), an open-source coding-agent harness, which needs Node.js 22.19+. Without Node, use the recorded trace in the lab.
+**Standalone programs** (the MCP server, the CI smoke evaluation) are single-file [PEP 723](https://peps.python.org/pep-0723/) scripts that declare their own dependencies. Run them with `uv run <file>.py`.
 
 ## Models and providers
 
@@ -61,56 +58,42 @@ Free models change often. If the default disappears or is busy, pick another fre
 | 3 | An agent SDK against your own loop | [`D3_2_agents_sdk.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_2_agents_sdk.ipynb) | Agents SDK |
 | 3 | Verification inside the loop | [`D3_3_loop_engineering.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_3_loop_engineering.ipynb) | Chat Completions |
 | 3 | Grading over five trials | [`D3_4_evals.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_4_evals.ipynb) | Chat Completions |
-| 4 | A permit-review graph | [`D4_1_review_graph.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_1_review_graph.ipynb) | LangGraph + SQLite checkpoints |
-| 4 | Orchestrator and workers | [`D4_2_multi_agent.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_2_multi_agent.ipynb) | Agents SDK + A2A |
-| 4 | Attack and defend | [`D4_3_security.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_3_security.ipynb) | Chat Completions + harness hooks |
-| 4 | Ship it | [`D4_4_ship_it.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_4_ship_it.ipynb) | FastAPI + OpenTelemetry |
+| 4 | A booking graph with an approval gate | [`D4_1_booking_graph.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_1_booking_graph.ipynb) | LangGraph + SQLite checkpoints |
+| 4 | Two agents or one? | [`D4_2_multi_agent.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_2_multi_agent.ipynb) | Chat Completions |
+| 4 | A planted instruction and one leg removed | [`D4_3_security.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_3_security.ipynb) | Chat Completions + hooks |
+| 4 | Behind an API, traced, gated in CI | [`D4_4_ship_it.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_4_ship_it.ipynb) | FastAPI + OpenTelemetry |
 
 Exercises are marked **✏️ Exercise** and raise `NotImplementedError` until you fill them in. Complete reference versions are in `solutions/`. Cells marked **✱ Stretch** are optional. Self-checks print ✅ or ❌. With free models, an occasional ❌ on an answer-quality check can be the model rather than your code: re-run, or compare with the solution.
 
-Labs don't depend on each other. Each one opens a fresh copy of the Madar database in `artifacts/<lab>/`, so write tools never change the shared data.
+Labs don't depend on each other. Each one opens a fresh copy of the port database in `artifacts/<lab>/`, so write tools never change the shared data. Delete `artifacts/` before running the course's `academy check`, which reports ignored files under `labs/`.
 
-## The case study: Madar Municipal Services
+## The case study: Marsa Ports Authority
 
-`prepare_data.py` generates everything in `data/`. It is synthetic and deterministic, dated around **1 November 2026** (the labs' "today"), and contains no real personal data.
+Synthetic and deterministic, dated around **1 November 2026** (the labs' "today"); no real personal data.
 
 | Data | File | Contents |
 |---|---|---|
-| Permit database (SQLite) | `madar.sqlite` | 249 applicants, 424 permits, payments, inspections, 540 inspection slots, refunds, escalations, an outbox and an audit log |
-| Shared inbox | `inbox.jsonl` | 30 messages in Arabic and English with gold triage labels; two contain prompt injections |
-| Policies | `policies/POL-01 … POL-10` | bilingual Markdown: permit types, fees, SLAs and working days, lifecycle, inspections, appeals and refunds, violations, privacy, food-truck zones, assistant scope |
-| Eval suite | `eval/tasks.jsonl` | 30 tasks with graders (string checks, tool-call checks, database checks, LLM judge) |
-| Skills and context file | `skills/*/SKILL.md`, `AGENTS.md` | four Agent Skills (refund, inspection booking, escalation, appeal) and Rafeeq's AGENTS.md, for Lab 2.3 |
-| Loop-engineering repo | `madar_fees/` | a small Python package with seeded bugs and failing tests, for the Ralph loop in Lab 3.3 |
+| Port database (SQLite) | `data/port.sqlite`, built by `port_data.py` (fixed seed) | 8 berths, 3 shipping agents, 14 vessels, 14 bookings with contact persons (synthetic personal data, classified Restricted by TC-05), an audit log |
+| Tariff circulars | `data/circulars/TC-01 … TC-08` | bilingual Markdown: scope, berth hire (TC-02 superseded by TC-07), berth fit, dangerous goods, contact data, amendments and approval, lead times |
+| A planted circular | `data/circulars_untrusted/TC-09` | received by email, carries an instruction for "automated assistants" (Lab 4.3 only) |
+| Tasks | `data/tasks/` | ten Day 1 tasks, twenty evaluation tasks (five with a rubric), twelve retrieval questions |
+| Reference states | `data/reference/` | a long-task history (Lab 2.1) and 100 recorded runs (Lab 3.4; **synthetic**, written by `_tools/make_reference.py`) |
+| Context file and skills | `data/bosla/` | Bosla's AGENTS.md and two skills, `tariff-quote` and `booking-change` (Lab 2.3) |
+| Berth requests | `data/berth_requests.jsonl` | six requests in English and Arabic with correct answers (Lab 1.2) |
 
-`madar.py` exposes the case study to agents: `Madar(workdir)` is a database copy with typed, documented **tools** (read: `search_policies`, `get_permit`, `compute_fee`, `list_slots`; write: `book_inspection`, `reschedule_inspection`, `create_refund`, `escalate`, `send_email`). Tools enforce Madar's rules themselves (identity verification, the 2-working-day booking rule, refund approval limits) and raise `ToolError` messages the model can act on.
+`port.py` exposes the three services as typed, documented tools: schedule (`list_berths`, `get_vessel`, `berth_schedule`, `find_windows`), tariff (`search_circulars`, `get_circular`, `compute_dues`) and booking (`get_booking`, and the write tools `create_booking`, `amend_booking`, `cancel_booking`). The tools enforce ownership, overlaps and lead times and raise `ToolError` messages the model can act on. They do **not** check under-keel clearance: that is Lab 3.3's planted problem.
 
-Nine applicants have known stories for the labs and the eval suite:
+`bosla.py` is the reference agent of Days 3 and 4: the loop of `agentkit.run_agent` inside a harness of named parts that a lab can switch off. `porttasks.py` loads tasks and grades runs by code.
 
-| Applicant | Permit | Story | Verify with |
-|---|---|---|---|
-| Sara | REN-10482 | under review, decision due 2 Nov | 4821 · 0501234821 |
-| Fahad | BLD-20417 | 640 m² building permit, 9 working days overdue | 7730 · 0555017730 |
-| Noura | FTR-30311 | approved food truck, needs a health inspection in Al-Rawdah | 6654 · 0532236654 |
-| Omar | SGN-40220 | rejected 14 m² sign; appeal deadline 7 Nov; 2,700 SAR refund pending approval | 0093 · 0540410093 |
-| Layla | EVT-50077 | needs Civil Defense approval by 3 Nov | 8012 · 0568988012 |
-| Khalid | SGN-40388 | paid twice | 2277 · 0505502277 |
-| Maha | REN-10519 | social-security beneficiary, no fee | — |
-| Huda | BLD-20981 | wants to move inspection INS-9001 to 5 Nov | 1196 · 0548841196 |
-| Yousef | (agent for Fahad) | authorised agent for BLD-20417 | 5530 · +966571475530 |
+Planted problems, for the trainer: TC-02 is superseded by TC-07 (52,000 GT for 3 days is SAR 15,600, not 12,480); Najm Coral (V-108) fits B03 by length but has 0.8 m under the keel; BK-24030 belongs to Sahil Feeders, not Najm Lines; BK-24029 carries dangerous goods; TC-09 carries an injected instruction.
 
 ## Standalone programs
 
 | Script | What it is | Run |
 |---|---|---|
-| `servers/marsa_mcp.py` | The Marsa circular store as an MCP server (Lab 2.4 reference); `mcp_test_client.py` holds its tests | `uv run servers/marsa_mcp.py` (stdio) or `--http 8765` |
-| `servers/madar_mcp.py` | Madar's tools, policies (resources) and triage prompt as an MCP server | `uv run servers/madar_mcp.py` (stdio) or `--http 8765` |
-| `loops/ralph.py` | A Ralph loop: a coding agent fixes `madar_fees` until its tests pass, one commit per iteration | `uv run loops/ralph.py --tests tests/test_fees.py` (`--harness pi` for Pi) |
-| `servers/madar_a2a.py` | Madar's policy worker as an A2A agent (agent card + JSON-RPC) | `uv run servers/madar_a2a.py --port 8792` |
-| `servers/rafeeq_api.py` | Rafeeq as an HTTP service: API keys, sessions, budgets, fallbacks, write tools queued for an officer, OpenTelemetry traces | `RAFEEQ_API_KEYS=dev-key-1 uv run servers/rafeeq_api.py` |
-| `ci/smoke_eval.py` | A smoke eval with a pass-rate gate for CI (`.github/workflows/smoke-eval.yml`) | `uv run ci/smoke_eval.py --min-rate 0.6` |
-| `capstone/starter.py` | Capstone starter: local + MCP tools, spec, compaction, permissions, budgets, eval on two configurations (see `capstone/README.md`) | `uv run capstone/starter.py eval capstone/tasks.example.jsonl` |
-
+| `servers/marsa_mcp.py` | The circular store as an MCP server (Lab 2.4 reference); `mcp_test_client.py` holds its tests | `uv run servers/marsa_mcp.py` (stdio) or `--http 8765` |
+| `ci/smoke_eval.py` | Five smoke tasks and a pass-rate gate for CI; `--regression` seeds a regression that must fail | `uv run ci/smoke_eval.py --min-rate 0.8` |
+| `ci/smoke-eval.yml` | A GitHub Actions workflow to copy into the capstone repository | |
 ## Helpers: `agentkit.py`
 
 | Helper | What it does |
@@ -126,6 +109,6 @@ Nine applicants have known stories for the labs and the eval suite:
 | `serve(cmd, ready_url)` / `stop(proc)` | start a background server (e.g. `uv run servers/...`) and stop it with its child processes |
 | `LEDGER` | calls, tokens, cached tokens and cost so far |
 
-`evals.py` runs the eval suite: `load_tasks()`, `run_suite(agent, tasks, trials=k)`, `report(df)` (pass@k and pass^k), with code graders and an LLM judge.
+`porttasks.grade(task, final, tool_calls, port)` grades a run by code: strings in the answer, write calls, the database after the run.
 
 **Windows and long folder paths.** If an import fails with "The filename or extension is too long", keep the virtual environment in a short folder: set `UV_PROJECT_ENVIRONMENT` to a short path (for example a folder at the root of your drive) before `uv sync`.

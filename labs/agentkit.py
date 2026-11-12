@@ -327,7 +327,7 @@ class MCPBridge:
     """Run an MCP client on a background event loop so the synchronous `run_agent` loop can call MCP tools.
 
     `server` is anything `mcp.Client` accepts: an `MCPServer` object (in-process), `StdioServerParameters`
-    (launch a subprocess, e.g. `uv run madar_mcp.py`) or a Streamable HTTP URL.
+    (launch a subprocess, e.g. `uv run servers/marsa_mcp.py`) or a Streamable HTTP URL.
 
         with MCPBridge(server) as mcp:
             mcp.list_tools()               # mcp.types.Tool objects

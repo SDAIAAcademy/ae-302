@@ -1,24 +1,20 @@
 # %% [markdown]
-# # Lab 4.4 · Ship it
+# # Lab 4.4 · Bosla behind an API, traced, gated in CI
 #
-# Day 4 · Session 4 (Agents in production) · 25 min. A notebook agent becomes a service when other programs can call
-# it safely, its cost is bounded, a failing provider doesn't take it down, someone can see what it did, and a
-# regression stops a release. In this lab you put Rafeeq behind **FastAPI** and add, one at a time:
-# - an **API key**, **sessions** and a **per-session token budget**;
-# - **least privilege** for write tools (queued for an officer, never run by the service);
-# - **fallbacks** across models;
-# - **OpenTelemetry traces** with the GenAI conventions;
-# - a **smoke eval** that gates CI.
+# Day 4 · Session 4 · 25 min. A production agent is a service: an endpoint with a key and a budget, a trace of
+# every request in a collector, and a smoke evaluation that stops a release when the agent gets worse. In this lab
+# you build each piece in-process (FastAPI's `TestClient`, an in-memory span exporter), then show the CI gate
+# passing on the baseline and failing on a seeded regression.
 #
-# You build it in-process (FastAPI's `TestClient`, no server needed); `servers/rafeeq_api.py` is the finished
-# service, which you start for real at the end.
+# **Reference state.** `bosla.py`, `port.py`, the twenty evaluation tasks, `ci/smoke_eval.py` and the workflow
+# template `ci/smoke-eval.yml`. Nothing from earlier labs.
 #
 # **Tasks**
-# - [ ] 1 · The endpoint: key, session, budget (8')
-# - [ ] 2 · Fallbacks (4')
-# - [ ] 3 · Traces (6')
-# - [ ] 4 · A smoke eval that gates CI (5')
-# - [ ] 5 · Run the real service, plan your capstone (2')
+# - [ ] 1 · The endpoint: key, budget, a fresh port per session (8')
+# - [ ] 2 · Spans: one per request, one per tool call (7')
+# - [ ] 3 · The smoke gate: baseline passes, seeded regression fails (7')
+# - [ ] 4 · The README lines: tools, permissions, operating limits (3')
+# - [ ] ✱ Stretch · Run the service for real with uvicorn
 
 # %%
 import os, sys, subprocess
@@ -37,294 +33,167 @@ else:
 sys.path.insert(0, os.getcwd())
 
 import agentkit as K
-print("provider:", K.PROVIDER, "| model:", K.MODEL, "| cache:", K.USE_CACHE)
+print("provider:", K.PROVIDER, "| model:", K.MODEL)
 
 # %%
 import functools
-import json
+import uuid
 
-import httpx
-import openai
-import pandas as pd
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.testclient import TestClient
-from pydantic import BaseModel, Field
-
-import evals
-import madar
-
-WORK = K.lab_dir("D4_4", reset=True)
-m = madar.Madar(WORK, actor="rafeeq-api")
-KEYS = {"key-portal", "key-callcenter"}
-
-# %% [markdown]
-# ## 1 · The endpoint: key, session, budget (8')
-#
-# The request and response are Pydantic models, so FastAPI validates input (no 50,000-character messages, no odd
-# session IDs) and documents the API at `/docs`.
-#
-# ✏️ **Exercise** · Complete `make_app(budget)`:
-# - `api_key`: a dependency that raises `HTTPException(401)` unless the `X-API-Key` header is in `KEYS`;
-# - `chat`: load the session's history and spent tokens from `SESSIONS` (key: `f"{key}:{session_id}"`, so one client
-#   can't read another's session); raise `HTTPException(429)` when `spent >= budget`; run Rafeeq with `history=`;
-#   save `run.state[1:]` (everything but the system prompt) and the new token total. Use the `permission` given: write
-#   tools are **denied** and recorded in `pending` for an officer.
-
-# %%
-class ChatIn(BaseModel):
-    session_id: str = Field(min_length=1, max_length=64, pattern=r"^[\w.-]+$")
-    message: str = Field(min_length=1, max_length=4000)
-
-
-class ChatOut(BaseModel):
-    session_id: str
-    reply: str
-    tools: list[str]
-    pending_actions: list[dict]
-    tokens: int
-
-
-SESSIONS: dict[str, dict] = {}  # the reference service uses SQLite; a dict is enough to learn the shape
-TOOLS = m.tools()
-
-
-def run_rafeeq(message: str, history: list, permission, **kw) -> K.Run:
-    return K.run_agent(message, TOOLS, system=madar.SYSTEM_PROMPT, history=history, max_steps=6,
-                       permission=permission, verbose=False, **kw)
-
-
-def make_app(budget: int = 40_000, runner=run_rafeeq) -> FastAPI:
-    app = FastAPI(title="Rafeeq API (lab)")
-
-    # BEGIN SOLUTION
-    def api_key(x_api_key: str = Header(default="")) -> str:
-        if x_api_key not in KEYS:
-            raise HTTPException(401, "Missing or invalid X-API-Key")
-        return x_api_key
-    # END SOLUTION
-
-    @app.post("/v1/chat", response_model=ChatOut)
-    def chat(req: ChatIn, key: str = Depends(api_key)) -> ChatOut:
-        pending: list[dict] = []
-
-        def permission(name: str, args: dict) -> str:
-            if m.is_write(name):
-                pending.append({"tool": name, "args": args})
-                return "deny"
-            return "allow"
-
-        # BEGIN SOLUTION
-        sid = f"{key}:{req.session_id}"
-        session = SESSIONS.get(sid, {"history": [], "tokens": 0})
-        if session["tokens"] >= budget:
-            raise HTTPException(429, f"Session budget of {budget} tokens used up")
-        before = K.LEDGER.input_tokens + K.LEDGER.output_tokens
-        run = runner(req.message, session["history"], permission)
-        used = K.LEDGER.input_tokens + K.LEDGER.output_tokens - before
-        SESSIONS[sid] = {"history": run.state[1:], "tokens": session["tokens"] + used}
-        # END SOLUTION
-        reply = run.final or "I couldn't finish this request. An officer will follow up."
-        if pending:
-            reply += "\n\n(An officer will review and confirm: " + ", ".join(p["tool"] for p in pending) + ".)"
-        return ChatOut(session_id=req.session_id, reply=reply, tools=[n for n, _ in run.tool_calls],
-                       pending_actions=pending, tokens=used)
-
-    return app
-
-
-# %% [markdown]
-# Contract tests: the API behaves as promised whatever the model says. These run in CI before any model is called.
-
-# %%
-api = TestClient(make_app())
-H = {"X-API-Key": "key-portal"}
-K.check(api.post("/v1/chat", json={"session_id": "s1", "message": "hi"}).status_code == 401, "no key → 401")
-K.check(api.post("/v1/chat", headers=H, json={"session_id": "bad id!", "message": "hi"}).status_code == 422,
-        "invalid session id → 422")
-
-r1 = api.post("/v1/chat", headers=H, json={"session_id": "sara", "message":
-              "What is the status of REN-10482? ID ends 4821, mobile 0501234821."}).json()
-r2 = api.post("/v1/chat", headers=H, json={"session_id": "sara", "message": "And when is the decision due?"}).json()
-print(r1["reply"][:300], "\n---\n", r2["reply"][:300])
-K.check(len(SESSIONS["key-portal:sara"]["history"]) > 2, "the session carries the conversation")
-K.check("key-callcenter:sara" not in SESSIONS, "sessions are scoped to the API key")
-
-# %%
-tight = TestClient(make_app(budget=1))
-tight.post("/v1/chat", headers=H, json={"session_id": "b", "message": "What are your office hours?"})
-K.check(tight.post("/v1/chat", headers=H, json={"session_id": "b", "message": "Thanks"}).status_code == 429,
-        "budget exhausted → 429")
-
-r3 = api.post("/v1/chat", headers=H, json={"session_id": "huda", "message":
-              "Move my BLD-20981 foundation inspection to Thursday 5 November before noon. Go ahead. "
-              "ID ends 1196, mobile 0548841196."}).json()
-print(r3["reply"][:400], r3["pending_actions"])
-K.check(not m.sql("SELECT 1 FROM inspections WHERE permit_id = 'BLD-20981' AND slot LIKE '2026-11-05%'"),
-        "the service never executed a write tool itself")
-
-# %% [markdown]
-# ## 2 · Fallbacks (4')
-#
-# Free models get rate-limited and disappear. Two layers:
-# - **gateway routing**: `K.chat` already sends OpenRouter a `models` list (`K.FALLBACKS`); OpenRouter tries them in
-#   order on errors and rate limits;
-# - **application fallback**: if the call still fails, retry the run on another model (or provider) and record it.
-#
-# ✏️ **Exercise** · Write `with_fallbacks(models)`, returning a `runner` for `make_app` that tries `run_rafeeq(...,
-# model=model, fallbacks=False)` for each model in turn, catching `openai.APIError`, and records which model answered
-# in `ANSWERED_BY`. Test it with a model that doesn't exist first.
-
-# %%
-ANSWERED_BY: list[str] = []
-
-
-def with_fallbacks(models: list[str]):
-    # BEGIN SOLUTION
-    def runner(message: str, history: list, permission) -> K.Run:
-        last = None
-        for model in models:
-            try:
-                run = run_rafeeq(message, history, permission, model=model, fallbacks=False)
-                ANSWERED_BY.append(model)
-                return run
-            except openai.APIError as e:
-                last = e
-        raise last
-    return runner
-    # END SOLUTION
-
-
-fb = TestClient(make_app(runner=with_fallbacks(["madar/no-such-model:free", K.MODEL])))
-out = fb.post("/v1/chat", headers=H, json={"session_id": "fb", "message": "What are your office hours?"})
-print(out.status_code, ANSWERED_BY)
-K.check(out.status_code == 200 and ANSWERED_BY[-1] == K.MODEL, "answered by the second model")
-
-# %% [markdown]
-# ## 3 · Traces (6')
-#
-# A trace is a tree of **spans**: one `invoke_agent` span per request, with a `chat` span per model call and an
-# `execute_tool` span per tool call. The **OpenTelemetry GenAI semantic conventions** name the attributes
-# (`gen_ai.operation.name`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.tool.name`, ...), so any
-# backend (Jaeger, Grafana Tempo, Phoenix, Langfuse, Datadog) can read them. Here spans go to memory so we can look
-# at them; the reference service writes JSON lines, and production would use an OTLP exporter.
-#
-# `TracedShape` (from the reference service) opens a `chat` span around every model call. ✏️ **Exercise** · Write
-# `traced(fn)`: a wrapper that runs the tool inside an `execute_tool <name>` span with `gen_ai.operation.name` and
-# `gen_ai.tool.name` set. Keep the function's name, signature and docstring (`functools.wraps`): the tool schema is
-# built from them.
-
-# %%
-sys.path.insert(0, str(K.LABS / "servers"))
+from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from pydantic import BaseModel, Field
 
-from rafeeq_api import TracedShape
+import bosla
+import port
 
-SPANS = InMemorySpanExporter()
+sys.path.insert(0, str(K.LABS / "ci"))
+import smoke_eval  # noqa: E402
+
+EXPORTER = InMemorySpanExporter()  # the trace collector of this lab; production sends spans to a collector service
 provider = TracerProvider()
-provider.add_span_processor(SimpleSpanProcessor(SPANS))
-tracer = provider.get_tracer("rafeeq-lab")
-
-
-# BEGIN SOLUTION
-def traced(fn):
-    @functools.wraps(fn)
-    def wrapper(*a, **kw):
-        with tracer.start_as_current_span(f"execute_tool {fn.__name__}") as span:
-            span.set_attribute("gen_ai.operation.name", "execute_tool")
-            span.set_attribute("gen_ai.tool.name", fn.__name__)
-            return fn(*a, **kw)
-    return wrapper
-# END SOLUTION
-
-
-def traced_runner(message: str, history: list, permission) -> K.Run:
-    with tracer.start_as_current_span("invoke_agent Rafeeq") as span:
-        span.set_attribute("gen_ai.operation.name", "invoke_agent")
-        span.set_attribute("gen_ai.agent.name", "Rafeeq")
-        return K.run_agent(message, [traced(t) for t in TOOLS], system=madar.SYSTEM_PROMPT, history=history,
-                           max_steps=6, permission=permission, verbose=False, shape=TracedShape(tracer))
-
-
-SPANS.clear()
-TestClient(make_app(runner=traced_runner)).post("/v1/chat", headers=H, json={"session_id": "t", "message":
-    "What is the fee for an illuminated 3 m² sign, and is REN-10482 decided yet? ID ends 4821, mobile 0501234821."})
-spans = sorted(SPANS.get_finished_spans(), key=lambda s: s.start_time)
-for s in spans:
-    depth = 0 if s.parent is None else 1
-    attrs = {k.removeprefix("gen_ai."): v for k, v in (s.attributes or {}).items() if "usage" in k or "tool.name" in k}
-    print("  " * depth + f"{s.name:<40} {(s.end_time - s.start_time) / 1e6:7.0f} ms  {attrs}")
-K.check(any(s.name.startswith("execute_tool") for s in spans) and any(s.name.startswith("chat") for s in spans),
-        "model and tool spans inside the agent span")
+provider.add_span_processor(SimpleSpanProcessor(EXPORTER))
+TRACER = provider.get_tracer("bosla")
+KEYS = {"key-najm": "NJM-4417", "key-sahil": "SHL-2290"}  # API key → the agent code it may act for
 
 # %% [markdown]
-# ✏️ **Exercise** · From `spans`, compute `summary`: model time vs. tool time (ms) and total input/output tokens. Where
-# does a request spend its time?
+# ## 1 · The endpoint (8')
+#
+# ✏️ **Exercise** · Write `make_app(runner, budget_tokens)`: `POST /v1/ask` with header `X-API-Key` and body `Ask`.
+# Unknown key: 401. The key decides the agent code (the caller cannot choose it): prefix the message with
+# "Agent code <code>." Each session gets its own port in the lab folder. Refuse with 429 once a session has used
+# `budget_tokens` input tokens. Return the answer, the stop reason, the tools called and a `trace_id`.
 
 # %%
-# BEGIN SOLUTION
-ms = lambda s: (s.end_time - s.start_time) / 1e6  # noqa: E731
-summary = {
-    "model_ms": round(sum(ms(s) for s in spans if s.name.startswith("chat"))),
-    "tool_ms": round(sum(ms(s) for s in spans if s.name.startswith("execute_tool"))),
-    "input_tokens": sum(s.attributes.get("gen_ai.usage.input_tokens", 0) for s in spans),
-    "output_tokens": sum(s.attributes.get("gen_ai.usage.output_tokens", 0) for s in spans),
-}
-# END SOLUTION
-summary
-
-# %% [markdown]
-# ## 4 · A smoke eval that gates CI (5')
-#
-# Contract tests check the API; a **smoke eval** checks the agent. A handful of fast, important tasks from Day 3's
-# suite run on every pull request; the pipeline fails below a pass rate. `ci/smoke_eval.py` (PEP 723) does exactly
-# this, and `.github/workflows/smoke-eval.yml` runs it with the OpenRouter key from the repository's secrets.
-#
-# ✏️ **Exercise** · Write `gate(df, min_rate)` → `(ok, rate)` as the CI script does, and run the smoke tasks.
-
-# %%
-print((K.LABS / "ci" / "smoke_eval.py").read_text(encoding="utf-8").split('"""')[1])
-SMOKE = ["rules-office-hours", "fee-sign-illuminated", "status-verified", "status-no-credentials",
-         "injection-contractor-email"]
+class Ask(BaseModel):
+    session_id: str = Field(min_length=1, max_length=64)
+    message: str = Field(min_length=1, max_length=4000)
 
 
-def gate(df: pd.DataFrame, min_rate: float) -> tuple[bool, float]:
+def make_app(runner=bosla.run, budget_tokens: int = 60_000) -> FastAPI:
+    app = FastAPI(title="Bosla API (lab)")
+    ports, used = {}, {}
     # BEGIN SOLUTION
-    rate = float(df.passed.mean()) if len(df) else 0.0
-    return rate >= min_rate, rate
+    @app.post("/v1/ask")
+    def ask(body: Ask, x_api_key: str = Header(default="")):
+        if x_api_key not in KEYS:
+            raise HTTPException(401, "unknown API key")
+        sid = f"{KEYS[x_api_key]}:{body.session_id}"
+        if used.get(sid, 0) >= budget_tokens:
+            raise HTTPException(429, "this session's token budget is spent")
+        p = ports.setdefault(sid, port.Port(K.lab_dir(f"D4_4/{uuid.uuid4().hex[:8]}")))
+        trace_id = uuid.uuid4().hex
+        before = K.LEDGER.input_tokens
+        with TRACER.start_as_current_span("bosla.ask", attributes={"session": sid, "trace_id": trace_id}):
+            r = runner(f"Agent code {KEYS[x_api_key]}. {body.message}", p)
+        used[sid] = used.get(sid, 0) + K.LEDGER.input_tokens - before
+        return {"answer": r.final, "stopped": r.stopped, "tools": [n for n, _ in r.tool_calls], "trace_id": trace_id}
+    # END SOLUTION
+    return app
+
+
+api = TestClient(make_app())
+print(api.post("/v1/ask", json={"session_id": "s1", "message": "hi"}, headers={"X-API-Key": "nope"}).status_code)
+resp = api.post("/v1/ask", json={"session_id": "s1", "message": "Berth hire for Najm Falcon for 2 days?"},
+                headers={"X-API-Key": "key-najm"})
+print(resp.status_code, resp.json())
+K.check(resp.status_code == 200 and "7,800" in resp.json()["answer"].replace("7800", "7,800"), "the API answers")
+
+# %% [markdown]
+# ## 2 · Spans (7')
+#
+# A span records one unit of work with its start, duration and attributes. One span per request, and a child span
+# per tool call, show where a request spends its time.
+#
+# ✏️ **Exercise** · Write `traced_tools(p)`: Bosla's tools, each wrapped so the call runs inside a span named
+# `tool <name>` with the argument names as an attribute (not their values: they can hold personal data). Then
+# `traced_run(task, p)`, which is `bosla.run` with those tools. Call the API with it and list the spans.
+
+# %%
+def traced_tools(p: port.Port) -> list:
+    # BEGIN SOLUTION
+    def wrap(fn):
+        @functools.wraps(fn)
+        def inner(**kw):
+            with TRACER.start_as_current_span(f"tool {fn.__name__}", attributes={"args": ",".join(sorted(kw))}):
+                return fn(**kw)
+        return inner
+    return [wrap(t) for t in p.tools()]
     # END SOLUTION
 
 
-smoke = evals.run_suite(evals.rafeeq(), evals.load_tasks(ids=SMOKE), name="smoke")
-ok, rate = gate(smoke, 0.6)
-print(f"pass rate {rate:.2f} → {'ship' if ok else 'block the release'}")
-K.check(gate(pd.DataFrame({"passed": [True, True, False]}), 0.6) == (True, 2 / 3), "gate")
+def traced_run(task: str, p: port.Port, **kw) -> K.Run:
+    tools = traced_tools(p)
+    return K.run_agent(task, tools, system=port.SYSTEM_PROMPT + "\n\n" + bosla.CONTEXT_FILE, max_steps=8,
+                       permission=bosla.write_gate(task), verbose=False)
+
+
+EXPORTER.clear()
+TestClient(make_app(runner=traced_run)).post("/v1/ask", json={"session_id": "s2", "message": "Status of BK-24017?"},
+                                            headers={"X-API-Key": "key-najm"})
+spans = [(s.name, round((s.end_time - s.start_time) / 1e6, 1)) for s in EXPORTER.get_finished_spans()]
+print(spans)
+K.check(any(n == "bosla.ask" for n, _ in spans) and any(n.startswith("tool ") for n, _ in spans), "request and tool spans")
 
 # %% [markdown]
-# ## 5 · Run the real service, plan your capstone (2')
+# ## 3 · The smoke gate (7')
 #
-# The reference service adds SQLite sessions, a second-model retry, JSONL traces and `/healthz`. Start it with `uv`
-# and call it over HTTP, exactly as a portal or a call-centre app would.
+# `ci/smoke_eval.py` runs five tasks that guard what must never regress (a write nobody asked for, ownership,
+# scope, the tariff, privacy) and exits 1 below the gate. `--regression` seeds a regression: it removes the
+# prompt rules and the write gate, the kind of change a refactor slips in.
+#
+# ✏️ **Exercise** · Run `smoke_eval.smoke(...)` on the baseline and with `smoke_eval.REGRESSION` removed, and the
+# gate at 0.8 on each. The outcome asks for both: a pass on the baseline and a fail on the regression.
 
 # %%
-PORT = 8793
-service = K.serve(["uv", "run", "-q", "servers/rafeeq_api.py", "--port", str(PORT)],
-                  ready_url=f"http://127.0.0.1:{PORT}/healthz")
-resp = httpx.post(f"http://127.0.0.1:{PORT}/v1/chat", headers={"X-API-Key": "dev-key-1"}, timeout=180,
-                  json={"session_id": "demo", "message": "ما هي ساعات عمل المكتب؟"})
-print(resp.status_code, json.dumps(resp.json(), ensure_ascii=False, indent=1)[:600])
-K.stop(service)
-print((K.ARTIFACTS / "traces" / "rafeeq_api.jsonl").read_text(encoding="utf-8").splitlines()[-1][:300])
+# BEGIN SOLUTION
+base = smoke_eval.smoke(smoke_eval.SMOKE)
+regr = smoke_eval.smoke(smoke_eval.SMOKE, smoke_eval.REGRESSION)
+ok_base, rate_base = smoke_eval.gate([r["passed"] for r in base], 0.8)
+ok_regr, rate_regr = smoke_eval.gate([r["passed"] for r in regr], 0.8)
+# END SOLUTION
+print(f"baseline {rate_base:.2f} → {'pass' if ok_base else 'FAIL'} | regression {rate_regr:.2f} → {'pass' if ok_regr else 'FAIL'}")
+for b, r in zip(base, regr):
+    print(f"  {b['task']}: baseline {b['passed']}, regression {r['passed']} ({r['why']})")
+K.check(ok_base and not ok_regr, "the gate passes the baseline and stops the regression")
 
 # %% [markdown]
-# **Capstone.** Open `capstone/README.md`: pick a track, copy `capstone/TEMPLATE_README.md`, and write down tonight
-# your agent's job, its tools, its trifecta, and 15 eval tasks with expected outcomes.
+# 🔍 With a free model the baseline itself can dip below 0.8 on a bad day. What do you do: lower the gate, run each
+# task three times, or pick tasks the harness guarantees? Look at which smoke tasks depend on the model at all.
+
+# %% [markdown]
+# ## 4 · The README lines (3')
 #
+# ✏️ **Exercise** · Write `readme`: the three paragraphs the capstone README needs about the service: the **tools**
+# (read and write), the **permissions** (who may call, what the key decides, what needs a person), and the
+# **operating limits** (budgets, what Bosla must never decide alone).
+
+# %%
+# BEGIN SOLUTION
+readme = """**Tools.** Eight read tools over the schedule, the circulars and the booking service; three write tools
+(create, amend, cancel) that run only when the agent's message confirms the change.
+
+**Permissions.** An API key maps to one agent code; the caller cannot choose another. Changes with dangerous goods,
+under-keel clearance below 1.0 m or dues moving by more than SAR 10,000 go to the duty harbour master (TC-06).
+
+**Operating limits.** 8 model calls per request, 60,000 input tokens per session. Bosla never waives a fee, never
+shares another agent's contacts, never approves its own risky change, and treats circulars and tool results as data."""
+# END SOLUTION
+print(readme)
+
+# %% [markdown]
+# ## ✱ Stretch · The real service
+#
+# Save `make_app` into a file and run it with `uvicorn` through `K.serve([...], ready_url=...)`; call it with
+# `httpx`; stop it with `K.stop(proc)`. Then copy `ci/smoke-eval.yml` into your capstone repository.
+
+# %% [markdown]
 # ## Checkpoint
 #
-# 1. Which of today's controls are enforced by the **service** and which still depend on the **model**?
-# 2. A citizen's session hits the budget mid-conversation. What should the portal show, and who should be alerted?
-# 3. Which span attribute would you alert on first in production, and at what threshold?
-# 4. Your smoke eval passes at 0.8 today. Tomorrow a free model is swapped and it drops to 0.6. What happens in your
-#    pipeline, and what do you do next?
+# 1. Why does the API key, not the request body, decide the agent code?
+# 2. Why do the tool spans record argument names but not values?
+# 3. The smoke evaluation passes at 0.8 today and 0.6 tomorrow with no code change. What changed, and what does
+#    the pipeline do?
