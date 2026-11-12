@@ -591,7 +591,7 @@
           }
         },
         {
-          "title": "Several agents and delegation",
+          "title": "Several agents and agent-to-agent delegation",
           "summary": "When a second agent pays, and what is lost at the handover",
           "outcomes": [
             "Split a task between a researcher and a drafter",
