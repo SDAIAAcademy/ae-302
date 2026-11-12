@@ -57,10 +57,10 @@ Free models change often. If the default disappears or is busy, pick another fre
 | 2 | Keyword and vector search over circulars | [`D2_2_retrieval.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_2_retrieval.ipynb) | Chat Completions |
 | 2 | A context file and a tariff skill | [`D2_3_context_skills.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_3_context_skills.ipynb) | Chat Completions |
 | 2 | An MCP server over the circular store | [`D2_4_mcp.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_4_mcp.ipynb) | MCP |
-| 3 | Harness teardown | [`D3_1_harness_teardown.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_1_harness_teardown.ipynb) | Pi (optional, Node.js 22.19+) |
-| 3 | Rafeeq on the OpenAI Agents SDK | [`D3_2_agents_sdk.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_2_agents_sdk.ipynb) | Chat Completions via the SDK |
-| 3 | A loop that fixes code | [`D3_3_loop_engineering.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_3_loop_engineering.ipynb) | Chat Completions + git + pytest |
-| 3 | Score Rafeeq | [`D3_4_evals.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_4_evals.ipynb) | Chat Completions |
+| 3 | Remove one harness part | [`D3_1_harness_teardown.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_1_harness_teardown.ipynb) | Chat Completions |
+| 3 | An agent SDK against your own loop | [`D3_2_agents_sdk.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_2_agents_sdk.ipynb) | Agents SDK |
+| 3 | Verification inside the loop | [`D3_3_loop_engineering.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_3_loop_engineering.ipynb) | Chat Completions |
+| 3 | Grading over five trials | [`D3_4_evals.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_4_evals.ipynb) | Chat Completions |
 | 4 | A permit-review graph | [`D4_1_review_graph.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_1_review_graph.ipynb) | LangGraph + SQLite checkpoints |
 | 4 | Orchestrator and workers | [`D4_2_multi_agent.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_2_multi_agent.ipynb) | Agents SDK + A2A |
 | 4 | Attack and defend | [`D4_3_security.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_3_security.ipynb) | Chat Completions + harness hooks |

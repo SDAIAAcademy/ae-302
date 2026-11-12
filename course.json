@@ -388,159 +388,161 @@
     {
       "id": "day3",
       "kind": "day",
-      "title": "Harness & Loop Engineering",
+      "title": "Harness and Loop",
       "deck": "slides/day3.html",
       "sessions": [
         {
           "title": "Anatomy of a harness",
+          "summary": "Tools, context, state and feedback around the model, and what each part protects",
           "outcomes": [
-            "Name the parts of a harness, and tell guides from sensors",
-            "Read Pi's prompt, loop and event stream",
-            "Compare Pi, OpenClaw, Hermes Agent and Mercury Agent on the same dimensions",
-            "Add permissions, hooks and an audit log to your own loop"
+            "Name the parts of an agent harness and what each protects",
+            "Remove one part from a working agent and measure the effect",
+            "Read from paired traces where two runs part ways"
+          ],
+          "lo": [
+            "LO1"
           ],
           "lab": {
             "id": "3.1",
-            "title": "Harness teardown",
+            "title": "Remove one harness part",
             "minutes": 25,
-            "summary": "Run Pi on a free model (or read the sample stream), map its events to your trace, compare harnesses, and add controls to your loop.",
+            "summary": "Run the reference Bosla on ten tasks, remove one harness part, run again, and record from the traces what broke.",
             "href": "D3_1_harness_teardown.ipynb",
             "steps": [
               {
-                "text": "Pi's JSON events: tools, turns, tokens, final answer",
-                "minutes": 6
-              },
-              {
-                "text": "Pi's prompt and loop; convert its events to your trace",
-                "minutes": 5
-              },
-              {
-                "text": "Four harnesses, one matrix",
+                "text": "Map the parts, and predict",
                 "minutes": 4
               },
               {
-                "text": "Permissions, a guard and an audit log; attack with the contractor email",
+                "text": "Baseline: the full harness on ten tasks",
+                "minutes": 6
+              },
+              {
+                "text": "Remove one part and run again",
                 "minutes": 10
+              },
+              {
+                "text": "What broke, and where in the trace",
+                "minutes": 5
               }
             ],
-            "stretch": "Pi in read-only mode on a real bug"
-          },
-          "lo": [
-            "LO1"
-          ]
+            "stretch": "Remove a second part: do the effects add up?"
+          }
         },
         {
           "title": "Agent SDKs and hosted agents",
+          "summary": "What an SDK gives and takes away compared with your own loop",
           "outcomes": [
-            "Place your options on the build-vs-buy spectrum",
-            "Use the OpenAI Agents SDK on any model: tools, guardrails, approvals, sessions",
-            "Know what the Claude Agent SDK, OpenAI's Agents API and Claude Managed Agents take off your hands",
-            "Name what each choice locks you into"
+            "Rebuild an agent on an agent SDK with a free model",
+            "Grade the SDK agent on the same tasks as the own loop",
+            "Compare code size, traces and control"
+          ],
+          "lo": [
+            "LO1"
           ],
           "lab": {
             "id": "3.2",
-            "title": "Rafeeq on the OpenAI Agents SDK",
+            "title": "An agent SDK against your own loop",
             "minutes": 25,
-            "summary": "Rebuild Rafeeq on the SDK with a free OpenRouter model, then add a guardrail, approvals and a session.",
+            "summary": "Rebuild Bosla on the OpenAI Agents SDK with a free OpenRouter model, run the same ten tasks, and compare code size, traces and control with the own loop.",
             "href": "D3_2_agents_sdk.ipynb",
             "steps": [
               {
-                "text": "Agent, model and function tools from Madar's methods",
+                "text": "Bosla on the SDK: model, tools, agent",
+                "minutes": 7
+              },
+              {
+                "text": "The same ten tasks, graded the same way",
                 "minutes": 6
               },
               {
-                "text": "An input guardrail against injected instructions",
+                "text": "Traces and control, side by side",
+                "minutes": 7
+              },
+              {
+                "text": "The comparison table",
                 "minutes": 5
-              },
-              {
-                "text": "Approvals for write tools: interrupt, decide, resume",
-                "minutes": 8
-              },
-              {
-                "text": "A SQLite session; the SDK vs. your loop",
-                "minutes": 6
               }
             ],
-            "stretch": "Streaming run-item events"
-          },
-          "lo": [
-            "LO1"
-          ]
+            "stretch": "The write gate in the SDK"
+          }
         },
         {
           "title": "Loop engineering",
+          "summary": "Verification inside the loop: the agent may not stop while a check fails",
           "outcomes": [
-            "Explain why long tasks need an outer loop with fresh context",
-            "Keep state in files and git, not in the model",
-            "Use tests as honest back-pressure, and stop loops that stop progressing"
+            "Write a check of agent actions against the rules",
+            "Keep the loop running while the check fails, within a budget",
+            "Compare outcomes with and without verification"
+          ],
+          "lo": [
+            "LO1",
+            "LO4"
           ],
           "lab": {
             "id": "3.3",
-            "title": "A loop that fixes code",
+            "title": "Verification inside the loop",
             "minutes": 25,
-            "summary": "Drive a coding agent on madar_fees until its fee tests pass: fresh context, progress file, git, stop conditions.",
+            "summary": "Add a check of each booking against the schedule and the berth rules, and keep the loop going until the check passes or the budget ends.",
             "href": "D3_3_loop_engineering.ipynb",
             "steps": [
               {
-                "text": "The repository, AGENTS.md and the test guard",
+                "text": "The planted problem, by hand",
                 "minutes": 4
               },
               {
-                "text": "One iteration with a fresh context",
-                "minutes": 7
-              },
-              {
-                "text": "The outer loop: four exits, one commit per iteration",
+                "text": "Write the check",
                 "minutes": 8
               },
               {
-                "text": "Review the diff: library changed, tests untouched",
+                "text": "The loop may not stop while the check fails",
+                "minutes": 7
+              },
+              {
+                "text": "With and without verification",
                 "minutes": 6
               }
             ],
-            "stretch": "The same loop around Pi"
-          },
-          "lo": [
-            "LO1"
-          ]
+            "stretch": "Verification by a second model call"
+          }
         },
         {
           "title": "Evaluating agents",
+          "summary": "Code and model graders, repeated trials, success in any and every trial, cost per completed task",
           "outcomes": [
-            "Build a task suite with code graders, state checks and an LLM judge",
-            "Read failures with error analysis, not just a score",
-            "Measure reliability with pass^k",
-            "Trace agents with OpenTelemetry's GenAI conventions"
+            "Grade agent runs with code and model graders",
+            "Compute success in any and in every trial",
+            "Compute cost per completed task"
+          ],
+          "lo": [
+            "LO5"
           ],
           "lab": {
             "id": "3.4",
-            "title": "Score Rafeeq",
+            "title": "Grading over five trials",
             "minutes": 25,
-            "summary": "Run the 30-task suite (or the 10-task quick subset), analyse the failures, compare two configurations, and measure pass^k.",
+            "summary": "Grade recorded runs of 20 tasks over five trials with code and model graders, compute success in any and every trial, and the cost per completed task.",
             "href": "D3_4_evals.ipynb",
             "steps": [
               {
-                "text": "Write two graders: contains_any and db",
+                "text": "A code grader for recorded runs",
                 "minutes": 6
               },
               {
-                "text": "Run the suite; assign a root cause to every failure",
+                "text": "A model grader for the rubric tasks",
+                "minutes": 6
+              },
+              {
+                "text": "Success in any and in every trial",
                 "minutes": 7
               },
               {
-                "text": "One change, two configurations: what flipped?",
-                "minutes": 7
-              },
-              {
-                "text": "pass@k vs. pass^k on repeated trials",
-                "minutes": 5
+                "text": "Cost per completed task",
+                "minutes": 6
               }
             ],
-            "stretch": "Is the judge right? Label five answers yourself"
-          },
-          "lo": [
-            "LO5"
-          ]
+            "stretch": "Record your own five trials of three tasks"
+          }
         }
       ]
     },

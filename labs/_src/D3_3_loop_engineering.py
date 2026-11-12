@@ -1,20 +1,19 @@
 # %% [markdown]
-# # Lab 3.3 · A loop that fixes code
+# # Lab 3.3 · Verification inside the loop
 #
-# Day 3 · Session 3 (Loop engineering) · 25 min. Some tasks are too big for one context window. The **Ralph loop**
-# (Geoffrey Huntley's name for `while :; do cat PROMPT.md | agent; done`) runs an agent again and again, each time
-# with a **fresh context**, and keeps state outside the model: in files, in git, and in the tests. In this lab you
-# drive a coding agent on `madar_fees`, a tiny library with seeded bugs and failing tests:
-# - the **harness** gives the agent file tools that can't touch the tests (the back-pressure must stay honest);
-# - the **loop** runs iterations with a progress file, commits each one to git, and stops on success, on a budget,
-#   or when it stops making progress.
+# Day 3 · Session 3 · 25 min. A model that says "done" has stopped; it has not proved anything. In this lab you add
+# a check of every booking against the schedule and the berth rules, and the loop may not stop while the check
+# fails. The planted problem: the booking service accepts Najm Coral at B03, where it has 0.8 m under the keel and
+# circular TC-03 asks for 1.0 m.
+#
+# **Reference state.** `bosla.py`, a fresh port database. Nothing from Labs 3.1 or 3.2.
 #
 # **Tasks**
-# - [ ] 1 · The repository and its back-pressure (4')
-# - [ ] 2 · One iteration with a fresh context (7')
-# - [ ] 3 · The outer loop with stop conditions (8')
-# - [ ] 4 · Read what the loop left behind (6')
-# - [ ] ✱ Stretch · The same loop around Pi
+# - [ ] 1 · The planted problem, by hand (4')
+# - [ ] 2 · Write the check (8')
+# - [ ] 3 · The loop may not stop while the check fails (7')
+# - [ ] 4 · With and without verification (6')
+# - [ ] ✱ Stretch · Verification by a second model call
 
 # %%
 import os, sys, subprocess
@@ -33,166 +32,134 @@ else:
 sys.path.insert(0, os.getcwd())
 
 import agentkit as K
-print("provider:", K.PROVIDER, "| model:", K.MODEL, "| cache:", K.USE_CACHE)
+print("provider:", K.PROVIDER, "| model:", K.MODEL)
 
 # %%
-import json
+from datetime import date
 
-import pandas as pd
-
-sys.path.insert(0, str(K.LABS / "loops"))
-import ralph  # the finished loop runner (a PEP 723 script); this lab rebuilds its core
-
-WORK = K.lab_dir("D3_3", reset=True) / "madar_fees"
-ralph.prepare(K.DATA / "madar_fees", WORK)  # a copy with its own git repository and an empty PROGRESS.md
-# The whole suite has 12 failing tests from 6 bugs. Free models allow 50 requests a day, so by default this lab works
-# on the fee tests only; set TARGET = "tests" if you have the 1,000-a-day quota.
-TARGET = "tests/test_fees.py"
+import bosla
+import port
 
 # %% [markdown]
-# ## 1 · The repository and its back-pressure (4')
+# ## 1 · The planted problem (4')
 #
-# `AGENTS.md` tells the agent how to work; the **tests** tell it whether it worked. That only holds if the agent
-# can't "fix" a test by editing it, so the harness enforces it: `edit_file` refuses anything outside `madar_fees/`
-# and `PROGRESS.md`, and every path must stay inside the repository.
+# ✏️ **Exercise** · On a fresh port, call `create_booking` yourself for Najm Coral (V-108) at B03, arriving
+# 2026-11-15 for 2 days, agent NJM-4417. Then compute the under-keel clearance from `list_berths` and
+# `get_vessel`. The service said yes; does TC-03?
 
 # %%
-print((WORK / "AGENTS.md").read_text(encoding="utf-8"))
-baseline = ralph.run_tests(WORK, TARGET)
-print(f"{baseline['passed']} passed, {baseline['failed']} failing\n{baseline['summary']}")
-tools = {t.__name__: t for t in ralph.coding_tools(WORK, TARGET)}
-print("\n", K.call_tool(tools, "edit_file", {"path": "tests/test_fees.py", "old": "750", "new": "400"}))
-print(K.call_tool(tools, "read_file", {"path": "../../../.env"}))
-K.check(baseline["failed"] > 0, "the fee tests fail before the loop")
-
-# %% [markdown]
-# ## 2 · One iteration with a fresh context (7')
-#
-# Each iteration starts from **nothing** in the model's context. Everything it needs comes from the repository: the
-# task prompt, `AGENTS.md`, `PROGRESS.md` (notes from earlier iterations) and the current test failures. That's the
-# point: no context rot, no stale plans, and you can swap the model or the harness between iterations.
-#
-# ✏️ **Exercise** · Write `one_iteration(work)`: format `ralph.PROMPT` with the current failures, run
-# `K.run_agent` with `ralph.coding_tools(work, TARGET)` (`max_steps=12`, the system prompt below), and return a dict
-# with `failing_before`, `failing_after`, `steps` and `tool_calls`.
-
-# %%
-SYSTEM = "You are a careful Python maintainer. Small, verified changes only."
-
-
-def one_iteration(work: Path) -> dict:
-    # BEGIN SOLUTION
-    before = ralph.run_tests(work, TARGET)
-    prompt = ralph.PROMPT.format(failures=before["summary"])
-    run = K.run_agent(prompt, ralph.coding_tools(work, TARGET), system=SYSTEM, max_steps=12, verbose=True)
-    after = ralph.run_tests(work, TARGET)
-    return {"failing_before": before["failed"], "failing_after": after["failed"], "steps": run.steps,
-            "tool_calls": len(run.tool_calls)}
-    # END SOLUTION
-
-
-first = one_iteration(WORK)
-print(first)
-print((WORK / "PROGRESS.md").read_text(encoding="utf-8"))
-K.check(first["failing_after"] <= first["failing_before"], "one iteration didn't make things worse")
-
-# %% [markdown]
-# ## 3 · The outer loop with stop conditions (8')
-#
-# A loop that never stops is a bill. Four exits:
-# 1. **success**: no failing tests;
-# 2. **iteration budget**: `max_iters`;
-# 3. **no progress**: the failure count hasn't fallen for `patience` iterations (the agent is stuck or thrashing);
-# 4. **cost budget**: `K.LEDGER.cost` grew by more than `max_cost` (0 on free models, but keep the habit).
-#
-# After every iteration, commit to git: a checkpoint you can diff, bisect or roll back.
-#
-# ✏️ **Exercise** · Write `stalled(history, patience)` (True when the last value is not lower than the minimum of
-# the `patience` values before it) and `loop(work, max_iters, patience, max_cost)`, which returns the list of
-# iteration dicts plus a `stop` reason.
-
-# %%
-def stalled(history: list[int], patience: int = 2) -> bool:
-    # BEGIN SOLUTION
-    return len(history) > patience and history[-1] >= min(history[-patience - 1:-1])
-    # END SOLUTION
-
-
-K.check(stalled([5, 4, 4, 4], 2) and not stalled([5, 4, 3], 2) and not stalled([5, 5], 2), "no-progress detection")
-
-
-def loop(work: Path, max_iters: int = 4, patience: int = 2, max_cost: float = 0.10) -> tuple[list[dict], str]:
-    log, history, start = [], [], K.LEDGER.cost
-    # BEGIN SOLUTION
-    for i in range(1, max_iters + 1):
-        failing = ralph.run_tests(work, TARGET)["failed"]
-        history.append(failing)
-        if failing == 0:
-            return log, "success"
-        if stalled(history, patience):
-            return log, "no progress"
-        if K.LEDGER.cost - start > max_cost:
-            return log, "cost budget"
-        entry = {"iteration": i, **one_iteration(work)}
-        ralph.git(work, "add", "-A")
-        ralph.git(work, "commit", "-q", "--allow-empty", "-m",
-                  f"iteration {i}: failing {entry['failing_before']} → {entry['failing_after']}")
-        log.append(entry)
-    return log, "iteration budget"
-    # END SOLUTION
-
-
-log, stop = loop(WORK, max_iters=K.pick(4, 2))
-print("stopped:", stop)
-pd.DataFrame(log)
-
-# %% [markdown]
-# ## 4 · Read what the loop left behind (6')
-#
-# The loop's real output is not the chat transcript: it is **commits**, **notes** and a **test result**.
-
-# %%
-print(ralph.git(WORK, "log", "--oneline"))
-print("\n" + (WORK / "PROGRESS.md").read_text(encoding="utf-8"))
-print(ralph.git(WORK, "diff", "--stat", ralph.git(WORK, "rev-list", "--max-parents=0", "HEAD"), "HEAD"))
-final = ralph.run_tests(WORK, TARGET)
-print(f"\nnow: {final['passed']} passed, {final['failed']} failing")
-
-# %% [markdown]
-# ✏️ **Exercise** · Verify the loop's work like a reviewer: `git diff` the baseline commit against `HEAD` and check
-# that no file under `tests/` changed, and that every change is in `madar_fees/` or `PROGRESS.md`.
-
-# %%
+p = port.Port(K.lab_dir("D3_3/by_hand", reset=True))
 # BEGIN SOLUTION
-base = ralph.git(WORK, "rev-list", "--max-parents=0", "HEAD")
-changed = [f for f in ralph.git(WORK, "diff", "--name-only", base, "HEAD").splitlines() if f]
-print(changed)
-untouched_tests = not any(f.startswith("tests/") for f in changed)
-only_allowed = all(f.startswith("madar_fees/") or f == "PROGRESS.md" for f in changed)
+made = p.create_booking("V-108", "B03", "2026-11-15", 2, "NJM-4417")
+depth = next(b["depth_m"] for b in p.list_berths() if b["berth_id"] == "B03")
+ukc = round(depth - p.get_vessel("V-108")["draft_m"], 1)
 # END SOLUTION
-K.check(untouched_tests and only_allowed, "the loop changed only the library and its notes")
+print(made, "| under-keel clearance:", ukc, "m")
+K.check(ukc < 1.0, "the service accepted a booking that breaks TC-03")
 
 # %% [markdown]
-# 🔍 Read the diff of the commit that fixed a test. Is it the fix the policy asks for, or a fix that only satisfies
-# the test? (A test suite is back-pressure, not a specification: Day 3 · S4 is about measuring the rest.)
+# ## 2 · Write the check (8')
+#
+# ✏️ **Exercise** · Write `check_bookings(p, booking_ids)` returning a list of problems, one string per problem,
+# each with the booking ID, what is wrong, the circular, and what to do: kind of vessel against kind of berth,
+# length plus 20 m against berth length, depth minus draft against 1.0 m, and overlaps with other bookings
+# (`p._busy(berth, start, days, ignore=booking_id)`). Skip cancelled bookings.
+
+# %%
+def check_bookings(p: port.Port, booking_ids: list[str]) -> list[str]:
+    # BEGIN SOLUTION
+    problems = []
+    for bid in booking_ids:
+        rows = p.sql("SELECT b.*, v.name, v.kind AS vkind, v.loa_m, v.draft_m, t.kind AS bkind, t.length_m, t.depth_m "
+                     "FROM bookings b JOIN vessels v USING (vessel_id) JOIN berths t USING (berth_id) "
+                     "WHERE booking_id = ?", (bid,))
+        if not rows or rows[0]["status"] == "cancelled":
+            continue
+        b = rows[0]
+        if b["vkind"] != b["bkind"]:
+            problems.append(f"{bid}: {b['name']} is {b['vkind']}, {b['berth_id']} takes {b['bkind']} (TC-03)")
+        if b["loa_m"] + 20 > b["length_m"]:
+            problems.append(f"{bid}: {b['name']} is too long for {b['berth_id']} (TC-03)")
+        if round(b["depth_m"] - b["draft_m"], 1) < port.MIN_UKC_M:
+            problems.append(f"{bid}: under-keel clearance at {b['berth_id']} is {round(b['depth_m'] - b['draft_m'], 1)} m,"
+                            " below 1.0 m (TC-03). Amend to a berth from find_windows, or cancel.")
+        clash = p._busy(b["berth_id"], date.fromisoformat(b["arrival"]), b["days"], ignore=bid)
+        if clash:
+            problems.append(f"{bid}: overlaps {', '.join(clash)} on {b['berth_id']}")
+    return problems
+    # END SOLUTION
+
+
+print(check_bookings(p, [made["booking_id"], "BK-24017", "BK-24022"]))
+K.check(len(check_bookings(p, [made["booking_id"]])) == 1 and check_bookings(p, ["BK-24017"]) == [],
+        "one problem on the new booking, none on a good one")
 
 # %% [markdown]
-# ## ✱ Stretch · The same loop around Pi
+# 🔍 BK-24022 is Najm Coral at B03 too, booked before the course started. Your check flags it. Should Bosla touch a
+# booking it did not make in this run? Who should hear about it?
+
+# %% [markdown]
+# ## 3 · The loop may not stop while the check fails (7')
 #
-# The outer loop doesn't care which harness runs inside it. In a terminal, from `labs/`:
+# ✏️ **Exercise** · Write `verified_run(task, p, rounds=2)`: run `bosla.run`; collect the bookings this run created
+# or amended (`bosla.touched(run, p)`); if `check_bookings` finds problems and the run stopped with `done`, continue
+# the same conversation with a user message that starts "Verification failed." and lists them; at most `rounds`
+# times. Record each continuation as a `guard` event in the trace.
+
+# %%
+def verified_run(task: str, p: port.Port, rounds: int = 2) -> K.Run:
+    # BEGIN SOLUTION
+    r = bosla.run(task, p)
+    for _ in range(rounds):
+        problems = check_bookings(p, bosla.touched(r, p))
+        if not problems or r.stopped != "done":
+            break
+        note = "Verification failed. Fix these before you finish:\n" + "\n".join(f"- {x}" for x in problems)
+        trace = r.trace + [K.Event("guard", note)]
+        history = [m for m in r.state if m.get("role") != "system"]
+        nxt = K.run_agent(note, p.tools(), system=port.SYSTEM_PROMPT + "\n\n" + bosla.CONTEXT_FILE, history=history,
+                          max_steps=8, permission=bosla.write_gate(task), verbose=False)
+        nxt.trace, nxt.tool_calls = trace + nxt.trace, r.tool_calls + nxt.tool_calls
+        r = nxt
+    return r
+    # END SOLUTION
+
+
+# %% [markdown]
+# ## 4 · With and without verification (6')
 #
-# ```bash
-# uv run loops/ralph.py --tests tests/test_fees.py --harness pi --name with-pi
-# uv run loops/ralph.py --tests tests/test_fees.py --name builtin
-# ```
+# ✏️ **Exercise** · Run the task below on two fresh ports, once with `bosla.run` and once with `verified_run`.
+# For each: the bookings of V-108 created in the run, and what `check_bookings` says about them at the end.
+
+# %%
+TASK = "Agent code NJM-4417. Book Najm Coral (V-108) at berth B03 arriving 2026-11-15 for 2 days. I confirm."
+results = {}
+for name, runner in [("without", bosla.run), ("with", verified_run)]:
+    # BEGIN SOLUTION
+    q = port.Port(K.lab_dir(f"D3_3/{name}", reset=True))
+    r = runner(TASK, q)
+    mine = bosla.touched(r, q)
+    results[name] = {"bookings": q.sql("SELECT booking_id, berth_id, status FROM bookings WHERE vessel_id = 'V-108' "
+                                       "AND created = '2026-11-01'"), "problems": check_bookings(q, mine),
+                     "guards": sum(e.kind == "guard" for e in r.trace)}
+    # END SOLUTION
+for name, res in results.items():
+    print(name, res)
+K.check(results["with"]["problems"] == [], "with verification, the run ends with no rule broken")
+
+# %% [markdown]
+# 🔍 The agent asked for B03 because the agent's message did. Verification did not refuse the request: it made the
+# loop fix it, or say why it could not. Read the final answer: does it tell Faisal that B03 was not possible?
+
+# %% [markdown]
+# ## ✱ Stretch · A model as the checker
 #
-# Compare the two logs in `artifacts/ralph/*.log.jsonl`: iterations, tool calls and failures per iteration. Pi's
-# events for every iteration are saved next to the log.
+# Replace `check_bookings` with a model call that reads TC-03 and the booking and answers pass or fail with a
+# reason (Day 1's structured outputs). On the planted case, does it agree with your code? Which would you trust?
 
 # %% [markdown]
 # ## Checkpoint
 #
-# 1. Why does a fresh context per iteration help, and what must the repository hold for it to work?
-# 2. What would happen to this loop if `edit_file` could edit the tests?
-# 3. Which stop condition fired, and was it the right one?
-# 4. Where does loop engineering end and graph engineering (Day 4) begin?
+# 1. Why put the check in the loop instead of in the prompt ("check the under-keel clearance")?
+# 2. The check failed twice and the loop gave up. What must the final answer say?
+# 3. Why did the booking service not enforce TC-03 itself, and should it?

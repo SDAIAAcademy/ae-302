@@ -1,21 +1,18 @@
 # %% [markdown]
-# # Lab 3.2 · Rafeeq on the OpenAI Agents SDK
+# # Lab 3.2 · An agent SDK against your own loop
 #
-# Day 3 · Session 2 (Agent SDKs and hosted agents) · 25 min. You've built a harness by hand. Now rebuild Rafeeq on
-# a harness someone else wrote: the **OpenAI Agents SDK** (open source, `openai-agents`), running on a free
-# OpenRouter model through Chat Completions. In this lab you:
-# - define Rafeeq as an `Agent` with function tools made from Madar's methods;
-# - add an **input guardrail** that stops prompt injections before the model runs;
-# - require **human approval** for write tools, and resume the run after a decision;
-# - keep conversation history in a **SQLite session**;
-# - compare the SDK's run with your own loop's trace.
+# Day 3 · Session 2 · 25 min. Agent SDKs package the loop, tools, sessions, guardrails and tracing. In this lab you
+# rebuild Bosla on one SDK (the OpenAI Agents SDK, pointed at a free OpenRouter model), run the same ten tasks, and
+# compare it with the reference loop on three things: code size, what the trace shows, and what you control.
+#
+# **Reference state.** `bosla.py` (the own-loop agent), `port.py`, the ten Day 1 tasks. Nothing from Lab 3.1.
 #
 # **Tasks**
-# - [ ] 1 · Agent, model and tools (6')
-# - [ ] 2 · An input guardrail (5')
-# - [ ] 3 · Approvals for write tools (8')
-# - [ ] 4 · Sessions, and the SDK vs. your loop (6')
-# - [ ] ✱ Stretch · Streaming events
+# - [ ] 1 · Bosla on the SDK: model, tools, agent (7')
+# - [ ] 2 · The same ten tasks, graded the same way (6')
+# - [ ] 3 · Traces and control, side by side (7')
+# - [ ] 4 · The comparison table (5')
+# - [ ] ✱ Stretch · The write gate in the SDK
 
 # %%
 import os, sys, subprocess
@@ -34,193 +31,138 @@ else:
 sys.path.insert(0, os.getcwd())
 
 import agentkit as K
-print("provider:", K.PROVIDER, "| model:", K.MODEL, "| cache:", K.USE_CACHE)
+print("provider:", K.PROVIDER, "| model:", K.MODEL)
+
+# %%
+import asyncio
+import inspect
+from concurrent.futures import ThreadPoolExecutor
+
+import pandas as pd
+from agents import Agent, OpenAIChatCompletionsModel, Runner, function_tool, set_tracing_disabled
+from openai import AsyncOpenAI
+
+import bosla
+import port
+import porttasks
+
+set_tracing_disabled(True)  # the SDK exports traces to OpenAI's dashboard by default; we keep them local
+TASKS = porttasks.load_tasks("day1_tasks")
+
+
+def run_sync(coro):
+    """Run a coroutine from a notebook (which already has an event loop) or from a script."""
+    with ThreadPoolExecutor(1) as pool:
+        return pool.submit(asyncio.run, coro).result()
+
+
+# %% [markdown]
+# ## 1 · Bosla on the SDK (7')
+#
+# The SDK speaks the Responses API to OpenAI by default. For any other provider, wrap an `AsyncOpenAI` client in
+# `OpenAIChatCompletionsModel`. `function_tool` reads the same type hints and docstrings as `K.tool_schema`.
+#
+# ✏️ **Exercise** · Write `make_sdk_agent(p)`: the model for OpenRouter, every port tool through `function_tool`,
+# and an `Agent` named "Bosla" with the reference prompt plus the context file as instructions.
+
+# %%
+def make_sdk_agent(p: port.Port) -> Agent:
+    # BEGIN SOLUTION
+    client = AsyncOpenAI(base_url=K.PROVIDERS[K.PROVIDER]["base_url"], api_key=K.api_key(), default_headers=K.headers())
+    model = OpenAIChatCompletionsModel(model=K.MODEL, openai_client=client)
+    tools = [function_tool(t) for t in p.tools()]
+    return Agent(name="Bosla", instructions=port.SYSTEM_PROMPT + "\n\n" + bosla.CONTEXT_FILE, model=model, tools=tools)
+    # END SOLUTION
+
+
+p = port.Port(K.lab_dir("D3_2/warmup", reset=True))
+result = run_sync(Runner.run(make_sdk_agent(p), "Berth hire for Najm Falcon for 2 days?", max_turns=8))
+print(result.final_output)
+for item in result.new_items:
+    print(f"  {type(item).__name__:22s}", getattr(item.raw_item, "name", "") or "")
+
+# %% [markdown]
+# ## 2 · The same ten tasks (6')
+#
+# The SDK reports tool calls as run items. To grade with `porttasks.grade` you need `(name, args)` pairs.
+#
+# ✏️ **Exercise** · For each task: a fresh port, the SDK agent, `Runner.run(..., max_turns=8)`, the tool calls from
+# `result.new_items` (items whose type is `ToolCallItem`: name and JSON arguments on `raw_item`), the grade. An
+# exception from the SDK (for example `MaxTurnsExceeded`) is a failed task with the exception's name as `why`.
 
 # %%
 import json
-import re
 
-import pandas as pd
-from agents import (Agent, GuardrailFunctionOutput, InputGuardrailTripwireTriggered, OpenAIChatCompletionsModel,
-                    RunContextWrapper, Runner, SQLiteSession, function_tool, input_guardrail, set_tracing_disabled)
-from openai import AsyncOpenAI
-
-import madar
-
-WORK = K.lab_dir("D3_2", reset=True)
-m = madar.Madar(WORK)
-set_tracing_disabled(True)  # tracing exports to OpenAI's dashboard by default; we use free OpenRouter models instead
+rows = []
+for t in TASKS:
+    # BEGIN SOLUTION
+    p = port.Port(K.lab_dir(f"D3_2/{t['id']}", reset=True))
+    try:
+        res = run_sync(Runner.run(make_sdk_agent(p), t["prompt"], max_turns=8))
+        calls = [(i.raw_item.name, json.loads(i.raw_item.arguments or "{}")) for i in res.new_items
+                 if type(i).__name__ == "ToolCallItem"]
+        ok, why = porttasks.grade(t, res.final_output, calls, p)
+    except Exception as e:  # noqa: BLE001 - the SDK stops a run by raising
+        ok, why, calls = False, type(e).__name__, []
+    rows.append({"task": t["id"], "passed": ok, "why": why, "tools": " ".join(n for n, _ in calls)})
+    # END SOLUTION
+sdk = pd.DataFrame(rows)
+print(sdk.to_string(index=False))
+K.check(len(sdk) == 10, "ten tasks on the SDK")
 
 # %% [markdown]
-# ## 1 · Agent, model and tools (6')
+# 🔍 T04 says "do not book yet" and T09 uses the wrong agent code. The SDK agent has no write gate: which of the two
+# does the tool's own check still protect, and which depends on the model alone?
+
+# %% [markdown]
+# ## 3 · Traces and control (7')
 #
-# The SDK talks to OpenAI's Responses API by default. For any other provider, wrap an `AsyncOpenAI` client in
-# `OpenAIChatCompletionsModel`. `function_tool` turns a typed, documented function into a tool, exactly like
-# `K.tool_schema` (it reads the same Google-style docstrings).
-#
-# ✏️ **Exercise** · Create `model` for OpenRouter, the read tools with `function_tool`, and `rafeeq`, an `Agent`
-# named "Rafeeq" with `madar.SYSTEM_PROMPT` as instructions. Then run Sara's question with `await Runner.run(...)`
-# (`max_turns=6`).
+# ✏️ **Exercise** · Fill `control`: for each harness part of `bosla.PARTS` (except `verify`), how you would get it
+# on the SDK, in a few words, or "not built in". Then count the lines of the two agents' code: `bosla.run` plus
+# `agentkit.run_agent` against `make_sdk_agent` plus the run call.
 
 # %%
-SARA = "What is the status of REN-10482 and when is the decision due? ID ends 4821, mobile 0501234821."
 # BEGIN SOLUTION
-client = AsyncOpenAI(base_url=K.PROVIDERS[K.PROVIDER]["base_url"], api_key=K.api_key(), default_headers=K.headers())
-model = OpenAIChatCompletionsModel(model=K.MODEL, openai_client=client)
-read_tools = [function_tool(getattr(m, name)) for name in m.READ_TOOLS]
-rafeeq = Agent(name="Rafeeq", instructions=madar.SYSTEM_PROMPT, model=model, tools=read_tools)
-result = await Runner.run(rafeeq, SARA, max_turns=6)
+control = {
+    "prompt_rules": "instructions=",
+    "context_file": "append to instructions",
+    "useful_errors": "the tool's own messages; the SDK passes exceptions to the model as text by default",
+    "step_budget": "max_turns= (raises MaxTurnsExceeded instead of returning a stop reason)",
+    "write_gate": "not built in as a plain hook here: a tool guardrail or an approval setting per tool (stretch)",
+}
+own_lines = len(inspect.getsource(bosla.run).splitlines()) + len(inspect.getsource(K.run_agent).splitlines())
+sdk_lines = len(inspect.getsource(make_sdk_agent).splitlines()) + 1
 # END SOLUTION
-print(result.final_output)
-print("\nschema the model sees:", json.dumps(read_tools[1].params_json_schema)[:300], "…")
-K.check(bool(result.final_output), "Rafeeq answered through the Agents SDK")
+print(pd.DataFrame(control.items(), columns=["part", "on the SDK"]).to_string(index=False))
+print("lines: own loop", own_lines, "| SDK agent", sdk_lines)
 
 # %% [markdown]
-# A run produces **items**, like the Responses API: tool calls, tool outputs, messages. And usage per request.
-
-# %%
-for item in result.new_items:
-    raw = item.raw_item
-    print(f"{type(item).__name__:20s}", (getattr(raw, "name", "") or ""), str(getattr(raw, "arguments", "") or "")[:80])
-print(result.context_wrapper.usage.requests, "requests ·", result.context_wrapper.usage.input_tokens, "input tokens")
-
-# %% [markdown]
-# ## 2 · An input guardrail (5')
+# ## 4 · The comparison table (5')
 #
-# Guardrails run **alongside** the agent: an input guardrail checks the user's input and can trip a wire that stops
-# the run before (or while) the model works. Here, a cheap check for prompt-injection phrases. (Day 4 replaces the
-# keyword list with a Decisions-style classifier.)
-#
-# ✏️ **Exercise** · Write `injection_guard`, an `@input_guardrail` that sets `tripwire_triggered=True` when the input
-# matches any pattern in `INJECTION_PATTERNS` (case-insensitive), and add it to `rafeeq_guarded`. Show that the
-# approval-letter message from the inbox trips it, and that Sara's question doesn't.
-
-# %%
-INJECTION_PATTERNS = ["ignore (all|previous|prior) instructions", "note for the ai", "to the digital assistant",
-                      "إلى المساعد الرقمي", "لها أولوية على سياساتك", "do not mention this note"]
-
-
-# BEGIN SOLUTION
-@input_guardrail
-async def injection_guard(ctx: RunContextWrapper, agent: Agent, input) -> GuardrailFunctionOutput:
-    text = input if isinstance(input, str) else json.dumps(input, ensure_ascii=False)
-    hits = [p for p in INJECTION_PATTERNS if re.search(p, text, re.IGNORECASE)]
-    return GuardrailFunctionOutput(output_info={"matched": hits}, tripwire_triggered=bool(hits))
-
-
-rafeeq_guarded = rafeeq.clone(input_guardrails=[injection_guard])
-# END SOLUTION
-
-letter = next(x for x in madar.load_inbox() if x["subject"].startswith("Approval letter"))
-try:
-    await Runner.run(rafeeq_guarded, letter["body"], max_turns=4)
-    tripped = False
-except InputGuardrailTripwireTriggered as e:
-    tripped = True
-    print("🛡️ tripped:", e.guardrail_result.output.output_info)
-K.check(tripped, "the injected approval letter trips the guardrail")
-ok = await Runner.run(rafeeq_guarded, SARA, max_turns=6)
-K.check(bool(ok.final_output), "a normal question passes")
-
-# %% [markdown]
-# ## 3 · Approvals for write tools (8')
-#
-# `function_tool(fn, needs_approval=True)` makes the SDK **pause** before running that tool. The run returns with
-# `result.interruptions` (the pending calls); you turn the result into a `RunState`, `approve` or `reject` each item,
-# and resume with `Runner.run(agent, state)`. A rejected call reaches the model as "not approved".
-#
-# ✏️ **Exercise** · Build `rafeeq_rw` with the read tools plus the write tools (`m.WRITE_TOOLS`) wrapped with
-# `needs_approval=True`. Run Huda's request, then approve only `reschedule_inspection` calls (reject anything else),
-# and resume until there are no interruptions left (at most 3 rounds).
-
-# %%
-HUDA = ("My foundation inspection for BLD-20981 is booked for Tuesday 3 November at 10:00. Please move it to "
-        "Thursday 5 November, any time before noon. Go ahead. ID ends 1196, mobile 0548841196.")
-decisions = []
-# BEGIN SOLUTION
-write_tools = [function_tool(getattr(m, name), needs_approval=True) for name in m.WRITE_TOOLS]
-rafeeq_rw = rafeeq.clone(tools=read_tools + write_tools)
-result = await Runner.run(rafeeq_rw, HUDA, max_turns=8)
-for _ in range(3):
-    if not result.interruptions:
-        break
-    state = result.to_state()
-    for item in result.interruptions:
-        name = item.raw_item.name
-        ok = name == "reschedule_inspection"
-        decisions.append((name, item.raw_item.arguments, ok))
-        state.approve(item) if ok else state.reject(item)
-    result = await Runner.run(rafeeq_rw, state, max_turns=8)
-# END SOLUTION
-for d in decisions:
-    print("🛡️", "approved" if d[2] else "rejected", d[0], d[1])
-print(result.final_output)
-booked = m.sql("SELECT slot, status FROM inspections WHERE permit_id = 'BLD-20981'")
-print(booked)
-K.check(any(d[0] == "reschedule_inspection" for d in decisions), "the reschedule waited for approval")
-K.check(any(r["slot"] == "2026-11-05 11:00" and r["status"] == "booked" for r in booked), "moved to 5 Nov 11:00")
-
-# %% [markdown]
-# 🔍 Where would the pending `state` live in a real service, between "Rafeeq asks" and "an officer clicks approve"
-# an hour later? (`RunState` serialises to JSON: `state.to_json()`.) That is the durable-execution problem Day 4's
-# graph solves with checkpoints.
-
-# %% [markdown]
-# ## 4 · Sessions, and the SDK vs. your loop (6')
-#
-# A `SQLiteSession` stores the conversation so the next `Runner.run` continues it: no history to pass by hand.
-
-# %%
-session = SQLiteSession("sara-2026-11-01", str(WORK / "sessions.sqlite"))
-r1 = await Runner.run(rafeeq, SARA, session=session, max_turns=6)
-r2 = await Runner.run(rafeeq, "And if I add 35 m² of structural works, what would the fee be?", session=session, max_turns=6)
-print(r2.final_output)
-items = await session.get_items()
-print(len(items), "items stored in the session")
-K.check(len(items) > 4, "the session kept both turns")
-
-# %% [markdown]
-# ✏️ **Exercise** · Run the same question with `K.run_agent` and fill `compare` with, for each harness: model
-# requests, tool calls and input tokens. Then list in `differences` three things the SDK gave you for free and one
-# thing you can no longer see or change easily.
+# ✏️ **Exercise** · Write `table`: rows `code size`, `trace`, `control`, `passed tasks`; columns `own loop` and
+# `SDK`. Use your numbers, and one line of judgement per row. This is the table the capstone README asks for when
+# you choose between an SDK and your own harness.
 
 # %%
 # BEGIN SOLUTION
-K.LEDGER.reset()
-mine = K.run_agent(SARA, m.tools(m.READ_TOOLS), system=madar.SYSTEM_PROMPT, max_steps=6, verbose=False)
-sdk = await Runner.run(rafeeq, SARA, max_turns=6)
-compare = pd.DataFrame([
-    {"harness": "K.run_agent", "requests": mine.steps, "tool_calls": len(mine.tool_calls), "input_tokens": K.LEDGER.input_tokens},
-    {"harness": "Agents SDK", "requests": sdk.context_wrapper.usage.requests,
-     "tool_calls": sum(type(i).__name__ == "ToolCallItem" for i in sdk.new_items),
-     "input_tokens": sdk.context_wrapper.usage.input_tokens},
+table = pd.DataFrame([
+    {"": "code size", "own loop": f"{own_lines} lines, all yours", "SDK": f"{sdk_lines} lines plus the SDK"},
+    {"": "trace", "own loop": "events you defined, stop reason returned", "SDK": "run items; exceptions for stops"},
+    {"": "control", "own loop": "every hook is a line you can read", "SDK": "settings and guardrails; less to write"},
+    {"": "passed tasks", "own loop": "from Lab 3.1's baseline", "SDK": f"{sdk.passed.sum()} of 10"},
 ])
-differences = ["approvals that pause and resume with serialisable state", "guardrails that run alongside the agent",
-               "sessions and handoffs built in",
-               "less visible: the exact messages sent each turn and how tool errors are worded"]
 # END SOLUTION
-compare
+print(table.to_string(index=False))
 
 # %% [markdown]
-# ## ✱ Stretch · Streaming events
+# ## ✱ Stretch · The write gate in the SDK
 #
-# `Runner.run_streamed(agent, input)` returns a result whose `stream_events()` yields raw model events (the semantic
-# events you saw on Day 1) and higher-level `run_item_stream_event`s (tool called, tool output, message). Print one
-# line per run-item event for Sara's question.
-
-# %%
-# BEGIN SOLUTION
-streamed = Runner.run_streamed(rafeeq, SARA, max_turns=6)
-async for ev in streamed.stream_events():
-    if ev.type == "run_item_stream_event":
-        print(ev.name, "·", type(ev.item).__name__)
-# END SOLUTION
+# Read the SDK's documentation for tool approvals or tool guardrails, and add a gate that refuses
+# `create_booking`, `amend_booking` and `cancel_booking` unless the input says "I confirm". Run T04 again.
 
 # %% [markdown]
 # ## Checkpoint
 #
-# 1. Which of today's SDK features did your Day 1 loop already have, and which would take you a day to build well?
-# 2. The SDK pauses for approval. Where does a **hosted** runtime (OpenAI's Agents API, Claude Managed Agents) keep
-#    that pending state, and what does that cost you in control?
-# 3. Your guardrail is a keyword list. Name one injection from the inbox it would miss.
-# 4. When would you pick the Claude Agent SDK instead, and what would you give up?
+# 1. Name one thing you lost and one thing you gained by moving to the SDK.
+# 2. The SDK raises when `max_turns` is reached. What does your evaluation code have to do about that?
+# 3. Where, in the SDK's run, would you look for the equivalent of your trace's `guard` events?
