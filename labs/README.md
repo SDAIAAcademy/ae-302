@@ -19,7 +19,8 @@ git clone https://github.com/SDAIAAcademy/agentic-ai
 cd agentic-ai/labs
 cp .env.example .env           # then paste your key into .env
 uv sync                        # creates .venv from pyproject.toml (uv.lock pins every version)
-uv run python prepare_data.py  # generates data/madar.sqlite and data/inbox.jsonl (a second)
+uv run python port_data.py     # rebuilds data/port.sqlite (Marsa Ports Authority; committed, so optional)
+uv run python prepare_data.py  # Days 2 to 4 until they are re-cased: data/madar.sqlite and data/inbox.jsonl
 uv run jupyter lab
 ```
 Run `00_setup_check.ipynb` once before Day 1. It checks your key against all three API shapes, downloads the Day 2 embedding model and checks `uv` and Node.js.
@@ -48,10 +49,10 @@ Free models change often. If the default disappears or is busy, pick another fre
 | Day | Session | Notebook | API shapes |
 |---|---|---|---|
 | 0 | Setup | [`00_setup_check.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/00_setup_check.ipynb) | all three |
-| 1 | Two providers, one client | [`D1_1_two_providers.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_1_two_providers.ipynb) | Chat Completions |
-| 1 | Triage with the Responses API | [`D1_2_responses_api.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_2_responses_api.ipynb) | Responses |
-| 1 | Rafeeq's first tools, three ways | [`D1_3_messages_and_tools.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_3_messages_and_tools.ipynb) | Messages |
-| 1 | The agent loop from scratch | [`D1_4_agent_loop.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_4_agent_loop.ipynb) | all three |
+| 1 | One model, three API shapes | [`D1_1_three_shapes.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_1_three_shapes.ipynb) | all three |
+| 1 | A berth request as a validated object | [`D1_2_structured_outputs.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_2_structured_outputs.ipynb) | Chat Completions |
+| 1 | Typed tools with useful errors | [`D1_3_typed_tools.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_3_typed_tools.ipynb) | Chat Completions |
+| 1 | The agent loop from scratch | [`D1_4_agent_loop.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_4_agent_loop.ipynb) | Chat Completions |
 | 2 | Budget the window | [`D2_1_context_budget.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_1_context_budget.ipynb) | Chat Completions |
 | 2 | Search the policies | [`D2_2_retrieval.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_2_retrieval.ipynb) | Chat Completions |
 | 2 | Remember and specialise | [`D2_3_memory_skills.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_3_memory_skills.ipynb) | Chat Completions |

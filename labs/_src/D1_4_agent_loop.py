@@ -1,20 +1,22 @@
 # %% [markdown]
 # # Lab 1.4 · The agent loop from scratch
 #
-# Day 1 · Session 4 (The agent loop) · 25 min. An agent is a model calling tools **in a loop** until it decides it
-# is done. Everything else in this course (context engineering, harnesses, loops, graphs) wraps this loop. In this
-# lab you:
-# - write the loop yourself in about 25 lines of Chat Completions code;
-# - give it Rafeeq's read tools and watch it chain several calls;
-# - add the two guards every loop needs: a **step budget** and **tool errors the model can recover from**;
-# - run the course's reference loop, `K.run_agent`, on all three API shapes and compare them.
+# Day 1 · Session 4 · 25 min. An agent is a model calling tools **in a loop** until a stop rule fires. In this lab
+# you write that loop yourself, give it Bosla's tools over the three port services (schedule, tariff, booking), and
+# run it on ten tasks with a trace per run.
+#
+# **AI policy: AI off.** Write `my_loop` without an assistant. That is the point of the lab: you will read every
+# other harness this week against the twenty lines you write here.
+#
+# **Reference state.** The lab starts from a fresh copy of the port database and the tools of `port.py`; it uses
+# nothing from Labs 1.1 to 1.3.
 #
 # **Tasks**
-# - [ ] 1 · Write `my_agent()` (8')
-# - [ ] 2 · Multi-step questions and the trace (6')
-# - [ ] 3 · One loop, three API shapes (5')
-# - [ ] 4 · Break it (6')
-# - [ ] ✱ Stretch · Run parallel tool calls concurrently
+# - [ ] 1 · Write `my_loop()` with a step budget and a stop rule (8')
+# - [ ] 2 · A trace per run (5')
+# - [ ] 3 · Ten tasks, graded by code (8')
+# - [ ] 4 · Break it: a tool that never finishes (4')
+# - [ ] ✱ Stretch · Run one turn's tool calls in parallel
 
 # %%
 import os, sys, subprocess
@@ -40,173 +42,170 @@ import json
 
 import pandas as pd
 
-import madar
+import port
+import porttasks
 
-m = madar.Madar(K.lab_dir("D1_4", reset=True))
-READ = m.tools(m.READ_TOOLS)  # search_policies, get_permit, compute_fee, list_slots
-print([t.__name__ for t in READ])
+TOOLS_NAMES = port.Port.READ_TOOLS + port.Port.WRITE_TOOLS
+print(TOOLS_NAMES)
 
 # %% [markdown]
-# ## 1 · Write `my_agent()` (8')
+# ## 1 · Write `my_loop()` (8')
 #
 # ```text
 # messages = [system, user]
-# repeat up to max_steps:
+# for step in 1..max_steps:                         ← the step budget
 #     reply = model(messages, tools)
-#     append reply to messages
-#     if reply has no tool calls: return reply.content        ← the model decided it is done
-#     for each tool call: run it, append {"role": "tool", "tool_call_id": ..., "content": result}
-# give up: return None                                         ← the loop decided it is done
+#     append reply
+#     if reply has no tool calls: stop "done"       ← the model's completion signal
+#     if this turn repeats the last turn's calls: stop "repeat"   ← no progress
+#     run each call, append one tool message per call
+# stop "max_steps"                                  ← the loop's own stop rule
 # ```
 #
-# ✏️ **Exercise** · Implement `my_agent` with `K.chat(messages, tools=tools)` (it accepts Python functions) and
-# `K.call_tool(by_name, name, arguments)` (it returns the result as JSON, or an error as JSON). Print one line per
-# tool call. Append the assistant message with `msg.model_dump(exclude_none=True)`.
+# ✏️ **Exercise** · Implement `my_loop`. Use `K.chat(messages, tools=tools)` (it accepts Python functions) and
+# `K.call_tool(by_name, name, arguments)`, which returns the result as JSON, or an error as JSON the model can act
+# on. Append the assistant message with `msg.model_dump(exclude_none=True)`. Return a dict with `final` (text or
+# `None`), `stopped` (`done`, `repeat` or `max_steps`), `steps`, `calls` (a list of `(name, args)`) and `trace`
+# (a list of dicts, one per event).
 
 # %%
-def my_agent(task: str, tools: list, system: str = madar.SYSTEM_PROMPT, max_steps: int = 8) -> str | None:
+def my_loop(task: str, tools: list, system: str = port.SYSTEM_PROMPT, max_steps: int = 8) -> dict:
     by_name = {t.__name__: t for t in tools}
     messages = [{"role": "system", "content": system}, {"role": "user", "content": task}]
+    trace, calls, last = [{"kind": "user", "text": task}], [], None
     # BEGIN SOLUTION
-    for step in range(max_steps):
+    for step in range(1, max_steps + 1):
         msg = K.chat(messages, tools=tools).choices[0].message
         messages.append(msg.model_dump(exclude_none=True))
         if not msg.tool_calls:
-            return msg.content
-        for call in msg.tool_calls:
-            print(f"  step {step + 1}: {call.function.name}({call.function.arguments})")
-            result = K.call_tool(by_name, call.function.name, call.function.arguments)
-            messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
-    return None
+            trace.append({"kind": "final", "step": step, "text": msg.content})
+            return {"final": msg.content, "stopped": "done", "steps": step, "calls": calls, "trace": trace}
+        this = [(c.function.name, c.function.arguments) for c in msg.tool_calls]
+        if this == last:
+            trace.append({"kind": "stop", "step": step, "text": "same calls as the previous turn"})
+            return {"final": None, "stopped": "repeat", "steps": step, "calls": calls, "trace": trace}
+        last = this
+        for c in msg.tool_calls:
+            args = json.loads(c.function.arguments or "{}")
+            calls.append((c.function.name, args))
+            trace.append({"kind": "call", "step": step, "name": c.function.name, "args": args})
+            out = K.call_tool(by_name, c.function.name, c.function.arguments or "{}")
+            trace.append({"kind": "error" if out.startswith('{"error"') else "result", "step": step, "text": out[:300]})
+            messages.append({"role": "tool", "tool_call_id": c.id, "content": out})
+    trace.append({"kind": "stop", "step": max_steps, "text": "step budget spent"})
+    return {"final": None, "stopped": "max_steps", "steps": max_steps, "calls": calls, "trace": trace}
     # END SOLUTION
 
 
-answer = my_agent("How much is the yearly fee for an illuminated sign of 3 m²?", READ)
-print(answer)
-K.check(answer is not None and "750" in answer, "my_agent computed the fee with a tool (750 SAR)")
+p = port.Port(K.lab_dir("D1_4", reset=True))
+r = my_loop("What is the berth hire for a 39,000 GT vessel for 2 days?", p.tools(TOOLS_NAMES))
+print(r["stopped"], r["steps"], r["calls"])
+print(r["final"])
+K.check(r["stopped"] == "done" and "7,800" in (r["final"] or "").replace("7800", "7,800"), "my_loop quoted SAR 7,800 from compute_dues")
 
 # %% [markdown]
-# ## 2 · Multi-step questions and the trace (6')
+# ## 2 · A trace per run (5')
 #
-# Fahad's permit is late. Answering him well needs **two** kinds of information: his permit (verified) and the
-# escalation policy. Nobody tells the model the order; it plans as it goes.
+# A trace is the evidence of a run: what the model asked for, what each tool answered, why the loop stopped.
+# Tomorrow's context work and Thursday's evaluation read traces, not answers.
 #
-# `K.run_agent` is the same loop as yours plus a **trace**: a list of events (`user`, `call`, `result`, `final`, ...)
-# that you can print, count and test.
+# ✏️ **Exercise** · Write `save_trace(task_id, run)` that writes `run["trace"]` to `traces/<task_id>.jsonl` in the
+# lab folder, one event per line, and adds a last line `{"kind": "summary", ...}` with `stopped`, `steps` and the
+# number of tool calls and tool errors. Return the path.
 
 # %%
-FAHAD = ("السلام عليكم، قدمت طلب رخصة بناء رقم BLD-20417 ولم يصلني رد. هل تأخر الطلب؟ وماذا أفعل؟ "
-         "آخر أربعة أرقام من هويتي 7730 وجوالي 0555017730")
-run = K.run_agent(FAHAD, READ, system=madar.SYSTEM_PROMPT, max_steps=8)
-print(f"\n{run.stopped} after {run.steps} model calls · tools used: {[n for n, _ in run.tool_calls]}")
+TRACES = K.lab_dir("D1_4") / "traces"
 
-# %% [markdown]
-# ✏️ **Exercise** · From `run.trace`, build `summary`: a dict with the number of model calls (`run.steps`), the number
-# of tool calls, the number of tool errors (events of kind `error`), and whether `get_permit` was called **before**
-# the final answer mentions an overdue period.
 
-# %%
-# BEGIN SOLUTION
-kinds = [e.kind for e in run.trace]
-summary = {"model_calls": run.steps, "tool_calls": kinds.count("call"), "tool_errors": kinds.count("error"),
-           "verified_first": any(n == "get_permit" for n, _ in run.tool_calls)}
-# END SOLUTION
-print(summary)
-K.check(summary["verified_first"], "Rafeeq looked up the permit (with verification) before answering")
-K.check("9" in run.final or "٩" in run.final, "the answer says the permit is 9 working days overdue")
-
-# %% [markdown]
-# ## 3 · One loop, three API shapes (5')
-#
-# `K.run_agent(..., shape=...)` runs the same loop over Chat Completions, Responses or Messages. Only an **adapter**
-# changes: how the request is built, where tool calls are found, and how results go back:
-#
-# | | `chat` | `responses` | `anthropic` |
-# |---|---|---|---|
-# | tool calls | `message.tool_calls` | `function_call` items | `tool_use` blocks |
-# | results | one `role="tool"` message each | one `function_call_output` item each | one user message of `tool_result` blocks |
-# | done when | no tool calls | no `function_call` items | no `tool_use` blocks |
-#
-# ✏️ **Exercise** · Run Sara's question on all three shapes and fill a table with: shape, `stopped`, model calls,
-# tool calls, input tokens (from `K.LEDGER`, reset before each run), and the first 80 characters of the answer.
-
-# %%
-SARA = "What is the status of REN-10482 and when is the decision due? National ID ends 4821, mobile 0501234821."
-rows = []
-for shape in ["chat", "responses", "anthropic"]:
+def save_trace(task_id: str, run: dict) -> Path:
     # BEGIN SOLUTION
-    K.LEDGER.reset()
-    r = K.run_agent(SARA, READ, system=madar.SYSTEM_PROMPT, shape=shape, max_steps=6, verbose=False)
-    rows.append({"shape": shape, "stopped": r.stopped, "model_calls": r.steps, "tool_calls": len(r.tool_calls),
-                 "input_tokens": K.LEDGER.input_tokens, "answer": " ".join(r.final.split())[:80]})
+    TRACES.mkdir(exist_ok=True)
+    path = TRACES / f"{task_id}.jsonl"
+    summary = {"kind": "summary", "stopped": run["stopped"], "steps": run["steps"], "tool_calls": len(run["calls"]),
+               "tool_errors": sum(e["kind"] == "error" for e in run["trace"])}
+    with path.open("w", encoding="utf-8") as f:
+        for e in run["trace"] + [summary]:
+            f.write(json.dumps(e, ensure_ascii=False) + "\n")
+    return path
     # END SOLUTION
-shapes = pd.DataFrame(rows)
-K.check(len(shapes) == 3 and (shapes.stopped == "done").all(), "all three shapes finished")
-shapes
+
+
+path = save_trace("warmup", r)
+print(path.read_text(encoding="utf-8"))
+K.check(path.exists() and '"summary"' in path.read_text(encoding="utf-8"), "the trace ends with a summary line")
 
 # %% [markdown]
-# 🔍 Same model, same tools, same question: do the token counts differ? Each shape formats tools and history
-# differently before the model's chat template turns them into tokens. Look at the adapters in `agentkit.py`
-# (`ChatShape`, `ResponsesShape`, `MessagesShape`): about 25 lines each.
-
-# %% [markdown]
-# ## 4 · Break it (6')
+# ## 3 · Ten tasks, graded by code (8')
 #
-# Real tools fail and real models loop. Try three failures and watch what the loop does.
+# `data/tasks/day1_tasks.jsonl` holds ten tasks for Najm Lines and Sahil Feeders: reads, a quote, a booking, an
+# amendment, a cancellation, an Arabic question, a wrong agent code and an out-of-scope request. Each has a check
+# that code can grade: strings in the answer, or the state of the database after the run.
 #
-# **(a) A tool that raises.** `get_permit` with a wrong mobile raises `ToolError`; `K.call_tool` turns it into
-# `{"error": "..."}` so the model can ask for the right data instead of crashing the loop.
+# ✏️ **Exercise** · For each task: a **fresh** `port.Port` (so one task's booking cannot change the next), run
+# `my_loop`, save the trace, grade with `porttasks.grade(task, final, calls, p)`. Collect one row per task. The
+# outcome asks for at least seven of ten.
 
 # %%
-r = K.run_agent("Status of REN-10482? ID ends 4821, mobile 0509999999.", READ, system=madar.SYSTEM_PROMPT, max_steps=5)
-K.check(any(e.kind == "error" for e in r.trace), "the tool error reached the model as a result")
+tasks = porttasks.load_tasks("day1_tasks")
+rows = []
+for t in tasks:
+    # BEGIN SOLUTION
+    p = port.Port(K.lab_dir(f"D1_4/{t['id']}", reset=True))
+    run = my_loop(t["prompt"], p.tools(TOOLS_NAMES))
+    save_trace(t["id"], run)
+    ok, why = porttasks.grade(t, run["final"], run["calls"], p)
+    rows.append({"task": t["id"], "passed": ok, "why": why, "stopped": run["stopped"], "steps": run["steps"],
+                 "tools": " ".join(n for n, _ in run["calls"])})
+    # END SOLUTION
+results = pd.DataFrame(rows)
+print(results.to_string(index=False))
+print(K.LEDGER)
+K.check(results.passed.sum() >= 7, f"{results.passed.sum()} of 10 tasks passed (the outcome asks for 7)")
 
 # %% [markdown]
-# **(b) A tool that never satisfies the model.** `check_queue` always answers "still processing, call again". Without
-# a step budget, this loop would run until your quota is gone.
+# 🔍 Open the trace of one failed task. Was it the model (wrong tool, wrong argument), the tool (an unhelpful
+# error), or the loop (stopped too early)? Write the cause next to it: this is the habit Thursday turns into an
+# evaluation.
+
+# %% [markdown]
+# ## 4 · Break it: a tool that never finishes (4')
 #
-# ✏️ **Exercise** · Run `K.run_agent` with `[check_queue]` and `max_steps=4` on "Check the queue until the job is
-# finished, then tell me the result." Confirm it stops with `max_steps`. Then write, in `fix`, one sentence you would
-# add to the tool's **result** so the model stops on its own.
+# `vessel_position` always answers "position not yet received, call again". Without a stop rule this loop would
+# spend your quota.
+#
+# ✏️ **Exercise** · Run `my_loop` with only this tool and `max_steps=5` on "Keep checking until Najm Falcon's
+# position arrives, then tell me." Which rule stopped it? Then write in `fix` one sentence you would put into the
+# tool's **result** so that the model stops by itself.
 
 # %%
-def check_queue(job_id: str = "J-1") -> dict:
-    """Check whether a background job has finished.
+def vessel_position(vessel_id: str = "V-110") -> dict:
+    """Latest reported position of a vessel.
 
     Args:
-        job_id: the job to check.
+        vessel_id: e.g. "V-110".
     """
-    return {"job_id": job_id, "status": "processing", "message": "Still processing. Call check_queue again."}
+    return {"vessel_id": vessel_id, "status": "pending", "message": "Position not yet received. Call vessel_position again."}
 
 
 # BEGIN SOLUTION
-r = K.run_agent("Check the queue until the job is finished, then tell me the result.", [check_queue], max_steps=4)
-fix = "Jobs take about 10 minutes: tell the person to check back later instead of calling again."
+broken = my_loop("Keep checking until Najm Falcon's position arrives, then tell me.", [vessel_position], max_steps=5)
+fix = "Positions arrive about every 6 hours: tell the agent to ask again later instead of calling again now."
 # END SOLUTION
-print("stopped:", r.stopped, "| fix:", fix)
-K.check(r.stopped in ("max_steps", "done"), "the step budget bounds the loop")
+print("stopped:", broken["stopped"], "after", broken["steps"], "steps | fix:", fix)
+K.check(broken["stopped"] in ("repeat", "max_steps", "done"), "a stop rule bounded the loop")
 
 # %% [markdown]
-# **(c) A question with no tool.** Ask Rafeeq something outside its tools and policies ("Can you renew my driving
-# licence?"). A good agent answers without calling any tool and says what it can't do (POL-10).
-
-# %%
-r = K.run_agent("Can you renew my driving licence?", READ, system=madar.SYSTEM_PROMPT, max_steps=4)
-K.check(len(r.tool_calls) <= 1 and r.stopped == "done", "out-of-scope question answered without a tool spree")
-
-# %% [markdown]
-# ## ✱ Stretch · Run parallel tool calls concurrently
+# ## ✱ Stretch · Run one turn's tool calls in parallel
 #
-# When the model returns several tool calls in one turn, they are independent by definition. Write
-# `my_parallel_agent`, a copy of `my_agent` that runs one turn's tool calls with a
-# `concurrent.futures.ThreadPoolExecutor` and appends the results **in the original order**. Test it on a question
-# that needs two fees.
+# Calls the model returns in one turn are independent by definition. Copy `my_loop` into `my_parallel_loop` and run
+# a turn's calls with `concurrent.futures.ThreadPoolExecutor`, appending the results **in the original order**.
+# Try it on "Berth hire for Najm Sky for 4 days and for Sahil Wave for 2 days?".
 
 # %%
 from concurrent.futures import ThreadPoolExecutor
 
 # BEGIN SOLUTION
-def my_parallel_agent(task: str, tools: list, system: str = madar.SYSTEM_PROMPT, max_steps: int = 8) -> str | None:
+def my_parallel_loop(task: str, tools: list, system: str = port.SYSTEM_PROMPT, max_steps: int = 8) -> str | None:
     by_name = {t.__name__: t for t in tools}
     messages = [{"role": "system", "content": system}, {"role": "user", "content": task}]
     for _ in range(max_steps):
@@ -214,20 +213,20 @@ def my_parallel_agent(task: str, tools: list, system: str = madar.SYSTEM_PROMPT,
         messages.append(msg.model_dump(exclude_none=True))
         if not msg.tool_calls:
             return msg.content
-        print(f"  {len(msg.tool_calls)} call(s) this turn")
         with ThreadPoolExecutor() as pool:
             outs = list(pool.map(lambda c: K.call_tool(by_name, c.function.name, c.function.arguments), msg.tool_calls))
         messages.extend({"role": "tool", "tool_call_id": c.id, "content": o} for c, o in zip(msg.tool_calls, outs))
     return None
 
 
-print(my_parallel_agent("Fees for a 3 m² illuminated sign and for a 420 m² building permit?", [m.compute_fee]))
+p = port.Port(K.lab_dir("D1_4/stretch", reset=True))
+print(my_parallel_loop("Berth hire for Najm Sky for 4 days and for Sahil Wave for 2 days?", p.tools(TOOLS_NAMES)))
 # END SOLUTION
 
 # %% [markdown]
 # ## Checkpoint
 #
-# 1. Who decides that the task is done: the model, the loop, or both? Point to the lines in `my_agent`.
+# 1. Who decides that the task is done: the model, the loop, or both? Point to the lines in `my_loop`.
 # 2. Why does a tool error go back to the model as a **result** instead of raising?
-# 3. Which line would you change to make `my_agent` speak the Messages API instead of Chat Completions?
-# 4. Your agent costs too much on long tasks. Name two numbers in the trace you would watch first.
+# 3. Task T09 uses Najm's code on Sahil's booking. Which line of `port.py` made it pass, and would it pass if the
+#    tool trusted the model to check ownership?

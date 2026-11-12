@@ -64,170 +64,164 @@
     {
       "id": "day1",
       "kind": "day",
-      "title": "From a Language Model to an Agent",
+      "title": "From Model to Agent",
       "deck": "slides/day1.html",
       "sessions": [
         {
-          "title": "What an LLM is",
-          "summary": "What an LLM is, and how to call one",
+          "title": "Three API shapes",
+          "summary": "What a language model is, and one model called through Chat Completions, Responses and Messages",
           "outcomes": [
-            "Explain what a language model computes, and what a token is",
-            "Tell a model apart from a product like ChatGPT",
-            "Call free models from Python and read everything that comes back",
-            "Shortlist a model from public benchmarks"
+            "Explain what a language model predicts and why its output varies",
+            "Call one open-weight model through three API shapes",
+            "Read stop reasons and token usage in each shape"
+          ],
+          "lo": [
+            "LO1"
           ],
           "lab": {
             "id": "1.1",
-            "title": "Two providers, one client",
+            "title": "One model, three API shapes",
             "minutes": 25,
-            "summary": "Call free models with the plain openai package, make a call survive a busy model, shortlist models, and measure the Arabic token tax.",
-            "href": "D1_1_two_providers.ipynb",
+            "summary": "Send one berth-hire question to one free open-weight model through Chat Completions, Responses and Messages, compare what each returns, and measure the Arabic token tax on a circular.",
+            "href": "D1_1_three_shapes.ipynb",
             "steps": [
               {
-                "text": "First call: read model, finish reason, tokens and cost",
-                "minutes": 5
-              },
-              {
-                "text": "Stream it and measure time to first token",
-                "minutes": 4
-              },
-              {
-                "text": "List the free tool-calling models; shortlist from benchmarks",
+                "text": "Chat Completions: one call, read every field",
                 "minutes": 6
               },
               {
-                "text": "Fallbacks with a models list and provider routing",
+                "text": "Responses: the same question as items",
                 "minutes": 5
               },
               {
-                "text": "Tokens: Arabic vs. English",
+                "text": "Messages: the same question as content blocks",
                 "minutes": 5
+              },
+              {
+                "text": "One table: text, stop reason, tokens per shape",
+                "minutes": 5
+              },
+              {
+                "text": "The Arabic token tax on one circular",
+                "minutes": 4
               }
             ],
-            "stretch": "Check your shortlist on a fee question with a known answer"
-          },
-          "lo": [
-            "LO1"
-          ]
+            "stretch": "Cut the answer short and read each shape's stop reason"
+          }
         },
         {
-          "title": "Structured outputs and Responses",
-          "summary": "Structured outputs and the Responses API",
+          "title": "Structured outputs",
+          "summary": "Turn free text into a typed object, and recover when the reply does not validate",
           "outcomes": [
-            "Name the three API shapes, and read OpenAI's Responses shape",
-            "Get validated JSON from a model, and repair it when the model ignores the schema",
-            "Turn guards and routers into typed decisions",
-            "Choose between resending history and server-side state"
+            "Define a schema whose constraints catch wrong values",
+            "Request output under a JSON Schema response format",
+            "Recover from malformed replies with validation and repair"
+          ],
+          "lo": [
+            "LO1"
           ],
           "lab": {
             "id": "1.2",
-            "title": "Triage with the Responses API",
+            "title": "A berth request as a validated object",
             "minutes": 25,
-            "summary": "Triage Madar's inbox into validated Pydantic objects, measure accuracy against the correct labels, and build a Decisions-style router.",
-            "href": "D1_2_responses_api.ipynb",
+            "summary": "Extract shipping agents' berth requests, in English and Arabic, into a validated schema; recover from three malformed replies; measure field accuracy on six requests.",
+            "href": "D1_2_structured_outputs.ipynb",
             "steps": [
               {
-                "text": "One request, two shapes: compare the outputs",
-                "minutes": 4
+                "text": "The schema: BerthRequest",
+                "minutes": 5
               },
               {
-                "text": "Structured triage with text.format, validate and repair",
-                "minutes": 7
+                "text": "Ask for it with a JSON Schema response format",
+                "minutes": 5
               },
               {
-                "text": "Triage the inbox and read the confusion table",
-                "minutes": 4
-              },
-              {
-                "text": "decide(): predicate, choice and score questions",
-                "minutes": 7
-              },
-              {
-                "text": "Count the streaming event types",
-                "minutes": 3
-              }
-            ],
-            "stretch": "Stateless replay vs. previous_response_id"
-          },
-          "lo": [
-            "LO1"
-          ]
-        },
-        {
-          "title": "Tools and the Messages API",
-          "outcomes": [
-            "Explain a tool call: who decides, and who executes",
-            "Do a tool round trip by hand in the Messages API",
-            "Describe one Python function as a tool for all three API shapes",
-            "Design tools and system prompts that agents use correctly"
-          ],
-          "lab": {
-            "id": "1.3",
-            "title": "Rafeeq's first tools, three ways",
-            "minutes": 25,
-            "summary": "Use the anthropic SDK on a free model, turn Python functions into tool definitions for all three shapes, and measure tool design. Step 4 uses K.run_agent, a helper that repeats the round trip until the model answers; you write your own in Session 4.",
-            "href": "D1_3_messages_and_tools.ipynb",
-            "steps": [
-              {
-                "text": "Content blocks and stop reasons, including max_tokens",
-                "minutes": 4
-              },
-              {
-                "text": "Write the three tool-schema converters",
-                "minutes": 6
-              },
-              {
-                "text": "One tool_use → tool_result round trip by hand",
+                "text": "Recover from three malformed replies",
                 "minutes": 8
               },
               {
-                "text": "Bad vs. good fee tool: accuracy and arguments",
+                "text": "Six requests, field accuracy",
                 "minutes": 7
               }
             ],
-            "stretch": "Parallel tool calls in one round trip"
-          },
-          "lo": [
-            "LO1"
-          ]
+            "stretch": "A request with missing fields: say so, do not invent"
+          }
         },
         {
-          "title": "The agent loop",
+          "title": "Tools",
+          "summary": "Typed tool schemas, and errors that tell the model what to send instead",
           "outcomes": [
-            "Define an agent, and tell it apart from a workflow",
-            "Write the loop, bounded by budgets, with errors as observations",
-            "Run one loop over all three API shapes",
-            "Recognise this loop inside every agent framework"
+            "Describe a tool call as a request the application executes",
+            "Write typed argument schemas for schedule and booking tools",
+            "Return errors a model can act on"
+          ],
+          "lo": [
+            "LO1"
+          ],
+          "lab": {
+            "id": "1.3",
+            "title": "Typed tools with useful errors",
+            "minutes": 25,
+            "summary": "Write typed argument schemas for the schedule and booking tools, turn bad arguments into errors that say what to send, and watch one round trip recover.",
+            "href": "D1_3_typed_tools.ipynb",
+            "steps": [
+              {
+                "text": "Read the schema generated from a plain function",
+                "minutes": 4
+              },
+              {
+                "text": "Typed argument models",
+                "minutes": 6
+              },
+              {
+                "text": "A wrapper that turns bad arguments into useful errors",
+                "minutes": 8
+              },
+              {
+                "text": "One round trip by hand: a bad call, a useful error, a good call",
+                "minutes": 7
+              }
+            ],
+            "stretch": "The same tool for the Messages and MCP shapes"
+          }
+        },
+        {
+          "title": "The agent loop from scratch",
+          "summary": "A model calling tools in a loop, with a step budget, a stop rule and a trace",
+          "outcomes": [
+            "Write an agent loop without a framework or AI assistance",
+            "Bound it with a step budget and explicit stop rules",
+            "Grade it on ten tasks from their traces"
+          ],
+          "lo": [
+            "LO1"
           ],
           "lab": {
             "id": "1.4",
             "title": "The agent loop from scratch",
             "minutes": 25,
-            "summary": "Write the loop, give it Rafeeq's read tools, run it on three API shapes, and break it on purpose.",
+            "summary": "Write the loop without AI assistance, with a step budget and stop rules, save a trace per run, and run it on ten port tasks graded by code.",
             "href": "D1_4_agent_loop.ipynb",
             "steps": [
               {
-                "text": "Write my_agent() with Chat Completions",
+                "text": "Write my_loop() with a step budget and a stop rule",
                 "minutes": 8
               },
               {
-                "text": "Multi-step questions; read and summarise the trace",
-                "minutes": 6
-              },
-              {
-                "text": "One loop, three API shapes: compare steps and tokens",
+                "text": "A trace per run",
                 "minutes": 5
               },
               {
-                "text": "Break it: tool errors, an endless tool, an out-of-scope question",
-                "minutes": 6
+                "text": "Ten tasks, graded by code",
+                "minutes": 8
+              },
+              {
+                "text": "Break it: a tool that never finishes",
+                "minutes": 4
               }
             ],
-            "stretch": "Run parallel tool calls concurrently"
-          },
-          "lo": [
-            "LO1"
-          ]
+            "stretch": "Run one turn's tool calls in parallel"
+          }
         }
       ]
     },
