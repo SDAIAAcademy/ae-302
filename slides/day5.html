@@ -1,0 +1,209 @@
+<!-- ======================= OPENING ======================= -->
+<section class="slide title" data-label="Welcome" id="title">
+  <div class="kicker">SDAIA Academy · Agentic AI Systems Engineering · <span class="ar">هندسة أنظمة الذكاء الاصطناعي التوكيلي</span></div>
+  <h1>Capstone: Polish &amp; Submit</h1>
+  <p class="lead mt">Day 5: turn a working agent system into evidence a stranger can check</p>
+  <div class="meta">
+    <span class="track">AI Engineering Track</span>
+    <span>Day 5 of 5</span>
+    <span>Polish · run evidence · README · public repository</span>
+  </div>
+</section>
+
+<section class="slide" data-label="Agenda" id="day-5-agenda">
+  <div class="kicker">Today</div>
+  <h2>Day 5 agenda</h2>
+  <div class="agenda">
+    <div class="item"><span><b>Session 1 · Expectations + the README</b><small>The rules and how you're scored (15'), then re-run your evals and save the evidence</small></span></div>
+    <div class="item"><span><b>Session 2 · Polish and submit</b><small>Run evidence, error analysis, the security note</small></span></div>
+    <div class="item"><span><b>Session 3 · Polish and submit</b><small>The README, a clean-clone test</small></span></div>
+    <div class="item"><span><b>Session 4 · Polish and submit + closing</b><small>Push the public repository before the deadline, lessons learned</small></span></div>
+  </div>
+  <aside class="notes">There are no talks. Session 1 is the briefing; Sessions 2–4 are working time with the instructor available for questions. Check that every learner has a public repository link and the README course line before the deadline.</aside>
+</section>
+
+<!-- ======================= SESSION 1 ======================= -->
+<section class="slide section" id="expectations-readme">
+  <div class="kicker">Session 1</div>
+  <h1>Expectations &amp; the README</h1>
+  <ul class="bullets outcomes tight">
+    <li>The rules: individual, public repository, evidence of real runs</li>
+    <li>How the README is scored as your presentation</li>
+    <li>A checklist for polishing and submitting</li>
+  </ul>
+  <div class="sess-no">01</div>
+</section>
+
+<section class="slide" id="individual-public-evidenced">
+  <div class="kicker">Rules</div>
+  <h2>Individual, public, evidenced</h2>
+  <div class="cols cols-3">
+    <div class="card c-teal"><h4 class="mt-s">Individual work</h4><p class="small mb0">Each learner submits their own project. A public GitHub repository before the Day 5 deadline: no zips, no Drive folders, no private repos.</p></div>
+    <div class="card c-coral"><h4 class="mt-s">AI assistants allowed</h4><p class="small mb0">For writing the code. You own every design decision, number and claim; anything the README claims must be backed by code or saved outputs.</p></div>
+    <div class="card c-navy"><h4 class="mt-s">README, not a talk</h4><p class="small mb0">The README is the presentation. Instead of a live run, the repo shows evidence of real runs.</p></div>
+  </div>
+  <div class="callout warn mt small"><b>Evidence of real runs:</b> eval CSVs for both configurations, plus logs or traces, a transcript, screenshots or a short screen recording. Synthetic or public data only.</div>
+</section>
+
+<section class="slide" id="what-readme-explains">
+  <div class="kicker">Suggested structure</div>
+  <h2>What the README explains</h2>
+  <div class="cols cols-2">
+    <ol class="bullets small">
+      <li><b>Problem and user</b>: who asks what, and what "done" looks like</li>
+      <li><b>Evidence of real runs</b>: a transcript of one multi-step task with tools and an approval, plus logs or traces</li>
+      <li><b>Design across the ladder</b>: prompt, context, harness, loop, graph; which rungs you needed and why</li>
+    </ol>
+    <ol class="bullets small" start="4">
+      <li><b>Evals and error analysis</b>: A vs. B on 15+ tasks; the biggest failure category; what flipped</li>
+      <li><b>Security</b>: your trifecta, one attack, the defence that stopped it, in code</li>
+    </ol>
+  </div>
+  <div class="ladder s mt">
+    <div class="rung c-teal on"><b>Prompt</b>spec, tools</div>
+    <div class="rung c-cyan on"><b>Context</b>memory, retrieval, MCP</div>
+    <div class="rung c-coral on"><b>Harness</b>permissions, budgets</div>
+    <div class="rung c-amber on"><b>Loop</b>exits, evals</div>
+    <div class="rung c-purple on"><b>Graph</b>gates, checkpoints</div>
+  </div>
+</section>
+
+<section class="slide" id="what-each-criterion-looks">
+  <div class="kicker">Scoring guide</div>
+  <h2>What each criterion looks like at its best</h2>
+  <table class="t small">
+    <tr><th>Criterion</th><th class="num">Weight</th><th>Strong evidence</th></tr>
+    <tr><td>Working system (code + saved run evidence)</td><td class="num">25%</td><td>A multi-step task with 3+ tools (one over MCP) runs from a clean clone; eval CSVs, logs or traces, a transcript or recording show real runs, including an approval</td></tr>
+    <tr><td>Context and harness engineering</td><td class="num">25%</td><td>A spec or AGENTS.md, memory or retrieval, a compaction or budget rule; permissions and budgets; each choice justified</td></tr>
+    <tr><td>Evaluation and error analysis</td><td class="num">20%</td><td>15+ tasks with automatic graders, two configurations with saved CSVs, root causes counted, one change explained by the data; judged from the README and the files it points to</td></tr>
+    <tr><td>Security, governance and operability</td><td class="num">20%</td><td>Trifecta mapped; an attack that worked before the defence and not after; defence enforced in code; PDPL considered; traces or logs</td></tr>
+    <tr><td>Presentation and reproducibility (README.md)</td><td class="num">10%</td><td>The README is the presentation: problem, ladder design, A vs. B, security note, and the course link; a stranger can run it with <code>uv run</code> and a key</td></tr>
+  </table>
+  <p class="small mt">The README must include this line exactly; without it you lose part of the presentation mark:<br><code>[Advanced Agentic AI Systems Engineering - SDAIA Academy](https://github.com/sdaiaacademy/agentic-ai/)</code></p>
+</section>
+
+<section class="slide" id="questions-your-readme-should">
+  <div class="kicker">The reader's questions</div>
+  <h2>Questions your README should answer</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Why an agent here and not a workflow (or the reverse)?</li>
+      <li>What's in the context on turn 10? How many tokens, and what did you cut?</li>
+      <li>Which tool call would you least like the model to get wrong? What stops it?</li>
+      <li>Your pass rate went from A to B. Is that difference bigger than the noise? What's pass^k?</li>
+    </ul>
+    <ul class="bullets small">
+      <li>Show me an injection that worked before your defence. Does the defence depend on the model?</li>
+      <li>Where does personal data go: which provider, which country, which logs?</li>
+      <li>What happens when the free model disappears tomorrow?</li>
+      <li>What does one conversation cost at 1,000 users a day?</li>
+    </ul>
+  </div>
+  <div class="callout tip mt small"><b>Great answers</b> point to a trace, an eval row, a line of the harness or a test. "We didn't handle that, and here's how we would" is a fine answer too.</div>
+</section>
+
+<section class="slide" id="polish-submit-checklist">
+  <div class="kicker">Sessions 2–4</div>
+  <h2>Polish and submit checklist</h2>
+  <div class="cols cols-2">
+    <ul class="checklist">
+      <li>Re-run your eval on A and B; paste the table into your README</li>
+      <li>Save the evidence: both eval CSVs, logs or traces, a transcript, screenshots or a short recording</li>
+      <li>Every number in the README traces to a saved file</li>
+      <li>Re-run your attack against the defended version</li>
+    </ul>
+    <ul class="checklist">
+      <li>Clean-clone test: does <code>uv run</code> work from the README alone?</li>
+      <li>No keys in the repository; <code>.env</code> is ignored</li>
+      <li>README: problem, ladder, A vs. B and error analysis, security note, course link</li>
+      <li>Push the public repository before the deadline; send the link</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= SESSIONS 2-4 ======================= -->
+<section class="slide section" id="polish-submit">
+  <div class="kicker">Sessions 2–4</div>
+  <h1>Polish &amp; submit</h1>
+  <ul class="bullets outcomes tight">
+    <li>Re-run both evals and save the CSVs, logs and a transcript</li>
+    <li>Finish the README: it is your presentation</li>
+    <li>Clean-clone test, then push the public repository before the deadline</li>
+  </ul>
+  <div class="sess-no">02</div>
+</section>
+
+<section class="slide section" id="submit-review-closing">
+  <div class="kicker">Session 4</div>
+  <h1>Submit, review &amp; closing</h1>
+  <ul class="bullets outcomes tight">
+    <li>Submit the repository link</li>
+    <li>Instructor review of patterns across projects</li>
+    <li>Lessons learned and where to go next</li>
+  </ul>
+  <div class="sess-no">04</div>
+</section>
+
+<section class="slide" data-label="Review" id="patterns-across-projects">
+  <div class="kicker">Instructor review</div>
+  <h2>Patterns across projects</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>What worked</h4>
+      <ul class="small"><li>Starting from the eval tasks, then building</li><li>Rules in code, judgement in the model</li><li>Defences that block in the harness, shown with a trace</li><li>One change between A and B, explained by the failures</li></ul></div>
+    <div class="card c-coral"><h4>What to watch</h4>
+      <ul class="small"><li>Twenty tools where five would do</li><li>"The model will follow the system prompt" as a security plan</li><li>Scores without transcripts, or one trial reported as reliability</li><li>README claims with no saved run, CSV or trace behind them</li></ul></div>
+  </div>
+  <aside class="notes">Adapt this slide live: replace the bullets with specific observations from the submissions so far.</aside>
+</section>
+
+<section class="slide" data-label="Recap" id="from-model-call-governed">
+  <div class="kicker">The whole week</div>
+  <h2>From a model call to a governed agent system</h2>
+  <div class="flow">
+    <div class="step c-teal"><b>Prompt</b>three API shapes, tools, the loop</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>Context</b>budgets, retrieval, memory, skills, MCP</div>
+    <div class="arrow">→</div>
+    <div class="step c-coral"><b>Harness</b>Pi, OpenClaw, Hermes, SDKs, controls</div>
+    <div class="arrow">→</div>
+    <div class="step c-amber"><b>Loop</b>Ralph, back-pressure, evals</div>
+    <div class="arrow">→</div>
+    <div class="step c-purple"><b>Graph</b>gates, checkpoints, many agents</div>
+    <div class="arrow">→</div>
+    <div class="step c-navy"><b>Production</b>security, traces, CI</div>
+  </div>
+  <table class="t small mt">
+    <tr><th>If you need…</th><th>Start with…</th></tr>
+    <tr><td>One answer from text</td><td>a single call with structured output; no agent</td></tr>
+    <tr><td>A known process with decisions</td><td>a graph with model nodes, a human gate and checkpoints</td></tr>
+    <tr><td>Open-ended work with a few tools</td><td>the loop (or an SDK) with permissions, budgets and an eval</td></tr>
+    <tr><td>Long work with an oracle (tests)</td><td>an outer loop with fresh context, progress files and exits</td></tr>
+    <tr><td>Untrusted input and private data</td><td>cut a trifecta leg; enforce egress in code; red-team it</td></tr>
+  </table>
+</section>
+
+<section class="slide" data-label="What next" id="where-go-from-here">
+  <div class="kicker">Keep going</div>
+  <h2>Where to go from here</h2>
+  <div class="cols cols-4 gap-s">
+    <div class="card c-amber"><h4>Coding agents</h4><p class="small mb0">Claude Code, Codex, Pi, OpenCode: harness design from the user's side</p></div>
+    <div class="card c-amber"><h4>Agent evaluation</h4><p class="small mb0">Larger suites, judge calibration, τ²-bench and Terminal-Bench methods</p></div>
+    <div class="card c-amber"><h4>Agent security</h4><p class="small mb0">OWASP agentic guidance, sandboxing, CaMeL-style designs</p></div>
+    <div class="card c-amber"><h4>Open models</h4><p class="small mb0">Serving Qwen and Gemma with vLLM or SGLang behind the same three API shapes</p></div>
+  </div>
+  <div class="cols cols-2 mt">
+    <div class="callout tip small"><b>This week:</b> push your capstone repository, add the eval table and the security note, and write a short post on one thing that surprised you.</div>
+    <div class="callout note small"><b>Keep reading:</b> Anthropic's engineering blog, OpenAI's agent guides, Simon Willison's weblog, the MCP and A2A specs, and artificialanalysis.ai for model choice.</div>
+  </div>
+</section>
+
+<section class="slide dark" data-label="Thank you" id="thank-you">
+  <div class="kicker">Agentic AI Systems Engineering · SDAIA Academy</div>
+  <h1>Thank you</h1>
+  <p class="lead mt">Please complete the course feedback survey before you leave. It directly shapes the next cohort.</p>
+  <div class="cols cols-3 mt">
+    <div class="card c-teal"><h4>Survey</h4><p class="small mb0">Link shared in the course channel</p></div>
+    <div class="card c-cyan"><h4>Certificates</h4><p class="small mb0">Issued after your public repository submission is confirmed</p></div>
+    <div class="card c-coral"><h4>Stay in touch</h4><p class="small mb0">Course channel stays open for capstone follow-ups</p></div>
+  </div>
+</section>

@@ -1,0 +1,690 @@
+{
+  "$schema": "https://sdaiaacademy.github.io/engine/schemas/course.schema.json",
+  "engine": "1",
+  "id": "agentic-ai",
+  "version": "2026.1.0",
+  "lang": "en",
+  "title": "Agentic AI Systems Engineering",
+  "tagline": "هندسة أنظمة الذكاء الاصطناعي التوكيلي",
+  "track": "ai-engineering",
+  "audience": "Python developers and engineers. Day 1 starts from what a language model is and how it differs from ChatGPT, so no prior LLM, API or agent framework experience is needed.",
+  "prerequisites": [
+    "Any laptop CPU with uv, or Google Colab. All model calls go to free API models (an OpenRouter key; a one-time 10-credit top-up raises the free quota from 50 to 1,000 requests a day). Node.js 22.19+ is optional, for the Pi teardown. Run 00_setup_check before Day 1; see labs/README.md."
+  ],
+  "site": {
+    "url": "https://sdaiaacademy.github.io/agentic-ai/",
+    "repo": "SDAIAAcademy/agentic-ai"
+  },
+  "outcomes": [
+    {
+      "id": "LO1",
+      "text": "Call LLMs through the Chat Completions, Responses and Messages APIs, and write the agent loop over all three"
+    },
+    {
+      "id": "LO2",
+      "text": "Design tools and context deliberately: budgets, compaction, retrieval, memory, skills and MCP"
+    },
+    {
+      "id": "LO3",
+      "text": "Take a harness apart (Pi, OpenClaw, Hermes, Mercury) and add permissions, hooks and budgets to their own"
+    },
+    {
+      "id": "LO4",
+      "text": "Choose between building on an SDK, a hosted agent runtime or their own loop"
+    },
+    {
+      "id": "LO5",
+      "text": "Run agents in outer loops and as graphs with human gates, checkpoints and many agents"
+    },
+    {
+      "id": "LO6",
+      "text": "Evaluate agents with graders, judges and pass^k, secure them against injection, and ship them as a traced service"
+    }
+  ],
+  "case_study": {
+    "name": "Madar Municipal Services",
+    "summary": "Madar Municipal Services is a fictional municipality that issues building, renovation, signage, food-truck and event permits. Participants build Rafeeq (رفيق), its bilingual permit assistant, and the systems around it: tools over three API shapes, retrieval over ten bilingual policies, memory and skills, an MCP server, a harness with permissions, a Ralph loop that fixes code, an eval suite, a review graph with a human gate, an A2A worker, an attack and its defence, and an HTTP service with traces. All data is synthetic."
+  },
+  "format": "intensive",
+  "unit": "day",
+  "days": [
+    {
+      "id": "day1",
+      "kind": "day",
+      "title": "From a Language Model to an Agent",
+      "deck": "slides/day1.html",
+      "sessions": [
+        {
+          "title": "What an LLM is",
+          "summary": "What an LLM is, and how to call one",
+          "outcomes": [
+            "Explain what a language model computes, and what a token is",
+            "Tell a model apart from a product like ChatGPT",
+            "Call free models from Python and read everything that comes back",
+            "Shortlist a model from public benchmarks"
+          ],
+          "lab": {
+            "id": "1.1",
+            "title": "Two providers, one client",
+            "minutes": 25,
+            "summary": "Call free models with the plain openai package, make a call survive a busy model, shortlist models, and measure the Arabic token tax.",
+            "href": "D1_1_two_providers.ipynb",
+            "steps": [
+              {
+                "text": "First call: read model, finish reason, tokens and cost",
+                "minutes": 5
+              },
+              {
+                "text": "Stream it and measure time to first token",
+                "minutes": 4
+              },
+              {
+                "text": "List the free tool-calling models; shortlist from benchmarks",
+                "minutes": 6
+              },
+              {
+                "text": "Fallbacks with a models list and provider routing",
+                "minutes": 5
+              },
+              {
+                "text": "Tokens: Arabic vs. English",
+                "minutes": 5
+              }
+            ],
+            "stretch": "Check your shortlist on a fee question with a known answer"
+          }
+        },
+        {
+          "title": "Structured outputs and Responses",
+          "summary": "Structured outputs and the Responses API",
+          "outcomes": [
+            "Name the three API shapes, and read OpenAI's Responses shape",
+            "Get validated JSON from a model, and repair it when the model ignores the schema",
+            "Turn guards and routers into typed decisions",
+            "Choose between resending history and server-side state"
+          ],
+          "lab": {
+            "id": "1.2",
+            "title": "Triage with the Responses API",
+            "minutes": 25,
+            "summary": "Triage Madar's inbox into validated Pydantic objects, measure accuracy against the correct labels, and build a Decisions-style router.",
+            "href": "D1_2_responses_api.ipynb",
+            "steps": [
+              {
+                "text": "One request, two shapes: compare the outputs",
+                "minutes": 4
+              },
+              {
+                "text": "Structured triage with text.format, validate and repair",
+                "minutes": 7
+              },
+              {
+                "text": "Triage the inbox and read the confusion table",
+                "minutes": 4
+              },
+              {
+                "text": "decide(): predicate, choice and score questions",
+                "minutes": 7
+              },
+              {
+                "text": "Count the streaming event types",
+                "minutes": 3
+              }
+            ],
+            "stretch": "Stateless replay vs. previous_response_id"
+          }
+        },
+        {
+          "title": "Tools and the Messages API",
+          "outcomes": [
+            "Explain a tool call: who decides, and who executes",
+            "Do a tool round trip by hand in the Messages API",
+            "Describe one Python function as a tool for all three API shapes",
+            "Design tools and system prompts that agents use correctly"
+          ],
+          "lab": {
+            "id": "1.3",
+            "title": "Rafeeq's first tools, three ways",
+            "minutes": 25,
+            "summary": "Use the anthropic SDK on a free model, turn Python functions into tool definitions for all three shapes, and measure tool design. Step 4 uses K.run_agent, a helper that repeats the round trip until the model answers; you write your own in Session 4.",
+            "href": "D1_3_messages_and_tools.ipynb",
+            "steps": [
+              {
+                "text": "Content blocks and stop reasons, including max_tokens",
+                "minutes": 4
+              },
+              {
+                "text": "Write the three tool-schema converters",
+                "minutes": 6
+              },
+              {
+                "text": "One tool_use → tool_result round trip by hand",
+                "minutes": 8
+              },
+              {
+                "text": "Bad vs. good fee tool: accuracy and arguments",
+                "minutes": 7
+              }
+            ],
+            "stretch": "Parallel tool calls in one round trip"
+          }
+        },
+        {
+          "title": "The agent loop",
+          "outcomes": [
+            "Define an agent, and tell it apart from a workflow",
+            "Write the loop, bounded by budgets, with errors as observations",
+            "Run one loop over all three API shapes",
+            "Recognise this loop inside every agent framework"
+          ],
+          "lab": {
+            "id": "1.4",
+            "title": "The agent loop from scratch",
+            "minutes": 25,
+            "summary": "Write the loop, give it Rafeeq's read tools, run it on three API shapes, and break it on purpose.",
+            "href": "D1_4_agent_loop.ipynb",
+            "steps": [
+              {
+                "text": "Write my_agent() with Chat Completions",
+                "minutes": 8
+              },
+              {
+                "text": "Multi-step questions; read and summarise the trace",
+                "minutes": 6
+              },
+              {
+                "text": "One loop, three API shapes: compare steps and tokens",
+                "minutes": 5
+              },
+              {
+                "text": "Break it: tool errors, an endless tool, an out-of-scope question",
+                "minutes": 6
+              }
+            ],
+            "stretch": "Run parallel tool calls concurrently"
+          }
+        }
+      ]
+    },
+    {
+      "id": "day2",
+      "kind": "day",
+      "title": "Context Engineering",
+      "deck": "slides/day2.html",
+      "sessions": [
+        {
+          "title": "Context is a budget",
+          "outcomes": [
+            "Explain why a bigger window is not a better window",
+            "Name the four context failures and the four strategies against them",
+            "Trim, compact and clear context without losing what matters",
+            "Design prompts so caching works"
+          ],
+          "lab": {
+            "id": "2.1",
+            "title": "Budget the window",
+            "minutes": 25,
+            "summary": "Measure what fills Rafeeq's context, then trim, compact and keep a cache-friendly prefix.",
+            "href": "D2_1_context_budget.ipynb",
+            "steps": [
+              {
+                "text": "Anatomy: tokens by system, tools, user, assistant, tool",
+                "minutes": 6
+              },
+              {
+                "text": "Trim tool results with an after_tool hook",
+                "minutes": 6
+              },
+              {
+                "text": "Compact the history without personal data",
+                "minutes": 7
+              },
+              {
+                "text": "Stable prefixes: measure the shared prefix, read cached_tokens",
+                "minutes": 6
+              }
+            ],
+            "stretch": "Context editing: clear old tool results"
+          }
+        },
+        {
+          "title": "Retrieval for agents",
+          "outcomes": [
+            "Choose between retrieval as a pipeline and retrieval as a tool",
+            "Build and evaluate BM25, embedding and hybrid search, in Arabic too",
+            "Give agents list / grep / read tools, and know when that beats an index",
+            "Make answers cite their sources"
+          ],
+          "lab": {
+            "id": "2.2",
+            "title": "Search the policies",
+            "minutes": 25,
+            "summary": "Evaluate three retrievers on bilingual questions, then compare a search tool with agentic list/grep/read tools.",
+            "href": "D2_2_retrieval.ipynb",
+            "steps": [
+              {
+                "text": "A retrieval eval and the keyword baseline",
+                "minutes": 4
+              },
+              {
+                "text": "BM25 with Arabic normalisation",
+                "minutes": 6
+              },
+              {
+                "text": "Embeddings and hybrid search with RRF",
+                "minutes": 6
+              },
+              {
+                "text": "Agentic search vs. a search tool: correctness, citations, tokens",
+                "minutes": 9
+              }
+            ],
+            "stretch": "When the corpus fits, skip retrieval"
+          }
+        },
+        {
+          "title": "Memory, skills, context files",
+          "summary": "Memory, skills and context files",
+          "outcomes": [
+            "Tell session memory, long-term memory and standing context apart",
+            "Implement the memory-tool contract safely: paths, caps, what never to store",
+            "Write AGENTS.md and Agent Skills, and load skills only when needed"
+          ],
+          "lab": {
+            "id": "2.3",
+            "title": "Remember and specialise",
+            "minutes": 25,
+            "summary": "Implement the memory contract, carry a preference across sessions, and give Rafeeq skills it loads on demand.",
+            "href": "D2_3_memory_skills.ipynb",
+            "steps": [
+              {
+                "text": "The memory tool: safe paths and size caps",
+                "minutes": 8
+              },
+              {
+                "text": "Remember a preference across two sessions, without personal data",
+                "minutes": 5
+              },
+              {
+                "text": "Parse SKILL.md, build the index, write load_skill",
+                "minutes": 9
+              },
+              {
+                "text": "Did the agent load the right skill? Check the database",
+                "minutes": 3
+              }
+            ],
+            "stretch": "A capped memory, Hermes-style"
+          }
+        },
+        {
+          "title": "Model Context Protocol",
+          "outcomes": [
+            "Explain hosts, clients and servers, and the three primitives",
+            "Write an MCP server as one PEP 723 file with the v2 Python SDK",
+            "Speak the stateless 2026-07-28 protocol by hand",
+            "Assess the supply-chain risk of third-party servers"
+          ],
+          "lab": {
+            "id": "2.4",
+            "title": "Madar as an MCP server",
+            "minutes": 25,
+            "summary": "Run a PEP 723 MCP server in-process, over stdio and over HTTP; speak JSON-RPC by hand; give its tools to your agent.",
+            "href": "D2_4_mcp.ipynb",
+            "steps": [
+              {
+                "text": "Read the server: PEP 723 block, tools, resources, prompt",
+                "minutes": 3
+              },
+              {
+                "text": "Connect and discover; call, read, render; then over stdio",
+                "minutes": 6
+              },
+              {
+                "text": "The protocol by hand: server/discover, tools/call",
+                "minutes": 6
+              },
+              {
+                "text": "MCP tools and a resource reader in your agent loop",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Turn on the write tools, with approvals"
+          }
+        }
+      ]
+    },
+    {
+      "id": "day3",
+      "kind": "day",
+      "title": "Harness & Loop Engineering",
+      "deck": "slides/day3.html",
+      "sessions": [
+        {
+          "title": "Anatomy of a harness",
+          "outcomes": [
+            "Name the parts of a harness, and tell guides from sensors",
+            "Read Pi's prompt, loop and event stream",
+            "Compare Pi, OpenClaw, Hermes Agent and Mercury Agent on the same dimensions",
+            "Add permissions, hooks and an audit log to your own loop"
+          ],
+          "lab": {
+            "id": "3.1",
+            "title": "Harness teardown",
+            "minutes": 25,
+            "summary": "Run Pi on a free model (or read the sample stream), map its events to your trace, compare harnesses, and add controls to your loop.",
+            "href": "D3_1_harness_teardown.ipynb",
+            "steps": [
+              {
+                "text": "Pi's JSON events: tools, turns, tokens, final answer",
+                "minutes": 6
+              },
+              {
+                "text": "Pi's prompt and loop; convert its events to your trace",
+                "minutes": 5
+              },
+              {
+                "text": "Four harnesses, one matrix",
+                "minutes": 4
+              },
+              {
+                "text": "Permissions, a guard and an audit log; attack with the contractor email",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Pi in read-only mode on a real bug"
+          }
+        },
+        {
+          "title": "Agent SDKs and hosted agents",
+          "outcomes": [
+            "Place your options on the build-vs-buy spectrum",
+            "Use the OpenAI Agents SDK on any model: tools, guardrails, approvals, sessions",
+            "Know what the Claude Agent SDK, OpenAI's Agents API and Claude Managed Agents take off your hands",
+            "Name what each choice locks you into"
+          ],
+          "lab": {
+            "id": "3.2",
+            "title": "Rafeeq on the OpenAI Agents SDK",
+            "minutes": 25,
+            "summary": "Rebuild Rafeeq on the SDK with a free OpenRouter model, then add a guardrail, approvals and a session.",
+            "href": "D3_2_agents_sdk.ipynb",
+            "steps": [
+              {
+                "text": "Agent, model and function tools from Madar's methods",
+                "minutes": 6
+              },
+              {
+                "text": "An input guardrail against injected instructions",
+                "minutes": 5
+              },
+              {
+                "text": "Approvals for write tools: interrupt, decide, resume",
+                "minutes": 8
+              },
+              {
+                "text": "A SQLite session; the SDK vs. your loop",
+                "minutes": 6
+              }
+            ],
+            "stretch": "Streaming run-item events"
+          }
+        },
+        {
+          "title": "Loop engineering",
+          "outcomes": [
+            "Explain why long tasks need an outer loop with fresh context",
+            "Keep state in files and git, not in the model",
+            "Use tests as honest back-pressure, and stop loops that stop progressing"
+          ],
+          "lab": {
+            "id": "3.3",
+            "title": "A loop that fixes code",
+            "minutes": 25,
+            "summary": "Drive a coding agent on madar_fees until its fee tests pass: fresh context, progress file, git, stop conditions.",
+            "href": "D3_3_loop_engineering.ipynb",
+            "steps": [
+              {
+                "text": "The repository, AGENTS.md and the test guard",
+                "minutes": 4
+              },
+              {
+                "text": "One iteration with a fresh context",
+                "minutes": 7
+              },
+              {
+                "text": "The outer loop: four exits, one commit per iteration",
+                "minutes": 8
+              },
+              {
+                "text": "Review the diff: library changed, tests untouched",
+                "minutes": 6
+              }
+            ],
+            "stretch": "The same loop around Pi"
+          }
+        },
+        {
+          "title": "Evaluating agents",
+          "outcomes": [
+            "Build a task suite with code graders, state checks and an LLM judge",
+            "Read failures with error analysis, not just a score",
+            "Measure reliability with pass^k",
+            "Trace agents with OpenTelemetry's GenAI conventions"
+          ],
+          "lab": {
+            "id": "3.4",
+            "title": "Score Rafeeq",
+            "minutes": 25,
+            "summary": "Run the 30-task suite (or the 10-task quick subset), analyse the failures, compare two configurations, and measure pass^k.",
+            "href": "D3_4_evals.ipynb",
+            "steps": [
+              {
+                "text": "Write two graders: contains_any and db",
+                "minutes": 6
+              },
+              {
+                "text": "Run the suite; assign a root cause to every failure",
+                "minutes": 7
+              },
+              {
+                "text": "One change, two configurations: what flipped?",
+                "minutes": 7
+              },
+              {
+                "text": "pass@k vs. pass^k on repeated trials",
+                "minutes": 5
+              }
+            ],
+            "stretch": "Is the judge right? Label five answers yourself"
+          }
+        }
+      ]
+    },
+    {
+      "id": "day4",
+      "kind": "day",
+      "title": "Graph Engineering & Production",
+      "deck": "slides/day4.html",
+      "sessions": [
+        {
+          "title": "Graph engineering",
+          "outcomes": [
+            "Decide when a process should be a graph rather than an agent",
+            "Draw the five workflow patterns as graphs",
+            "Build typed state, rule nodes, model nodes and a router in LangGraph",
+            "Pause for a human, survive a crash, and resume"
+          ],
+          "lab": {
+            "id": "4.1",
+            "title": "A permit-review graph",
+            "minutes": 25,
+            "summary": "Intake → document check → fee check → risk → officer gate or info request → letter → record, checkpointed to SQLite.",
+            "href": "D4_1_review_graph.ipynb",
+            "steps": [
+              {
+                "text": "State and the rule nodes (fees from POL-02)",
+                "minutes": 6
+              },
+              {
+                "text": "Model nodes and the router",
+                "minutes": 6
+              },
+              {
+                "text": "The officer's gate: interrupt and resume",
+                "minutes": 7
+              },
+              {
+                "text": "Crash, restart, resume without repeating model calls",
+                "minutes": 6
+              }
+            ],
+            "stretch": "Run the two checks in parallel"
+          }
+        },
+        {
+          "title": "Multi-agent systems",
+          "outcomes": [
+            "Tell when splitting work across agents pays off",
+            "Build agents-as-tools and handoffs, and measure them against one agent",
+            "Publish and call an agent over A2A"
+          ],
+          "lab": {
+            "id": "4.2",
+            "title": "Orchestrator and workers",
+            "minutes": 25,
+            "summary": "Three specialists, three designs, one metered comparison; then the policy worker as a separate A2A service.",
+            "href": "D4_2_multi_agent.ipynb",
+            "steps": [
+              {
+                "text": "Workers and an HTTP-level meter",
+                "minutes": 5
+              },
+              {
+                "text": "Agents as tools vs. one agent",
+                "minutes": 8
+              },
+              {
+                "text": "Handoffs: who answered?",
+                "minutes": 5
+              },
+              {
+                "text": "The policy worker over A2A, called as a tool",
+                "minutes": 7
+              }
+            ],
+            "stretch": "Parallel fan-out with asyncio.gather"
+          }
+        },
+        {
+          "title": "Securing agents",
+          "outcomes": [
+            "Name the main agentic threats, with OWASP's list",
+            "Find the lethal trifecta in a design",
+            "Defend in layers that don't depend on the model obeying",
+            "Prove it with a red-team suite that also checks utility"
+          ],
+          "lab": {
+            "id": "4.3",
+            "title": "Attack and defend",
+            "minutes": 25,
+            "summary": "A staff inbox assistant with all three legs; the injected emails; layered defences; a red-team suite that measures both safety and utility.",
+            "href": "D4_3_security.ipynb",
+            "steps": [
+              {
+                "text": "Map the trifecta for every tool",
+                "minutes": 4
+              },
+              {
+                "text": "Attack with the injected emails; read the outbox",
+                "minutes": 5
+              },
+              {
+                "text": "Approval on sensitive reads and an egress guard",
+                "minutes": 10
+              },
+              {
+                "text": "Red-team suite: attack success vs. benign replies",
+                "minutes": 6
+              }
+            ],
+            "stretch": "Quarantine the email (dual LLM)"
+          }
+        },
+        {
+          "title": "Agents in production",
+          "outcomes": [
+            "Serve an agent behind an API with keys, sessions and budgets",
+            "Survive provider failures with fallbacks",
+            "Trace every request with OpenTelemetry's GenAI conventions",
+            "Gate releases on a smoke eval; plan your capstone"
+          ],
+          "lab": {
+            "id": "4.4",
+            "title": "Ship it",
+            "minutes": 25,
+            "summary": "Rafeeq behind FastAPI, built and tested in-process; then the reference service started with uv run.",
+            "href": "D4_4_ship_it.ipynb",
+            "steps": [
+              {
+                "text": "The endpoint: key, session, budget, queued writes",
+                "minutes": 8
+              },
+              {
+                "text": "Fallbacks across models",
+                "minutes": 4
+              },
+              {
+                "text": "GenAI spans: where does a request spend its time?",
+                "minutes": 6
+              },
+              {
+                "text": "A smoke eval with a gate",
+                "minutes": 5
+              },
+              {
+                "text": "Run the real service; open the capstone kit",
+                "minutes": 2
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "day5",
+      "kind": "capstone",
+      "title": "Capstone: Polish & Submit",
+      "deck": "slides/day5.html"
+    }
+  ],
+  "capstone": {
+    "summary": "An individual project: build a working agent system on one of three tracks and submit it as a public GitHub repository before the Day 5 deadline. AI coding assistants are allowed for the code, but you own every design decision, number and claim. There is no live demo and no presentation: the README is the presentation, backed by saved evidence of real runs (eval CSVs for both configurations, plus logs or traces, a transcript, screenshots or a short recording). Rafeeq in production: the Madar assistant as a complete service with MCP tools, memory, approvals, security, evals and an API; Your harness: a domain harness for a real workflow in your entity, with context files, permissions, a loop and evals; Graph workflow: a durable, human-in-the-loop process as a graph with agents inside nodes. Minimum: 3+ tools (one over MCP), a context file plus memory or retrieval plus a compaction or budget rule, an approval on a write action with step and cost budgets, 15+ eval tasks on two configurations with an error analysis, and a security note (trifecta, one attack, one defence), using synthetic or public data only. Starter kit: labs/capstone/.",
+    "rubric": [
+      {
+        "criterion": "Working system (code + saved run evidence)",
+        "weight": 25
+      },
+      {
+        "criterion": "Context and harness engineering decisions",
+        "weight": 25
+      },
+      {
+        "criterion": "Evaluation and error analysis",
+        "weight": 20
+      },
+      {
+        "criterion": "Security, governance and operability",
+        "weight": 20
+      },
+      {
+        "criterion": "Presentation and reproducibility (README.md)",
+        "weight": 10
+      }
+    ]
+  },
+  "labs": {
+    "kind": "notebooks",
+    "base": "labs/"
+  }
+}
