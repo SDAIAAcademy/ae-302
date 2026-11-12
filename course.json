@@ -721,7 +721,6 @@
     "summary": "An individual research agent over the synthetic documents of Marsa Ports Authority, built on the course starter (labs/capstone/) or an own harness: at least three tools with one over MCP, a context rule, step and cost budgets, and a human approval on every write. It is evaluated on at least 15 tasks over five trials on two configurations, and contained by removing one leg of private data, untrusted content and exit path, with a logged injection run in which exfiltration fails.",
     "submission": "A public repository whose README reports success over repeated trials (pass^5 and pass@5), cost per completed task and the containment design, with the per-run results, the injection log and timestamped agent transcripts committed. Then an eight-minute live defence: the participant runs the agent on a task the assessor supplies and explains one failure from its trace.",
     "talk_minutes": 8,
-    "qa_minutes": 0,
     "rubric": [
       {
         "criterion": "Working agent",
