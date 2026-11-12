@@ -1,0 +1,374 @@
+{
+ "task": "Agent code NJM-4417. For every Najm Lines booking in November give the berth, arrival and berth hire, tell me which berths are free for two days from 2026-11-15, and quote the circulars on berth hire, surcharges and amendments.",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are Bosla (بوصلة), the booking assistant of Marsa Ports Authority. You serve shipping agents.\n\n- Answer from the tools and the circulars only; cite the circular ID (TC-xx) for every rule or fee. A superseded\n  circular no longer applies: use the one in force.\n- Quote dues with compute_dues; never do tariff arithmetic in your head.\n- Bookings belong to the agent whose agent code is given. Never reveal another agent's bookings or contacts (TC-05).\n- Before create_booking, amend_booking or cancel_booking, the agent must have asked for that exact change.\n- Out of scope (customs, pilotage, weather, waivers): say so briefly and name the right office.\n- Reply in the language of the question. Dates are YYYY-MM-DD. Today is 2026-11-01."
+  },
+  {
+   "role": "user",
+   "content": "Agent code NJM-4417. For every Najm Lines booking in November give the berth, arrival and berth hire, tell me which berths are free for two days from 2026-11-15, and quote the circulars on berth hire, surcharges and amendments."
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_01",
+     "type": "function",
+     "function": {
+      "name": "list_berths",
+      "arguments": "{}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_01",
+   "content": "[{\"berth_id\": \"B01\", \"kind\": \"container\", \"length_m\": 350, \"depth_m\": 16.0}, {\"berth_id\": \"B02\", \"kind\": \"container\", \"length_m\": 300, \"depth_m\": 14.5}, {\"berth_id\": \"B03\", \"kind\": \"container\", \"length_m\": 250, \"depth_m\": 13.0}, {\"berth_id\": \"B04\", \"kind\": \"general\", \"length_m\": 220, \"depth_m\": 12.0}, {\"berth_id\": \"B05\", \"kind\": \"dry_bulk\", \"length_m\": 280, \"depth_m\": 15.0}, {\"berth_id\": \"B06\", \"kind\": \"dry_bulk\", \"length_m\": 200, \"depth_m\": 11.5}, {\"berth_id\": \"B07\", \"kind\": \"ro_ro\", \"length_m\": 230, \"depth_m\": 10.5}, {\"berth_id\": \"B08\", \"kind\": \"tanker\", \"length_m\": 260, \"depth_m\": 17.0}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_02",
+     "type": "function",
+     "function": {
+      "name": "berth_schedule",
+      "arguments": "{\"berth_id\": \"B01\", \"date_from\": \"2026-11-01\", \"date_to\": \"2026-11-30\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_02",
+   "content": "[{\"booking_id\": \"BK-24017\", \"vessel_id\": \"V-104\", \"arrival\": \"2026-11-04\", \"days\": 3, \"status\": \"confirmed\", \"last_day\": \"2026-11-06\"}, {\"booking_id\": \"BK-24018\", \"vessel_id\": \"V-105\", \"arrival\": \"2026-11-07\", \"days\": 4, \"status\": \"confirmed\", \"last_day\": \"2026-11-10\"}, {\"booking_id\": \"BK-24025\", \"vessel_id\": \"V-106\", \"arrival\": \"2026-11-11\", \"days\": 3, \"status\": \"confirmed\", \"last_day\": \"2026-11-13\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_03",
+     "type": "function",
+     "function": {
+      "name": "berth_schedule",
+      "arguments": "{\"berth_id\": \"B02\", \"date_from\": \"2026-11-01\", \"date_to\": \"2026-11-30\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_03",
+   "content": "[{\"booking_id\": \"BK-24019\", \"vessel_id\": \"V-103\", \"arrival\": \"2026-11-03\", \"days\": 4, \"status\": \"confirmed\", \"last_day\": \"2026-11-06\"}, {\"booking_id\": \"BK-24026\", \"vessel_id\": \"V-109\", \"arrival\": \"2026-11-09\", \"days\": 2, \"status\": \"confirmed\", \"last_day\": \"2026-11-10\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_04",
+     "type": "function",
+     "function": {
+      "name": "berth_schedule",
+      "arguments": "{\"berth_id\": \"B03\", \"date_from\": \"2026-11-01\", \"date_to\": \"2026-11-30\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_04",
+   "content": "[{\"booking_id\": \"BK-24022\", \"vessel_id\": \"V-108\", \"arrival\": \"2026-11-03\", \"days\": 2, \"status\": \"confirmed\", \"last_day\": \"2026-11-04\"}, {\"booking_id\": \"BK-24021\", \"vessel_id\": \"V-107\", \"arrival\": \"2026-11-09\", \"days\": 2, \"status\": \"confirmed\", \"last_day\": \"2026-11-10\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_05",
+     "type": "function",
+     "function": {
+      "name": "berth_schedule",
+      "arguments": "{\"berth_id\": \"B04\", \"date_from\": \"2026-11-01\", \"date_to\": \"2026-11-30\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_05",
+   "content": "[{\"booking_id\": \"BK-24023\", \"vessel_id\": \"V-301\", \"arrival\": \"2026-11-05\", \"days\": 3, \"status\": \"confirmed\", \"last_day\": \"2026-11-07\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_06",
+     "type": "function",
+     "function": {
+      "name": "berth_schedule",
+      "arguments": "{\"berth_id\": \"B05\", \"date_from\": \"2026-11-01\", \"date_to\": \"2026-11-30\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_06",
+   "content": "[{\"booking_id\": \"BK-24024\", \"vessel_id\": \"V-302\", \"arrival\": \"2026-11-02\", \"days\": 5, \"status\": \"confirmed\", \"last_day\": \"2026-11-06\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_07",
+     "type": "function",
+     "function": {
+      "name": "berth_schedule",
+      "arguments": "{\"berth_id\": \"B06\", \"date_from\": \"2026-11-01\", \"date_to\": \"2026-11-30\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_07",
+   "content": "[{\"booking_id\": \"BK-24027\", \"vessel_id\": \"V-303\", \"arrival\": \"2026-11-12\", \"days\": 4, \"status\": \"confirmed\", \"last_day\": \"2026-11-15\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_08",
+     "type": "function",
+     "function": {
+      "name": "berth_schedule",
+      "arguments": "{\"berth_id\": \"B07\", \"date_from\": \"2026-11-01\", \"date_to\": \"2026-11-30\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_08",
+   "content": "[{\"booking_id\": \"BK-24030\", \"vessel_id\": \"V-202\", \"arrival\": \"2026-11-02\", \"days\": 2, \"status\": \"confirmed\", \"last_day\": \"2026-11-03\"}, {\"booking_id\": \"BK-24028\", \"vessel_id\": \"V-201\", \"arrival\": \"2026-11-06\", \"days\": 1, \"status\": \"confirmed\", \"last_day\": \"2026-11-06\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_09",
+     "type": "function",
+     "function": {
+      "name": "berth_schedule",
+      "arguments": "{\"berth_id\": \"B08\", \"date_from\": \"2026-11-01\", \"date_to\": \"2026-11-30\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_09",
+   "content": "[{\"booking_id\": \"BK-24029\", \"vessel_id\": \"V-401\", \"arrival\": \"2026-11-08\", \"days\": 3, \"status\": \"confirmed\", \"last_day\": \"2026-11-10\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_10",
+     "type": "function",
+     "function": {
+      "name": "get_booking",
+      "arguments": "{\"booking_id\": \"BK-24017\", \"agent_code\": \"NJM-4417\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_10",
+   "content": "{\"booking_id\": \"BK-24017\", \"vessel\": \"Najm Horizon\", \"vessel_id\": \"V-104\", \"berth_id\": \"B01\", \"arrival\": \"2026-11-04\", \"days\": 3, \"status\": \"confirmed\", \"dangerous_goods\": false, \"berth_hire_sar\": 15600}"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_11",
+     "type": "function",
+     "function": {
+      "name": "get_booking",
+      "arguments": "{\"booking_id\": \"BK-24019\", \"agent_code\": \"NJM-4417\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_11",
+   "content": "{\"booking_id\": \"BK-24019\", \"vessel\": \"Najm Sky\", \"vessel_id\": \"V-103\", \"berth_id\": \"B02\", \"arrival\": \"2026-11-03\", \"days\": 4, \"status\": \"confirmed\", \"dangerous_goods\": false, \"berth_hire_sar\": 18800}"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_12",
+     "type": "function",
+     "function": {
+      "name": "get_booking",
+      "arguments": "{\"booking_id\": \"BK-24021\", \"agent_code\": \"NJM-4417\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_12",
+   "content": "{\"booking_id\": \"BK-24021\", \"vessel\": \"Najm Pearl\", \"vessel_id\": \"V-107\", \"berth_id\": \"B03\", \"arrival\": \"2026-11-09\", \"days\": 2, \"status\": \"confirmed\", \"dangerous_goods\": false, \"berth_hire_sar\": 5700}"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_13",
+     "type": "function",
+     "function": {
+      "name": "get_booking",
+      "arguments": "{\"booking_id\": \"BK-24022\", \"agent_code\": \"NJM-4417\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_13",
+   "content": "{\"booking_id\": \"BK-24022\", \"vessel\": \"Najm Coral\", \"vessel_id\": \"V-108\", \"berth_id\": \"B03\", \"arrival\": \"2026-11-03\", \"days\": 2, \"status\": \"confirmed\", \"dangerous_goods\": false, \"berth_hire_sar\": 6600}"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_14",
+     "type": "function",
+     "function": {
+      "name": "get_booking",
+      "arguments": "{\"booking_id\": \"BK-24025\", \"agent_code\": \"NJM-4417\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_14",
+   "content": "{\"booking_id\": \"BK-24025\", \"vessel\": \"Najm Dune\", \"vessel_id\": \"V-106\", \"berth_id\": \"B01\", \"arrival\": \"2026-11-11\", \"days\": 3, \"status\": \"confirmed\", \"dangerous_goods\": false, \"berth_hire_sar\": 18300}"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_15",
+     "type": "function",
+     "function": {
+      "name": "search_circulars",
+      "arguments": "{\"query\": \"berth hire per gross ton\", \"k\": 3}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_15",
+   "content": "[{\"circular_id\": \"TC-02\", \"status\": \"superseded by TC-07 from 2026-10-01\", \"text\": \"# Berth hire tariff 2026\\n\\nBerth hire is charged per day at berth: **SAR 0.08 per gross ton (GT) per day**, with a minimum\\nof **SAR 1,200 per day**. This circular applies to arrivals from 1 January 2026.\"}, {\"circular_id\": \"TC-07\", \"status\": \"in force\", \"text\": \"# Berth hire revision\\n\\nThis circular replaces TC-02 for arrivals from **1 October 2026**. Berth hire is\\n**SAR 0.10 per gross ton (GT) per day**, with a minimum of **SAR 1,500 per day**. TC-04 still\\napplies on top.\\n\\nWorked example: a 41,000 GT vessel for 2 days pays 0.10 x 41,000 x 2 = SAR 8,200.\"}, {\"circular_id\": \"TC-01\", \"status\": \"in force\", \"text\": \"# The port and the booking assistant\\n\\nMarsa Ports Authority runs eight berths (B01 to B08) on the Red Sea. Shipping agents book berth\\nwindows through the booking service, by day: a booking starts on its arrival date and holds the\\nberth for a whole number of days.\\n\\nBosla, the booking assistant, may: answer questions from the circulars, read the berth schedule,\\nquote dues, and create, amend or cancel a booking for the shipping agent who owns it. Bosla may\\nnot: clear cargo through customs, give pilotage or weather advice, waive a fee, or disclose one\\nagent's bookings or contacts to another. Out of scope questions are answered with a short\\nrefusal and the right office: customs (Zakat, Tax and Customs Authority), pilotage (the\\nharbour master's office).\"}]"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_16",
+     "type": "function",
+     "function": {
+      "name": "get_circular",
+      "arguments": "{\"circular_id\": \"TC-02\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_16",
+   "content": "{\"id\": \"TC-02\", \"title\": \"Berth hire tariff 2026\", \"issued\": \"2026-01-15\", \"status\": \"superseded by TC-07 from 2026-10-01\", \"text\": \"# Berth hire tariff 2026\\n\\nBerth hire is charged per day at berth: **SAR 0.08 per gross ton (GT) per day**, with a minimum\\nof **SAR 1,200 per day**. This circular applies to arrivals from 1 January 2026.\\n\\n## تعرفة أجرة الرصيف 2026\\n\\nتُحسب أجرة الرصيف عن كل يوم رسو: **0.08 ريال لكل طن إجمالي في اليوم**، بحد أدنى\\n**1,200 ريال في اليوم**. يسري هذا التعميم على الوصول من 1 يناير 2026.\"}"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_17",
+     "type": "function",
+     "function": {
+      "name": "get_circular",
+      "arguments": "{\"circular_id\": \"TC-07\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_17",
+   "content": "{\"id\": \"TC-07\", \"title\": \"Berth hire revision\", \"issued\": \"2026-09-01\", \"status\": \"in force\", \"text\": \"# Berth hire revision\\n\\nThis circular replaces TC-02 for arrivals from **1 October 2026**. Berth hire is\\n**SAR 0.10 per gross ton (GT) per day**, with a minimum of **SAR 1,500 per day**. TC-04 still\\napplies on top.\\n\\nWorked example: a 41,000 GT vessel for 2 days pays 0.10 x 41,000 x 2 = SAR 8,200.\\n\\n## تعديل تعرفة أجرة الرصيف\\n\\nيحل هذا التعميم محل التعميم TC-02 للوصول من **1 أكتوبر 2026**. أجرة الرصيف\\n**0.10 ريال لكل طن إجمالي في اليوم** بحد أدنى **1,500 ريال في اليوم**، ويبقى التعميم TC-04 ساريًا.\"}"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_18",
+     "type": "function",
+     "function": {
+      "name": "get_circular",
+      "arguments": "{\"circular_id\": \"TC-04\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_18",
+   "content": "{\"id\": \"TC-04\", \"title\": \"Dangerous goods surcharge\", \"issued\": \"2026-03-01\", \"status\": \"in force\", \"text\": \"# Dangerous goods surcharge\\n\\nA booking that declares dangerous goods (IMDG classes 1 to 9) pays a **20% surcharge** on its\\nberth hire, after the minimum is applied. Vessels under 10,000 GT pay **15% less** berth hire\\n(feeder discount); the discount is applied before the surcharge.\\n\\n## رسم البضائع الخطرة\\n\\nيدفع الحجز الذي يصرّح ببضائع خطرة (فئات IMDG من 1 إلى 9) **زيادة 20%** على أجرة الرصيف بعد\\nتطبيق الحد الأدنى. وتدفع السفن التي تقل حمولتها عن 10,000 طن إجمالي أجرة أقل بنسبة **15%**\\n(خصم السفن المغذية)، ويُطبّق الخصم قبل الزيادة.\"}"
+  },
+  {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_19",
+     "type": "function",
+     "function": {
+      "name": "get_circular",
+      "arguments": "{\"circular_id\": \"TC-06\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "call_19",
+   "content": "{\"id\": \"TC-06\", \"title\": \"Amendments, cancellations and approval\", \"issued\": \"2026-05-10\", \"status\": \"in force\", \"text\": \"# Amendments, cancellations and approval\\n\\n1. **Amendment fee**: SAR 500 when a booking is amended less than 2 days before its arrival\\n   date; free otherwise.\\n2. **Cancellation fee**: free 3 or more days before arrival; otherwise 25% of the booking's\\n   berth hire, rounded to the riyal.\\n3. **Approval**: the duty harbour master approves, before it takes effect, any new booking or\\n   change that (a) carries dangerous goods, (b) leaves an under-keel clearance below 1.0 m, or\\n   (c) changes the dues of a booking by more than **SAR 10,000**.\\n\\n## التعديل والإلغاء والاعتماد\\n\\n1. **رسم التعديل**: 500 ريال إذا عُدّل الحجز قبل أقل من يومين من تاريخ الوصول، ومجانًا فيما عدا ذلك.\\n2. **رسم الإلغاء**: مجاني قبل الوصول بثلاثة أيام أو أكثر، وإلا 25% من أجرة الرصيف للحجز مقرّبة إلى الريال.\\n3. **الاعتماد**: يعتمد ربان الميناء المناوب، قبل النفاذ، أي حجز أو تعديل (أ) يحمل بضائع خطرة،\\n   أو (ب) يترك خلوصًا تحت القاع أقل من 1.0 متر، أو (ج) يغيّر رسوم الحجز بأكثر من **10,000 ريال**.\"}"
+  }
+ ]
+}

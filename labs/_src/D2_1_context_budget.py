@@ -1,20 +1,20 @@
 # %% [markdown]
-# # Lab 2.1 · Budget the window
+# # Lab 2.1 · Context as a budget
 #
-# Day 2 · Session 1 (Context is a budget) · 25 min. Every step of an agent resends the whole conversation: system
-# prompt, tool definitions, every message and every tool result. What you put in that window decides cost, latency
-# and, past a point, accuracy ("context rot"). In this lab you:
-# - measure **what fills** Rafeeq's context after a short conversation;
-# - **trim** oversized tool results before the model sees them;
-# - **compact** an old history into a summary, without leaking personal data into it;
-# - keep a **stable prefix** so prompt caching can work.
+# Day 2 · Session 1 · 25 min. Every model call resends the whole history. On a long task the tool results pile
+# up until a request no longer fits the budget you set. In this lab you measure tokens per turn on a long task,
+# then cut them two ways: **offloading** big tool results to files, and **compacting** old turns into notes.
+#
+# **Reference state.** `data/reference/long_task_history.json`: the history of one long Bosla task (fourteen tool
+# calls with real results from `port.py`, in a fixed order). A fresh port database for the live run. Nothing from
+# Day 1 is needed.
 #
 # **Tasks**
-# - [ ] 1 · Anatomy of a context window (6')
-# - [ ] 2 · Trim tool results (6')
-# - [ ] 3 · Compact the history (7')
-# - [ ] 4 · Stable prefixes and caching (6')
-# - [ ] ✱ Stretch · Context editing: clear old tool results
+# - [ ] 1 · Tokens per turn on the long task (5')
+# - [ ] 2 · Offload big tool results to files (7')
+# - [ ] 3 · Compact old turns into notes (7')
+# - [ ] 4 · Before and after: tokens, cost and success, live (6')
+# - [ ] ✱ Stretch · A cache-aware layout: stable first, volatile last
 
 # %%
 import os, sys, subprocess
@@ -33,274 +33,211 @@ else:
 sys.path.insert(0, os.getcwd())
 
 import agentkit as K
-print("provider:", K.PROVIDER, "| model:", K.MODEL, "| cache:", K.USE_CACHE)
+print("provider:", K.PROVIDER, "| model:", K.MODEL)
 
 # %%
 import json
 
-import matplotlib.pyplot as plt
 import pandas as pd
 
-import madar
+import port
 
-m = madar.Madar(K.lab_dir("D2_1", reset=True))
-READ = m.tools(m.READ_TOOLS)
-print("tokenizer for estimates:", K.TOKENIZER_ID, "| 'رسوم اللوحة المضيئة' =", K.count_tokens("رسوم اللوحة المضيئة"), "tokens")
+REF = json.loads((K.DATA / "reference" / "long_task_history.json").read_text(encoding="utf-8"))
+TASK, HISTORY = REF["task"], REF["messages"]
+TOOLS = port.Port().tools()
+TOOL_TOKENS = K.count_tokens([K.tool_schema(t) for t in TOOLS])
+BUDGET = 4000  # tokens per request: the fixed budget of this lab
+print(TASK)
+print(len(HISTORY), "messages | tool definitions:", TOOL_TOKENS, "tokens")
 
 # %% [markdown]
-# ## 1 · Anatomy of a context window (6')
+# ## 1 · Tokens per turn (5')
 #
-# Sara has a three-turn conversation with Rafeeq. We pass the history of each run into the next one, exactly as a
-# chat app would.
+# The request before each assistant turn holds the tool definitions plus every message so far.
+#
+# ✏️ **Exercise** · Write `per_turn(messages)`: for each assistant message at index `i`, the tokens of the request
+# that produced it, `TOOL_TOKENS + K.count_tokens(messages[:i])`. Return the list. At which turn does the request
+# first exceed `BUDGET`?
 
 # %%
-TURNS = [
-    "What is the status of REN-10482? National ID ends 4821, mobile 0501234821.",
-    "If I make the renovation structural, 35 m², how much more would it cost?",
-    "What documents do I need for a structural renovation, and what if one is missing?",
-]
-history = []
-for q in TURNS:
-    run = K.run_agent(q, READ, system=madar.SYSTEM_PROMPT, history=history, max_steps=6, verbose=False)
-    history = run.state[1:]  # everything except the system message
-    print(f"→ {q[:60]}…\n  {' '.join(run.final.split())[:160]}\n")
-print(len(history), "messages in the history;", K.LEDGER)
-
-# %% [markdown]
-# ✏️ **Exercise** · Write `anatomy(system, tools, history)`: the estimated tokens (`K.count_tokens`) of each part of
-# the **next** request: `system`, `tools` (their Chat Completions schemas, `K.tool_schema(t)`), `user` messages,
-# `assistant` messages (text and tool calls), and `tool` results. Return a dict.
-
-# %%
-def anatomy(system: str, tools: list, history: list[dict]) -> dict:
+def per_turn(messages: list[dict]) -> list[int]:
     # BEGIN SOLUTION
-    parts = {"system": K.count_tokens(system), "tools": K.count_tokens([K.tool_schema(t) for t in tools]),
-             "user": 0, "assistant": 0, "tool": 0}
-    for msg in history:
-        parts[msg["role"]] += K.count_tokens({k: v for k, v in msg.items() if k != "role"})
-    return parts
+    return [TOOL_TOKENS + K.count_tokens(messages[:i]) for i, m in enumerate(messages) if m["role"] == "assistant"]
     # END SOLUTION
 
 
-parts = anatomy(madar.SYSTEM_PROMPT, READ, history)
-total = sum(parts.values())
-print({k: f"{v} ({v / total:.0%})" for k, v in parts.items()}, "| total ≈", total)
-pd.Series(parts).plot.barh(title="Where Rafeeq's next request spends its tokens", figsize=(7, 2.6))
-plt.xlabel("estimated tokens")
-plt.show()
-K.check(set(parts) == {"system", "tools", "user", "assistant", "tool"} and total > 500, "anatomy of the window")
+sizes = per_turn(HISTORY)
+over = next((i + 1 for i, s in enumerate(sizes) if s > BUDGET), None)
+print("request tokens per turn:", sizes)
+print("first turn over budget:", over, "| history alone:", K.count_tokens(HISTORY), "tokens")
+K.check(over is not None, "the long task overflows the budget")
 
 # %% [markdown]
-# 🔍 Compare with what the provider counted for the last call (`usage.prompt_tokens`): our tokenizer is not the
-# model's, and the chat template adds a little. Which part grows with every turn? Which part is paid on **every**
-# call even when nothing changes?
+# 🔍 Which messages grow fastest? Count tokens by role: the tool results are most of it.
 
 # %% [markdown]
-# ## 2 · Trim tool results (6')
+# ## 2 · Offload big tool results (7')
 #
-# Tool results are the biggest and least controlled part: a search returns five long passages when one would do.
-# `run_agent` takes an `after_tool(name, args, result)` hook that may return a replacement result.
+# A tool result the model does not need in full can live in a file. The model sees a short stub with the path and
+# a preview, and gets a `read_result` tool to page through it when it must.
 #
-# ✏️ **Exercise** · Write `trim(name, args, result, max_chars=900)`:
-# - if the result is a JSON **list** longer than `max_chars`, keep as many items as fit, then add one item
-#   `{"note": "N more results not shown; refine the query"}`;
-# - if it is any other text longer than `max_chars`, cut it and append `" …[truncated, N chars omitted]"`;
-# - otherwise return it unchanged.
+# ✏️ **Exercise** · Write `offload(name, args, result)`, an `after_tool` hook: when `result` is longer than
+# `LIMIT` characters, write it to `RESULTS/<name>_<n>.json` and return a JSON stub with `offloaded` (the file
+# name), `chars`, and `preview` (the first 120 characters). Otherwise return `None` (keep the result). Then apply
+# it to every tool message of the reference history and measure again.
 
 # %%
-def trim(name: str, args: dict, result: str, max_chars: int = 900) -> str:
-    if len(result) <= max_chars:
-        return result
+RESULTS = K.lab_dir("D2_1", reset=True) / "results"
+RESULTS.mkdir(exist_ok=True)
+LIMIT = 500
+
+
+def offload(name: str, args: dict, result: str) -> str | None:
     # BEGIN SOLUTION
-    try:
-        data = json.loads(result)
-    except json.JSONDecodeError:
-        data = None
-    if isinstance(data, list):
-        kept, size = [], 0
-        for item in data:
-            s = len(json.dumps(item, ensure_ascii=False))
-            if kept and size + s > max_chars:
-                break
-            kept.append(item)
-            size += s
-        if len(kept) < len(data):
-            kept.append({"note": f"{len(data) - len(kept)} more results not shown; refine the query"})
-        return json.dumps(kept, ensure_ascii=False)
-    return result[:max_chars] + f" …[truncated, {len(result) - max_chars} chars omitted]"
+    if len(result) <= LIMIT:
+        return None
+    path = RESULTS / f"{name}_{len(list(RESULTS.iterdir())) + 1}.json"
+    path.write_text(result, encoding="utf-8")
+    return json.dumps({"offloaded": path.name, "chars": len(result), "preview": result[:120],
+                       "note": "Full result saved. Call read_result with this file name to read it."})
     # END SOLUTION
 
 
-big = m.search_policies("refund after rejection and withdrawal", k=5)
-out = trim("search_policies", {}, json.dumps(big, ensure_ascii=False))
-print(len(json.dumps(big, ensure_ascii=False)), "→", len(out), "chars |", out[-90:])
-K.check(len(out) < len(json.dumps(big, ensure_ascii=False)) and "more results" in out, "long lists are trimmed with a note")
+def read_result(file: str, start: int = 0, length: int = 1500) -> str:
+    """Read part of a tool result that was saved to a file.
+
+    Args:
+        file: the file name given in the "offloaded" field.
+        start: first character to read.
+        length: how many characters to read (at most 3000).
+    """
+    text = (RESULTS / Path(file).name).read_text(encoding="utf-8")
+    return text[start: start + min(int(length), 3000)]
+
+
+offloaded = [dict(m, content=offload("tool", {}, m["content"]) or m["content"]) if m["role"] == "tool" else m
+             for m in HISTORY]
+print("history:", K.count_tokens(HISTORY), "→", K.count_tokens(offloaded), "tokens;", len(list(RESULTS.iterdir())), "files")
+K.check(K.count_tokens(offloaded) < K.count_tokens(HISTORY), "offloading cut the history")
 
 # %% [markdown]
-# Now the same question with and without the hook. The system prompt asks for broad searches (`k=5`) to make the
-# effect visible. Compare tokens **and** the answers: did trimming lose what the model needed?
+# ## 3 · Compact old turns into notes (7')
+#
+# Compaction replaces old turns with a short note and keeps the recent ones verbatim. Two rules keep it safe:
+# never split a tool call from its result, and keep the task.
+#
+# ✏️ **Exercise** · Write `compact(messages, keep_last=6)`: keep the system message and the first user message;
+# replace everything up to the last `keep_last` messages with **one** user message that starts with
+# `"Notes from earlier steps:"` and has one line per earlier tool call: its name, its arguments, and the first
+# 120 characters of its result. Move the cut forward until the kept part does not start with a `tool` message.
+# Compaction runs again later on a history that already holds notes: carry those lines forward.
 
 # %%
-Q = "Omar's sign permit was rejected. What refund does he get, and could he appeal instead?"
-SYS = madar.SYSTEM_PROMPT + "\nWhen you search policies, always ask for k=5 results."
-rows = []
-for label, hook in [("raw", None), ("trimmed", trim)]:
-    K.LEDGER.reset()
-    r = K.run_agent(Q, READ, system=SYS, after_tool=hook, max_steps=5, verbose=False)
-    rows.append({"variant": label, "input_tokens": K.LEDGER.input_tokens, "steps": r.steps,
-                 "mentions_100": "100" in r.final, "answer": " ".join(r.final.split())[:110]})
-pd.DataFrame(rows)
-
-# %% [markdown]
-# ## 3 · Compact the history (7')
-#
-# When the history passes a budget, replace the **old** turns with a short summary and keep the last few messages
-# verbatim. Two things must survive compaction: facts the agent needs later (permit ID, what was decided) and
-# **rules**: a summary must not copy personal data that the conversation no longer needs (PDPL data minimisation).
-#
-# ✏️ **Exercise** · Write `compact(history, keep_last=2)`:
-# 1. split `history` into `old` and `recent` (the last `keep_last` messages; don't start `recent` with a `tool`
-#    message: move the cut earlier until it starts with a `user` message);
-# 2. ask `K.SMALL_MODEL` (with `K.chat`) to summarise `old` using `SUMMARY_PROMPT`;
-# 3. return `[{"role": "user", "content": "Summary of the conversation so far: ..."}, *recent]`.
-
-# %%
-SUMMARY_PROMPT = """Summarise this conversation between a citizen and Rafeeq, Madar's assistant, for Rafeeq to continue it.
-Keep: permit IDs, permit status and dates, amounts quoted, what the citizen asked for, and open questions.
-Write "identity verified for <permit ID>" instead of any national ID digits or mobile numbers. At most 120 words."""
-
-
-def compact(history: list[dict], keep_last: int = 2) -> list[dict]:
+def compact(messages: list[dict], keep_last: int = 6) -> list[dict]:
     # BEGIN SOLUTION
-    cut = max(0, len(history) - keep_last)
-    while cut > 0 and history[cut]["role"] != "user":
-        cut -= 1
-    old, recent = history[:cut], history[cut:]
-    if not old:
-        return history
-    transcript = json.dumps(old, ensure_ascii=False)
-    summary = K.text_of(K.chat([{"role": "system", "content": SUMMARY_PROMPT},
-                                {"role": "user", "content": transcript}], model=K.SMALL_MODEL))
-    return [{"role": "user", "content": f"Summary of the conversation so far: {summary}"}, *recent]
+    head, body = messages[:2], messages[2:]
+    cut = max(0, len(body) - keep_last)
+    while cut < len(body) and body[cut]["role"] == "tool":
+        cut += 1
+    old, recent = body[:cut], body[cut:]
+    results = {m["tool_call_id"]: m["content"] for m in old if m["role"] == "tool"}
+    lines = []
+    for m in old:
+        if m["role"] == "user" and str(m["content"]).startswith("Notes from earlier steps:"):
+            lines += m["content"].splitlines()[1:]  # keep the notes of an earlier compaction
+        for c in m.get("tool_calls") or []:
+            lines.append(f"- {c['function']['name']}({c['function']['arguments']}) → "
+                         f"{' '.join(results.get(c['id'], '').split())[:120]}")
+    if not lines:
+        return messages
+    return head + [{"role": "user", "content": "Notes from earlier steps:\n" + "\n".join(lines)}] + recent
     # END SOLUTION
 
 
-short = compact(history, keep_last=2)
-print(short[0]["content"][:600])
-before, after = K.count_tokens(history), K.count_tokens(short)
-print(f"\nhistory ≈ {before} tokens → {after} tokens")
-K.check(after < before / 2, "compaction at least halves the history")
-K.check("4821" not in short[0]["content"] and "0501234821" not in short[0]["content"], "no ID digits or mobile in the summary")
+compacted = compact(HISTORY)
+print(compacted[2]["content"][:600])
+print("history:", K.count_tokens(HISTORY), "→", K.count_tokens(compacted), "tokens")
+K.check(compacted[2]["content"].startswith("Notes from earlier steps:") and compacted[3]["role"] != "tool",
+        "one notes message, and no orphan tool result")
 
 # %% [markdown]
-# Does Rafeeq still know what it needs? Continue the conversation from the compacted history.
+# ## 4 · Before and after, live (6')
+#
+# `budget_loop` is the Day 1 loop with two switches: offload tool results, and compact whenever the next request
+# would exceed `BUDGET`. Each configuration runs on a **fresh** port.
+#
+# ✏️ **Exercise** · Run the long task in three configurations: `none`, `offload`, `offload+compact`. For each,
+# record: largest request (tokens), total input tokens, cost, and success (the answer names all five Najm
+# bookings). This table is the evidence the outcome asks for.
 
 # %%
-r = K.run_agent("Remind me: which permit are we talking about, and when is its decision due?", READ,
-                system=madar.SYSTEM_PROMPT, history=short, max_steps=4)
-K.check("REN-10482" in r.final, "the permit ID survived compaction")
+NAJM = ["BK-24017", "BK-24019", "BK-24021", "BK-24022", "BK-24025"]
 
-# %% [markdown]
-# 🔍 Did the model call `get_permit` again? With the credentials gone from the summary it **can't**, unless it asks
-# Sara again. Is that a bug or a feature? (Both APIs now offer server-side compaction: `/responses/compact` on OpenAI
-# and compaction in the Anthropic Messages API. The trade-off is the same: what is kept is what the summary says.)
 
-# %% [markdown]
-# ## 4 · Stable prefixes and caching (6')
-#
-# Providers cache the **prefix** of a request: if the first N tokens are identical to a recent request, they are
-# read from cache (faster, and billed at a fraction on paid models). OpenAI and most OpenRouter providers do this
-# automatically for long prefixes; Anthropic needs `cache_control` breakpoints. Anything that changes near the top
-# (a timestamp, a user name, reordered tools) breaks the cache for everything after it.
-#
-# ✏️ **Exercise** · Write `shared_prefix_tokens(req_a, req_b)`: serialize both requests with
-# `json.dumps(..., ensure_ascii=False)`, find the length of their common character prefix, and return
-# `K.count_tokens` of that prefix. Then compare the two system-prompt designs below.
-
-# %%
-def shared_prefix_tokens(req_a: dict, req_b: dict) -> int:
-    # BEGIN SOLUTION
-    a, b = json.dumps(req_a, ensure_ascii=False), json.dumps(req_b, ensure_ascii=False)
-    n = 0
-    for x, y in zip(a, b):
-        if x != y:
+def budget_loop(task: str, p: port.Port, use_offload: bool, use_compact: bool, max_steps: int = 24) -> dict:
+    tools = p.tools() + ([read_result] if use_offload else [])
+    by_name = {t.__name__: t for t in tools}
+    tool_tokens = K.count_tokens([K.tool_schema(t) for t in tools])
+    messages = [{"role": "system", "content": port.SYSTEM_PROMPT}, {"role": "user", "content": task}]
+    largest, final = 0, None
+    for _ in range(max_steps):
+        if use_compact and tool_tokens + K.count_tokens(messages) > BUDGET:
+            messages = compact(messages)
+        largest = max(largest, tool_tokens + K.count_tokens(messages))
+        msg = K.chat(messages, tools=tools).choices[0].message
+        messages.append(msg.model_dump(exclude_none=True))
+        if not msg.tool_calls:
+            final = msg.content
             break
-        n += 1
-    return K.count_tokens(a[:n])
+        for c in msg.tool_calls:
+            out = K.call_tool(by_name, c.function.name, c.function.arguments)
+            if use_offload:
+                out = offload(c.function.name, {}, out) or out
+            messages.append({"role": "tool", "tool_call_id": c.id, "content": out})
+    return {"final": final, "largest_request": largest}
+
+
+rows = []
+for name, off, comp in [("none", False, False), ("offload", True, False), ("offload+compact", True, True)]:
+    # BEGIN SOLUTION
+    K.LEDGER.reset()
+    r = budget_loop(TASK, port.Port(K.lab_dir(f"D2_1/{name}", reset=True)), off, comp)
+    rows.append({"config": name, "largest_request": r["largest_request"], "input_tokens": K.LEDGER.input_tokens,
+                 "cost_usd": round(K.LEDGER.cost, 4), "success": all(b in (r["final"] or "") for b in NAJM)})
     # END SOLUTION
-
-
-POLICIES = "\n\n".join(f"## {p['id']} {p['title']}\n{p['text']}" for p in madar.load_policies())
-tools = [K.tool_schema(t) for t in READ]
-
-
-def request(system: str, question: str) -> dict:
-    return {"model": K.MODEL, "tools": tools,
-            "messages": [{"role": "system", "content": system}, {"role": "user", "content": question}]}
-
-
-def bad_system(now: str) -> str:   # volatile first
-    return f"Current time: {now}.\n{madar.SYSTEM_PROMPT}\n\n# Policies\n{POLICIES}"
-
-
-def good_system(now: str) -> str:  # stable first, volatile last
-    return f"{madar.SYSTEM_PROMPT}\n\n# Policies\n{POLICIES}\n\nCurrent time: {now}."
-
-
-for name, fn in [("bad", bad_system), ("good", good_system)]:
-    a = request(fn("2026-11-01 09:00"), "How much is an illuminated 3 m² sign?")
-    b = request(fn("2026-11-01 09:05"), "Which food-truck zones are open on Fridays?")
-    print(f"{name:5s} shared prefix ≈ {shared_prefix_tokens(a, b):5d} of {K.count_tokens(a)} tokens")
+table = pd.DataFrame(rows)
+print(table.to_string(index=False))
+K.check(len(table) == 3, "three configurations measured")
 
 # %% [markdown]
-# Now ask the provider: two calls with the long, stable prefix, a few seconds apart. Read `cached_tokens` from the
-# second response's usage. Free providers on OpenRouter may or may not cache (and report `0`): the design rule
-# holds anyway, because on paid models a cached prefix costs 10-50% of normal input.
-
-# %%
-for q in ["How much is an illuminated 3 m² sign?", "Which food-truck zones are open on Fridays?"]:
-    resp = K.chat([{"role": "system", "content": good_system("2026-11-01 09:00")}, {"role": "user", "content": q}],
-                  use_cache=False, max_tokens=150)
-    details = resp.usage.prompt_tokens_details
-    print(f"prompt {resp.usage.prompt_tokens} tokens | cached {getattr(details, 'cached_tokens', None) if details else None}"
-          f" | {K.text_of(resp)[:70]!r}")
+# 🔍 Did a cut cost success? A compaction that drops a booking ID the answer needs is a saving that fails the
+# task. Read the trace of any failed configuration before you trust the token column.
 
 # %% [markdown]
-# For reference, how each API marks or keys a cacheable prefix:
+# ## ✱ Stretch · Cache-aware layout
 #
-# ```python
-# # Anthropic Messages: explicit breakpoints (up to 4); everything up to the marked block is cached
-# system=[{"type": "text", "text": SYSTEM_AND_POLICIES, "cache_control": {"type": "ephemeral"}}]
-#
-# # OpenAI Responses / Chat Completions: automatic for long prefixes; a key improves the hit rate across users
-# client.responses.create(..., prompt_cache_key="rafeeq-v3")
-# ```
-
-# %% [markdown]
-# ## ✱ Stretch · Context editing: clear old tool results
-#
-# Anthropic's context editing (and many harnesses) clear **old tool results** but keep the call that produced them,
-# so the model knows it already looked something up. Write `clear_old_results(history, keep=1)` that replaces the
-# `content` of every `tool` message except the last `keep` with `"[cleared to save context; call the tool again if
-# needed]"`. Measure the tokens saved on `history`.
+# Providers can reuse the computation of a request's unchanged **prefix**. Put what is stable first (system prompt,
+# tool definitions) and what changes last. Build two requests a day apart, once with the date at the top of the
+# system prompt and once at the bottom, and count the shared prefix in tokens.
 
 # %%
 # BEGIN SOLUTION
-def clear_old_results(history: list[dict], keep: int = 1) -> list[dict]:
-    tool_idx = [i for i, msg in enumerate(history) if msg["role"] == "tool"]
-    old = set(tool_idx[:-keep] if keep else tool_idx)
-    return [{**msg, "content": "[cleared to save context; call the tool again if needed]"} if i in old else msg
-            for i, msg in enumerate(history)]
+def shared_prefix_tokens(a: str, b: str) -> int:
+    n = 0
+    while n < min(len(a), len(b)) and a[n] == b[n]:
+        n += 1
+    return K.count_tokens(a[:n])
 
 
-cleared = clear_old_results(history)
-print(K.count_tokens(history), "→", K.count_tokens(cleared), "tokens")
+for where in ("top", "bottom"):
+    reqs = [(f"Today is {d}.\n" + port.SYSTEM_PROMPT) if where == "top" else (port.SYSTEM_PROMPT + f"\nToday is {d}.")
+            for d in ("2026-11-01", "2026-11-02")]
+    print(where, shared_prefix_tokens(*reqs), "shared of", K.count_tokens(reqs[0]))
 # END SOLUTION
 
 # %% [markdown]
 # ## Checkpoint
 #
-# 1. Which part of Rafeeq's window would you cut first, and which would you never cut?
-# 2. A summary dropped the national ID digits, so Rafeeq asks Sara to verify again. Is that acceptable for Madar?
-# 3. Why does putting the current time at the **top** of a system prompt cost money?
-# 4. Trimming, compaction, clearing: which one loses information the model can't get back by calling a tool?
+# 1. Which of the two cuts loses information, and which only moves it?
+# 2. Why must compaction never keep a `tool` message without the assistant message that asked for it?
+# 3. Your table shows fewer tokens and one more failure. Which column decides?

@@ -232,156 +232,156 @@
       "deck": "slides/day2.html",
       "sessions": [
         {
-          "title": "Context is a budget",
+          "title": "Context as a budget",
+          "summary": "Every call resends the history: measure it, then cut it with offloading and compaction",
           "outcomes": [
-            "Explain why a bigger window is not a better window",
-            "Name the four context failures and the four strategies against them",
-            "Trim, compact and clear context without losing what matters",
-            "Design prompts so caching works"
+            "Measure tokens per turn on a long agent task",
+            "Offload large tool results to files the agent can page through",
+            "Compact old turns into notes without losing what the answer needs"
+          ],
+          "lo": [
+            "LO2"
           ],
           "lab": {
             "id": "2.1",
-            "title": "Budget the window",
+            "title": "Context as a budget",
             "minutes": 25,
-            "summary": "Measure what fills Rafeeq's context, then trim, compact and keep a cache-friendly prefix.",
+            "summary": "Measure tokens per turn on a long task, cut them by offloading tool results to files and by compaction, and build the before-and-after table of tokens, cost and success.",
             "href": "D2_1_context_budget.ipynb",
             "steps": [
               {
-                "text": "Anatomy: tokens by system, tools, user, assistant, tool",
-                "minutes": 6
+                "text": "Tokens per turn on the long task",
+                "minutes": 5
               },
               {
-                "text": "Trim tool results with an after_tool hook",
-                "minutes": 6
-              },
-              {
-                "text": "Compact the history without personal data",
+                "text": "Offload big tool results to files",
                 "minutes": 7
               },
               {
-                "text": "Stable prefixes: measure the shared prefix, read cached_tokens",
+                "text": "Compact old turns into notes",
+                "minutes": 7
+              },
+              {
+                "text": "Before and after: tokens, cost and success, live",
                 "minutes": 6
               }
             ],
-            "stretch": "Context editing: clear old tool results"
-          },
-          "lo": [
-            "LO2"
-          ]
+            "stretch": "A cache-aware layout: stable first, volatile last"
+          }
         },
         {
           "title": "Retrieval for agents",
+          "summary": "Keyword and vector search over bilingual circulars, offered to the agent as tools",
           "outcomes": [
-            "Choose between retrieval as a pipeline and retrieval as a tool",
-            "Build and evaluate BM25, embedding and hybrid search, in Arabic too",
-            "Give agents list / grep / read tools, and know when that beats an index",
-            "Make answers cite their sources"
+            "Score retrieval on the top hit, not only the top three",
+            "Build keyword search with Arabic normalisation and a vector search",
+            "Read from a trace which search tool the agent chose"
+          ],
+          "lo": [
+            "LO2"
           ],
           "lab": {
             "id": "2.2",
-            "title": "Search the policies",
+            "title": "Keyword and vector search over circulars",
             "minutes": 25,
-            "summary": "Evaluate three retrievers on bilingual questions, then compare a search tool with agentic list/grep/read tools.",
+            "summary": "Score retrieval on twelve bilingual questions, build BM25 with Arabic normalisation and a character n-gram vector search, give both to the agent as tools and trace which it picks.",
             "href": "D2_2_retrieval.ipynb",
             "steps": [
               {
-                "text": "A retrieval eval and the keyword baseline",
+                "text": "The eval and the baseline",
                 "minutes": 4
               },
               {
                 "text": "BM25 with Arabic normalisation",
+                "minutes": 7
+              },
+              {
+                "text": "Vector search with character n-grams",
                 "minutes": 6
               },
               {
-                "text": "Embeddings and hybrid search with RRF",
-                "minutes": 6
-              },
-              {
-                "text": "Agentic search vs. a search tool: correctness, citations, tokens",
-                "minutes": 9
+                "text": "Both as tools: which does the agent pick?",
+                "minutes": 8
               }
             ],
             "stretch": "When the corpus fits, skip retrieval"
-          },
-          "lo": [
-            "LO2"
-          ]
+          }
         },
         {
-          "title": "Memory, skills, context files",
-          "summary": "Memory, skills and context files",
+          "title": "Memory, skills and context files",
+          "summary": "What every session needs, what only some tasks need, and loading it in stages",
           "outcomes": [
-            "Tell session memory, long-term memory and standing context apart",
-            "Implement the memory-tool contract safely: paths, caps, what never to store",
-            "Write AGENTS.md and Agent Skills, and load skills only when needed"
+            "Write a short context file for an agent",
+            "Package a procedure as a skill with an index line",
+            "Show staged loading of a skill in a trace"
+          ],
+          "lo": [
+            "LO2"
           ],
           "lab": {
             "id": "2.3",
-            "title": "Remember and specialise",
+            "title": "A context file and a tariff skill",
             "minutes": 25,
-            "summary": "Implement the memory contract, carry a preference across sessions, and give Rafeeq skills it loads on demand.",
-            "href": "D2_3_memory_skills.ipynb",
+            "summary": "Write the context file into Bosla's prompt, parse two skills into an index, load a skill and its reference file on demand, and show the staged loading in a trace.",
+            "href": "D2_3_context_skills.ipynb",
             "steps": [
               {
-                "text": "The memory tool: safe paths and size caps",
-                "minutes": 8
-              },
-              {
-                "text": "Remember a preference across two sessions, without personal data",
+                "text": "The context file in the system prompt",
                 "minutes": 5
               },
               {
-                "text": "Parse SKILL.md, build the index, write load_skill",
-                "minutes": 9
+                "text": "Parse the skills and build the index",
+                "minutes": 6
               },
               {
-                "text": "Did the agent load the right skill? Check the database",
-                "minutes": 3
+                "text": "Staged loading: load_skill and read_skill_file",
+                "minutes": 6
+              },
+              {
+                "text": "Show it in a trace",
+                "minutes": 8
               }
             ],
-            "stretch": "A capped memory, Hermes-style"
-          },
-          "lo": [
-            "LO2"
-          ]
+            "stretch": "A memory file per agent"
+          }
         },
         {
           "title": "Model Context Protocol",
+          "summary": "A server over the circular store, discovered by the agent at run time",
           "outcomes": [
-            "Explain hosts, clients and servers, and the three primitives",
-            "Write an MCP server as one PEP 723 file with the v2 Python SDK",
-            "Speak the stateless 2026-07-28 protocol by hand",
-            "Assess the supply-chain risk of third-party servers"
+            "Build an MCP server with tools and resources",
+            "Pass a provided test client in-process and over stdio",
+            "Connect an agent through capability discovery, with a trace"
+          ],
+          "lo": [
+            "LO3"
           ],
           "lab": {
             "id": "2.4",
-            "title": "Madar as an MCP server",
+            "title": "An MCP server over the circular store",
             "minutes": 25,
-            "summary": "Run a PEP 723 MCP server in-process, over stdio and over HTTP; speak JSON-RPC by hand; give its tools to your agent.",
+            "summary": "Build an MCP server over the circulars, pass the provided test client, and connect Bosla to it through discovery with a trace of discovery and calls.",
             "href": "D2_4_mcp.ipynb",
             "steps": [
               {
-                "text": "Read the server: PEP 723 block, tools, resources, prompt",
+                "text": "Read the shape of a server",
                 "minutes": 3
               },
               {
-                "text": "Connect and discover; call, read, render; then over stdio",
+                "text": "Build the server",
+                "minutes": 8
+              },
+              {
+                "text": "Pass the provided tests, in-process and over stdio",
                 "minutes": 6
               },
               {
-                "text": "The protocol by hand: server/discover, tools/call",
-                "minutes": 6
-              },
-              {
-                "text": "MCP tools and a resource reader in your agent loop",
-                "minutes": 10
+                "text": "Bosla discovers the server and uses it, with a trace",
+                "minutes": 8
               }
             ],
-            "stretch": "Turn on the write tools, with approvals"
-          },
-          "lo": [
-            "LO3"
-          ]
+            "stretch": "Speak the protocol by hand over HTTP"
+          }
         }
       ]
     },

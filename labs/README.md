@@ -53,10 +53,10 @@ Free models change often. If the default disappears or is busy, pick another fre
 | 1 | A berth request as a validated object | [`D1_2_structured_outputs.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_2_structured_outputs.ipynb) | Chat Completions |
 | 1 | Typed tools with useful errors | [`D1_3_typed_tools.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_3_typed_tools.ipynb) | Chat Completions |
 | 1 | The agent loop from scratch | [`D1_4_agent_loop.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_4_agent_loop.ipynb) | Chat Completions |
-| 2 | Budget the window | [`D2_1_context_budget.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_1_context_budget.ipynb) | Chat Completions |
-| 2 | Search the policies | [`D2_2_retrieval.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_2_retrieval.ipynb) | Chat Completions |
-| 2 | Remember and specialise | [`D2_3_memory_skills.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_3_memory_skills.ipynb) | Chat Completions |
-| 2 | Madar as an MCP server | [`D2_4_mcp.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_4_mcp.ipynb) | MCP (stdio, Streamable HTTP) |
+| 2 | Context as a budget | [`D2_1_context_budget.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_1_context_budget.ipynb) | Chat Completions |
+| 2 | Keyword and vector search over circulars | [`D2_2_retrieval.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_2_retrieval.ipynb) | Chat Completions |
+| 2 | A context file and a tariff skill | [`D2_3_context_skills.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_3_context_skills.ipynb) | Chat Completions |
+| 2 | An MCP server over the circular store | [`D2_4_mcp.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_4_mcp.ipynb) | MCP |
 | 3 | Harness teardown | [`D3_1_harness_teardown.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_1_harness_teardown.ipynb) | Pi (optional, Node.js 22.19+) |
 | 3 | Rafeeq on the OpenAI Agents SDK | [`D3_2_agents_sdk.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_2_agents_sdk.ipynb) | Chat Completions via the SDK |
 | 3 | A loop that fixes code | [`D3_3_loop_engineering.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_3_loop_engineering.ipynb) | Chat Completions + git + pytest |
@@ -103,6 +103,7 @@ Nine applicants have known stories for the labs and the eval suite:
 
 | Script | What it is | Run |
 |---|---|---|
+| `servers/marsa_mcp.py` | The Marsa circular store as an MCP server (Lab 2.4 reference); `mcp_test_client.py` holds its tests | `uv run servers/marsa_mcp.py` (stdio) or `--http 8765` |
 | `servers/madar_mcp.py` | Madar's tools, policies (resources) and triage prompt as an MCP server | `uv run servers/madar_mcp.py` (stdio) or `--http 8765` |
 | `loops/ralph.py` | A Ralph loop: a coding agent fixes `madar_fees` until its tests pass, one commit per iteration | `uv run loops/ralph.py --tests tests/test_fees.py` (`--harness pi` for Pi) |
 | `servers/madar_a2a.py` | Madar's policy worker as an A2A agent (agent card + JSON-RPC) | `uv run servers/madar_a2a.py --port 8792` |
@@ -126,3 +127,5 @@ Nine applicants have known stories for the labs and the eval suite:
 | `LEDGER` | calls, tokens, cached tokens and cost so far |
 
 `evals.py` runs the eval suite: `load_tasks()`, `run_suite(agent, tasks, trials=k)`, `report(df)` (pass@k and pass^k), with code graders and an LLM judge.
+
+**Windows and long folder paths.** If an import fails with "The filename or extension is too long", keep the virtual environment in a short folder: set `UV_PROJECT_ENVIRONMENT` to a short path (for example a folder at the root of your drive) before `uv sync`.
