@@ -43,8 +43,8 @@ from importlib.metadata import PackageNotFoundError, version
 
 import pandas as pd
 
-packages = ["openai", "anthropic", "openai-agents", "pydantic", "huggingface-hub", "model2vec", "bm25s", "mcp",
-            "langgraph", "a2a-sdk", "fastapi", "opentelemetry-sdk", "uv"]
+packages = ["openai", "anthropic", "openai-agents", "pydantic", "huggingface-hub", "bm25s", "mcp",
+            "langgraph", "fastapi", "opentelemetry-sdk", "uv"]
 rows = []
 for name in packages:
     try:

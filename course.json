@@ -3,14 +3,17 @@
   "engine": "1",
   "id": "agentic-ai",
   "code": "AE-302",
-  "version": "2026.1.0",
+  "version": "2027.1.0",
   "lang": "en",
   "title": "Agentic Systems Engineering: Loops, Context and Harnesses",
   "tagline": "Build an agent as a model in a loop calling typed tools, with most of the engineering in the harness",
   "track": "ai-engineering",
-  "audience": "Python developers and engineers. Day 1 starts from what a language model is and how it differs from ChatGPT, so no prior LLM, API or agent framework experience is needed.",
+  "audience": "Practitioners: developers and engineers who already build applications on language models and now need agents that are measured, contained and shipped.",
   "prerequisites": [
-    "Any laptop CPU with uv, or Google Colab. All model calls go to free API models (an OpenRouter key; a one-time 10-credit top-up raises the free quota from 50 to 1,000 requests a day). Node.js 22.19+ is optional, for the Pi teardown. Run 00_setup_check before Day 1; see labs/README.md."
+    "AE-203 Building Applications on Language Models",
+    "Writes typed Python and calls a web API that returns JSON",
+    "Runs a container and reads its logs",
+    "Setup: a laptop CPU with uv, or Google Colab, and a key for a free hosted model (OpenRouter by default). Nothing downloads a model. Run 00_setup_check before Day 1; see labs/README.md."
   ],
   "site": {
     "url": "https://sdaiaacademy.github.io/agentic-ai/",
@@ -710,37 +713,198 @@
     {
       "id": "day5",
       "kind": "capstone",
-      "title": "Capstone: Polish & Submit",
+      "title": "Capstone: a research agent and its defence",
       "deck": "slides/day5.html"
     }
   ],
   "capstone": {
-    "summary": "An individual project: build a working agent system on one of three tracks and submit it as a public GitHub repository before the Day 5 deadline. AI coding assistants are allowed for the code, but you own every design decision, number and claim. There is no live demo and no presentation: the README is the presentation, backed by saved evidence of real runs (eval CSVs for both configurations, plus logs or traces, a transcript, screenshots or a short recording). Rafeeq in production: the Madar assistant as a complete service with MCP tools, memory, approvals, security, evals and an API; Your harness: a domain harness for a real workflow in your entity, with context files, permissions, a loop and evals; Graph workflow: a durable, human-in-the-loop process as a graph with agents inside nodes. Minimum: 3+ tools (one over MCP), a context file plus memory or retrieval plus a compaction or budget rule, an approval on a write action with step and cost budgets, 15+ eval tasks on two configurations with an error analysis, and a security note (trifecta, one attack, one defence), using synthetic or public data only. Starter kit: labs/capstone/.",
+    "summary": "An individual research agent over the synthetic documents of Marsa Ports Authority, built on the course starter (labs/capstone/) or an own harness: at least three tools with one over MCP, a context rule, step and cost budgets, and a human approval on every write. It is evaluated on at least 15 tasks over five trials on two configurations, and contained by removing one leg of private data, untrusted content and exit path, with a logged injection run in which exfiltration fails.",
+    "submission": "A public repository whose README reports success over repeated trials (pass^5 and pass@5), cost per completed task and the containment design, with the per-run results, the injection log and timestamped agent transcripts committed. Then an eight-minute live defence: the participant runs the agent on a task the assessor supplies and explains one failure from its trace.",
+    "talk_minutes": 8,
+    "qa_minutes": 0,
     "rubric": [
       {
-        "criterion": "Working system (code + saved run evidence)",
+        "criterion": "Working agent",
         "weight": 25
       },
       {
-        "criterion": "Context and harness engineering decisions",
-        "weight": 25
-      },
-      {
-        "criterion": "Evaluation and error analysis",
+        "criterion": "Context and harness design",
         "weight": 20
       },
       {
-        "criterion": "Security, governance and operability",
+        "criterion": "Evaluation over trials",
         "weight": 20
       },
       {
-        "criterion": "Presentation and reproducibility (README.md)",
-        "weight": 10
+        "criterion": "Containment",
+        "weight": 20
+      },
+      {
+        "criterion": "Reproducibility",
+        "weight": 15
       }
     ]
   },
   "labs": {
     "kind": "notebooks",
     "base": "labs/"
-  }
+  },
+  "description": "Participants build an agent as a model in a loop calling typed tools inside a sandbox, with most of the engineering in the harness. For a fictional ports authority they write the loop from scratch, budget the context, add a context file, a skill and a Model Context Protocol (MCP) server, compare an agent SDK with their own harness, gate bookings in a checkpointed state graph, and ship a traced, evaluated and contained agent behind an API.",
+  "level": 300,
+  "badge": {
+    "name": "AE Associate"
+  },
+  "format_note": "Intensive: 4 teaching days of four sessions and a capstone day, with guided pre-work and a tracked follow-up task",
+  "hours": {
+    "instruction": 6,
+    "lab": 7,
+    "guided_self_study": 6,
+    "assessment": 1,
+    "capstone": 6
+  },
+  "tools": [
+    {
+      "slot": "Language model access",
+      "examples": [
+        "a locally served open-weight model",
+        "a free hosted open-weight model",
+        "any commercial API"
+      ]
+    },
+    {
+      "slot": "Agent framework with state graphs and checkpoints",
+      "examples": [
+        "LangGraph",
+        "Pydantic AI with its graph library"
+      ]
+    },
+    {
+      "slot": "Agent SDK for the comparison",
+      "examples": [
+        "smolagents",
+        "OpenAI Agents SDK",
+        "Google Agent Development Kit"
+      ]
+    },
+    {
+      "slot": "Protocol server SDK",
+      "examples": [
+        "official Model Context Protocol Python SDK",
+        "FastMCP"
+      ]
+    },
+    {
+      "slot": "Tracing and evaluation",
+      "examples": [
+        "OpenTelemetry with Langfuse",
+        "Arize Phoenix",
+        "Inspect"
+      ]
+    },
+    {
+      "slot": "Execution sandbox",
+      "examples": [
+        "Docker or Podman containers with no network by default",
+        "OpenSandbox"
+      ]
+    },
+    {
+      "slot": "API service and continuous integration",
+      "examples": [
+        "FastAPI",
+        "GitLab CI",
+        "GitHub Actions"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "group": "Agents, tools and context",
+      "items": [
+        {
+          "title": "Anthropic: Building effective agents",
+          "url": "https://www.anthropic.com/engineering/building-effective-agents"
+        },
+        {
+          "title": "Anthropic: Writing effective tools for agents",
+          "url": "https://www.anthropic.com/engineering/writing-tools-for-agents"
+        },
+        {
+          "title": "Anthropic: Effective context engineering for AI agents",
+          "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents"
+        },
+        {
+          "title": "AGENTS.md, the context-file convention",
+          "url": "https://agents.md/"
+        }
+      ]
+    },
+    {
+      "group": "Harnesses, SDKs and evaluation",
+      "items": [
+        {
+          "title": "Birgitta Böckeler: Harness engineering",
+          "url": "https://martinfowler.com/articles/harness-engineering.html"
+        },
+        {
+          "title": "OpenAI Agents SDK documentation",
+          "url": "https://openai.github.io/openai-agents-python/"
+        },
+        {
+          "title": "Anthropic: Demystifying evals for AI agents",
+          "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"
+        }
+      ]
+    },
+    {
+      "group": "Protocols and several agents",
+      "items": [
+        {
+          "title": "Model Context Protocol: versioning",
+          "url": "https://modelcontextprotocol.io/specification/versioning"
+        },
+        {
+          "title": "MCP Python SDK v2: migration guide",
+          "url": "https://py.sdk.modelcontextprotocol.io/v2/migration/"
+        },
+        {
+          "title": "Agent2Agent (A2A) protocol",
+          "url": "https://a2a-protocol.org/"
+        },
+        {
+          "title": "Anthropic: How we built our multi-agent research system",
+          "url": "https://www.anthropic.com/engineering/multi-agent-research-system"
+        },
+        {
+          "title": "Cognition: Don't build multi-agents",
+          "url": "https://cognition.ai/blog/dont-build-multi-agents"
+        }
+      ]
+    },
+    {
+      "group": "Security and governance",
+      "items": [
+        {
+          "title": "OWASP GenAI Security Project: Top 10 for Agentic Applications for 2026",
+          "url": "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/"
+        },
+        {
+          "title": "Simon Willison: The lethal trifecta",
+          "url": "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/"
+        },
+        {
+          "title": "Simon Willison: The dual LLM pattern",
+          "url": "https://simonwillison.net/2023/Apr/25/dual-llm-pattern/"
+        },
+        {
+          "title": "Debenedetti et al.: Defeating prompt injections by design (CaMeL)",
+          "url": "https://arxiv.org/abs/2503.18813"
+        },
+        {
+          "title": "SDAIA: national data and AI regulations, including the PDPL",
+          "url": "https://sdaia.gov.sa/"
+        }
+      ]
+    }
+  ]
 }

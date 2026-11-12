@@ -1,89 +1,129 @@
-# Agentic AI Systems Engineering · هندسة أنظمة الذكاء الاصطناعي التوكيلي
+<!-- academy:title -->
+# Agentic Systems Engineering: Loops, Context and Harnesses
 
-**SDAIA Academy · AI Engineering Track**: a 4-day hands-on bootcamp (4 sessions per day) plus a capstone polish-and-submit day (an individual project, submitted as a public GitHub repository). Build agents that work, and the systems around them: the three LLM API shapes and the agent loop, context engineering, harnesses, loops and graphs, then evaluation, security and production. Every lab runs on **free** open models through OpenRouter (and Hugging Face).
+AI Engineering Track · SDAIA Academy · AE-302 · Level 300
 
-**Audience:** programmers comfortable with Python who have used ChatGPT but have not worked with LLMs from code. Day 1 starts from what a language model is and how it differs from ChatGPT; every later idea is introduced before it is used (see [nuggets.md](nuggets.md) for the dependency map the decks follow).
+Build an agent as a model in a loop calling typed tools, with most of the engineering in the harness
+
+Participants build an agent as a model in a loop calling typed tools inside a sandbox, with most of the engineering in the harness. For a fictional ports authority they write the loop from scratch, budget the context, add a context file, a skill and a Model Context Protocol (MCP) server, compare an agent SDK with their own harness, gate bookings in a checkpointed state graph, and ship a traced, evaluated and contained agent behind an API.
+
+**Format:** Intensive: 4 teaching days of four sessions and a capstone day, with guided pre-work and a tracked follow-up task
 
 **Course page:** https://sdaiaacademy.github.io/agentic-ai/
+<!-- /academy:title -->
 
-| Day | Theme | Slides |
-|---|---|---|
-| 1 | From a Language Model to an Agent | [day1](https://sdaiaacademy.github.io/agentic-ai/slides/day1.html) |
-| 2 | Context Engineering | [day2](https://sdaiaacademy.github.io/agentic-ai/slides/day2.html) |
-| 3 | Harness & Loop Engineering | [day3](https://sdaiaacademy.github.io/agentic-ai/slides/day3.html) |
-| 4 | Graph Engineering & Production | [day4](https://sdaiaacademy.github.io/agentic-ai/slides/day4.html) |
-| 5 | Capstone: Polish & Submit | [day5](https://sdaiaacademy.github.io/agentic-ai/slides/day5.html) |
+The whole course follows one case study: **Marsa Ports Authority**, a fictional Red Sea port authority, and **Bosla
+(بوصلة)**, the booking assistant participants build for it. The port has three services: a berth schedule, bilingual
+tariff circulars and a booking service with write actions. The schedule, circulars, bookings and tasks are synthetic and
+generated with a fixed seed by `labs/port_data.py`. One circular, TC-09, carries a planted instruction for the
+security lab.
 
-Each day has four sessions. Every session is about 20–25 minutes of concepts and demos followed by a 25-minute lab.
+Every lab runs on free hosted models (OpenRouter by default), on a laptop CPU with [uv](https://docs.astral.sh/uv/) or
+on Google Colab. Nothing downloads a model. See [labs/README.md](labs/README.md).
 
-## How the course is organised
+<!-- academy:units -->
+## Units
 
-The days climb the ladder practitioners now use to describe agent work, **prompt → context → harness → loop → graph engineering**, with evaluation, security and production as cross-cutting skills:
+| Unit | Title | Sessions | Slides |
+|---|---|---|---|
+| Day 1 | From Model to Agent | Three API shapes; Structured outputs; Tools; The agent loop from scratch | [`slides/day1.html`](slides/day1.html) |
+| Day 2 | Context Engineering | Context as a budget; Retrieval for agents; Memory, skills and context files; Model Context Protocol | [`slides/day2.html`](slides/day2.html) |
+| Day 3 | Harness and Loop | Anatomy of a harness; Agent SDKs and hosted agents; Loop engineering; Evaluating agents | [`slides/day3.html`](slides/day3.html) |
+| Day 4 | Graph and Production | State graphs with checkpoints; Several agents and agent-to-agent delegation; Securing agents; Production | [`slides/day4.html`](slides/day4.html) |
+| Capstone | Capstone: a research agent and its defence |  | [`slides/day5.html`](slides/day5.html) |
+<!-- /academy:units -->
 
-| Rung | What you engineer | Where |
-|---|---|---|
-| Prompt | what an LLM is, the chat format, system prompts as specifications, structured outputs, tools, the loop | Day 1 |
-| Context | what enters the window: budgets, compaction, retrieval, memory, Agent Skills, MCP | Day 2 |
-| Harness | everything around the model: tools, permissions, hooks, sandbox, sessions, SDKs | Day 3 · S1–S2 |
-| Loop | outer loops with fresh context, back-pressure and exits; evals | Day 3 · S3–S4 |
-| Graph | explicit workflows with typed state, human gates, checkpoints, many agents | Day 4 · S1–S2 |
+<!-- academy:labs -->
+## Labs
 
-Design choices, and the evidence behind them (October 2026):
+Every lab is a notebook in `labs/`. Open it in Google Colab from the course page, or run it locally with `uv`. Exercises raise `NotImplementedError` until they are done; the reference versions are in `labs/solutions/`.
 
-- **Three API shapes.** OpenAI's Responses API, Anthropic's Messages API and Chat Completions are served by most inference engines and gateways (vLLM, SGLang, llama.cpp, Ollama, LM Studio, LiteLLM, OpenRouter, Hugging Face). Day 1 gives each one a session, and every lab tool is generated for all three. OpenAI's Decisions and Agents APIs and Anthropic's Managed Agents are taught from their official docs and emulated on free models (they are vendor-only and paid).
-- **Open harnesses** went mainstream in 2026. Pi, OpenClaw, Hermes Agent and Mercury Agent are taken apart on dimensions (loop, context files, memory, skills, permissions, sandbox), and their security incidents feed Day 4.
-- **Free models only.** Gemma 4 on OpenRouter by default (`google/gemma-4-31b-it:free`, with fallbacks), with Qwen and Gemma on Hugging Face. Model choice is taught from public benchmarks ([Artificial Analysis](https://artificialanalysis.ai/), [LMArena](https://lmarena.ai/leaderboard), [BFCL](https://gorilla.cs.berkeley.edu/leaderboard.html), [τ²-bench](https://taubench.com), [Terminal-Bench](https://www.tbench.ai/leaderboard)) and then the participant's own eval. Nothing downloads an LLM; small Qwen and Gemma models are optional for local experiments.
-- **Python via uv**: notebooks for labs; standalone programs (MCP and A2A servers, the loop runner, the API, the CI eval, the capstone starter) are single-file [PEP 723](https://peps.python.org/pep-0723/) scripts run with `uv run`.
+| | Session | Lab | File |
+|---|---|---|---|
+| 1.1 | Day 1 · Session 1 | One model, three API shapes | [`D1_1_three_shapes.ipynb`](labs/D1_1_three_shapes.ipynb) |
+| 1.2 | Day 1 · Session 2 | A berth request as a validated object | [`D1_2_structured_outputs.ipynb`](labs/D1_2_structured_outputs.ipynb) |
+| 1.3 | Day 1 · Session 3 | Typed tools with useful errors | [`D1_3_typed_tools.ipynb`](labs/D1_3_typed_tools.ipynb) |
+| 1.4 | Day 1 · Session 4 | The agent loop from scratch | [`D1_4_agent_loop.ipynb`](labs/D1_4_agent_loop.ipynb) |
+| 2.1 | Day 2 · Session 1 | Context as a budget | [`D2_1_context_budget.ipynb`](labs/D2_1_context_budget.ipynb) |
+| 2.2 | Day 2 · Session 2 | Keyword and vector search over circulars | [`D2_2_retrieval.ipynb`](labs/D2_2_retrieval.ipynb) |
+| 2.3 | Day 2 · Session 3 | A context file and a tariff skill | [`D2_3_context_skills.ipynb`](labs/D2_3_context_skills.ipynb) |
+| 2.4 | Day 2 · Session 4 | An MCP server over the circular store | [`D2_4_mcp.ipynb`](labs/D2_4_mcp.ipynb) |
+| 3.1 | Day 3 · Session 1 | Remove one harness part | [`D3_1_harness_teardown.ipynb`](labs/D3_1_harness_teardown.ipynb) |
+| 3.2 | Day 3 · Session 2 | An agent SDK against your own loop | [`D3_2_agents_sdk.ipynb`](labs/D3_2_agents_sdk.ipynb) |
+| 3.3 | Day 3 · Session 3 | Verification inside the loop | [`D3_3_loop_engineering.ipynb`](labs/D3_3_loop_engineering.ipynb) |
+| 3.4 | Day 3 · Session 4 | Grading over five trials | [`D3_4_evals.ipynb`](labs/D3_4_evals.ipynb) |
+| 4.1 | Day 4 · Session 1 | A booking graph with an approval gate | [`D4_1_booking_graph.ipynb`](labs/D4_1_booking_graph.ipynb) |
+| 4.2 | Day 4 · Session 2 | Two agents or one? | [`D4_2_multi_agent.ipynb`](labs/D4_2_multi_agent.ipynb) |
+| 4.3 | Day 4 · Session 3 | A planted instruction, one leg removed | [`D4_3_security.ipynb`](labs/D4_3_security.ipynb) |
+| 4.4 | Day 4 · Session 4 | Behind an API, traced, gated in CI | [`D4_4_ship_it.ipynb`](labs/D4_4_ship_it.ipynb) |
+<!-- /academy:labs -->
 
-The whole week follows one case study: **Madar Municipal Services**, a fictional municipality, and **Rafeeq (رفيق)**, its bilingual permit assistant. The policies, database, inbox (with two hidden prompt injections), a small buggy library and the eval tasks are synthetic and generated by `labs/prepare_data.py`.
+## Capstone
+
+A research agent over the port's synthetic documents, built on the starter in [labs/capstone/](labs/capstone/) or on
+your own harness. You publish it in a public repository whose README reports:
+
+- success over repeated trials;
+- cost per completed task;
+- the containment design.
+
+Then you defend it for eight minutes: you run the agent on a task the assessor supplies and explain one failure from its
+trace.
 
 ## Repository
 
 ```
-index.html          course page (GitHub Pages)
-nuggets.md          the knowledge map: every concept, where it is taught, and what it depends on
-slides/             one HTML deck per day
-labs/               notebooks, case-study data, shared helpers, servers, loop runner, CI eval, capstone kit
-.github/workflows/  the smoke eval (Lab 4.4)
+course.json   the course manifest: outcomes, days, sessions, labs, capstone, tools, sources
+slides/       one deck per day; the engine builds them into the course site
+labs/         notebooks and their solutions, the port (port.py, data/), the reference agent (bosla.py),
+              the helper module (agentkit.py), the MCP server (servers/), the CI smoke evaluation (ci/), the capstone kit
 ```
 
-Labs run on any laptop CPU with [uv](https://docs.astral.sh/uv/) or on Google Colab (one click from the course page): see [labs/README.md](labs/README.md).
+Build and check with the Academy engine: `node academy.mjs check`, `node academy.mjs build`.
 
+<!-- academy:tools -->
+## Tools
+
+Each line is a capability; the examples are interchangeable.
+
+- **Language model access:** a locally served open-weight model, a free hosted open-weight model, any commercial API
+- **Agent framework with state graphs and checkpoints:** LangGraph, Pydantic AI with its graph library
+- **Agent SDK for the comparison:** smolagents, OpenAI Agents SDK, Google Agent Development Kit
+- **Protocol server SDK:** official Model Context Protocol Python SDK, FastMCP
+- **Tracing and evaluation:** OpenTelemetry with Langfuse, Arize Phoenix, Inspect
+- **Execution sandbox:** Docker or Podman containers with no network by default, OpenSandbox
+- **API service and continuous integration:** FastAPI, GitLab CI, GitHub Actions
+<!-- /academy:tools -->
+
+<!-- academy:sources -->
 ## Sources
 
-**The engineering ladder**
-- Kirill, [prompt → context → harness → loop → graph engineering](https://x.com/kirillk_web3/status/2088682533278077382); Akshay Pachaar, [on the same progression](https://x.com/akshay_pachaar/status/2081356379026280677); Peter Steinberger, [on loops](https://x.com/steipete/status/2078277297791189132)
-- Anthropic, [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)
+### Agents, tools and context
 
-**Context engineering**
-- Anthropic, [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents); Simon Willison, [Context engineering](https://simonwillison.net/2025/jun/27/context-engineering/)
-- Chroma, [Context rot](https://research.trychroma.com/context-rot); Drew Breunig, [How to fix your context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html); LangChain, [Context engineering for agents](https://www.langchain.com/blog/context-engineering-for-agents)
-- Manus, [Context engineering for AI agents: lessons from building Manus](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)
-- Anthropic, [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) and [Code execution with MCP](https://www.anthropic.com/engineering/code-execution-with-mcp); [AGENTS.md](https://agents.md/)
+- [Anthropic: Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)
+- [Anthropic: Writing effective tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
+- [Anthropic: Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [AGENTS.md, the context-file convention](https://agents.md/)
 
-**APIs and providers**
-- OpenRouter, [Responses API](https://openrouter.ai/docs/api/reference/responses/overview), [Anthropic Messages](https://openrouter.ai/docs/api/api-reference/anthropic-messages/create-a-message), [model fallbacks](https://openrouter.ai/docs/guides/routing/model-fallbacks), [structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs), [tool calling](https://openrouter.ai/docs/guides/features/tool-calling), [prompt caching](https://openrouter.ai/docs/guides/best-practices/prompt-caching), [limits](https://openrouter.ai/docs/api/reference/limits)
-- [Open Responses](https://www.openresponses.org); Hugging Face, [Inference Providers](https://huggingface.co/docs/inference-providers/index) and [Responses API](https://huggingface.co/docs/inference-providers/guides/responses-api); llama.cpp, [Anthropic Messages API support](https://huggingface.co/blog/ggml-org/anthropic-messages-api-in-llamacpp); LM Studio, [Anthropic compatibility](https://lmstudio.ai/docs/developer/anthropic-compat)
-- OpenAI, [Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses), [Decisions API](https://developers.openai.com/api/docs/guides/decisions) and [DevDay 2026 recap](https://openai.com/index/devday-2026-recap/) (Agents API)
-- Anthropic, [Claude API and Messages](https://platform.claude.com/docs/en/intro) and [Claude Managed Agents](https://platform.claude.com/docs/en/managed-agents/overview)
+### Harnesses, SDKs and evaluation
 
-**Harnesses and SDKs**
-- OpenAI, [Harness engineering](https://openai.com/index/harness-engineering/); Birgitta Böckeler, [Harness engineering](https://martinfowler.com/articles/harness-engineering.html); Anthropic, [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) and [Writing effective tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
-- [Pi](https://github.com/earendil-works/pi) ([how Pi works](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/how-pi-works.md)); [OpenClaw](https://github.com/openclaw/openclaw) ([background](https://en.wikipedia.org/wiki/OpenClaw)); [Hermes Agent](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory); [Mercury Agent](https://github.com/cosmicstack-labs/mercury-agent)
-- [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) ([other models](https://openai.github.io/openai-agents-python/models/)); Hugging Face, [agents and MCP on the Hub](https://huggingface.co/docs/hub/agents-mcp)
+- [Birgitta Böckeler: Harness engineering](https://martinfowler.com/articles/harness-engineering.html)
+- [OpenAI Agents SDK documentation](https://openai.github.io/openai-agents-python/)
+- [Anthropic: Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)
 
-**Loops, evals and multi-agent systems**
-- Geoffrey Huntley, [Ralph](https://ghuntley.com/ralph/)
-- Anthropic, [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) and [How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system); Cognition, [Don't build multi-agents](https://cognition.ai/blog/dont-build-multi-agents)
+### Protocols and several agents
 
-**Protocols, graphs and production**
-- Model Context Protocol, [versioning](https://modelcontextprotocol.io/specification/versioning) and [2026-07-28 changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog); [MCP Python SDK v2 migration](https://py.sdk.modelcontextprotocol.io/v2/migration/); [MCP registry](https://registry.modelcontextprotocol.io)
-- [A2A protocol](https://a2a-protocol.org/); [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview); [OpenTelemetry GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
+- [Model Context Protocol: versioning](https://modelcontextprotocol.io/specification/versioning)
+- [MCP Python SDK v2: migration guide](https://py.sdk.modelcontextprotocol.io/v2/migration/)
+- [Agent2Agent (A2A) protocol](https://a2a-protocol.org/)
+- [Anthropic: How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)
+- [Cognition: Don't build multi-agents](https://cognition.ai/blog/dont-build-multi-agents)
 
-**Security and governance**
-- OWASP GenAI Security Project, [Top 10 for Agentic Applications for 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
-- Simon Willison, [The lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) and [the dual LLM pattern](https://simonwillison.net/2023/Apr/25/dual-llm-pattern/); Debenedetti et al., [Defeating prompt injections by design (CaMeL)](https://arxiv.org/abs/2503.18813)
-- Saudi Personal Data Protection Law (PDPL) and SDAIA's AI Ethics Principles ([sdaia.gov.sa](https://sdaia.gov.sa/))
+### Security and governance
 
-**Further courses**
-- DeepLearning.AI, [MCP](https://www.deeplearning.ai/short-courses/mcp-build-rich-context-ai-apps-with-anthropic/), [Agent Skills](https://www.deeplearning.ai/short-courses/agent-skills-with-anthropic/) and [A2A](https://www.deeplearning.ai/short-courses/a2a-the-agent2agent-protocol/) short courses
+- [OWASP GenAI Security Project: Top 10 for Agentic Applications for 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+- [Simon Willison: The lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)
+- [Simon Willison: The dual LLM pattern](https://simonwillison.net/2023/Apr/25/dual-llm-pattern/)
+- [Debenedetti et al.: Defeating prompt injections by design (CaMeL)](https://arxiv.org/abs/2503.18813)
+- [SDAIA: national data and AI regulations, including the PDPL](https://sdaia.gov.sa/)
+<!-- /academy:sources -->

@@ -1,80 +1,87 @@
 # <Project name>
 
-> One sentence: who uses this agent, and what does it do for them?
+> One sentence: who asks this agent what, and what it gives back.
 
-[Advanced Agentic AI Systems Engineering - SDAIA Academy](https://github.com/sdaiaacademy/agentic-ai/)
+[Agentic Systems Engineering: Loops, Context and Harnesses - SDAIA Academy](https://github.com/sdaiaacademy/agentic-ai/)
 
-<!-- Keep the course line above exactly as written: a README without it loses part of the presentation mark. This README is your presentation (no live demo, no talk): explain the problem, the design, the A vs. B results with the error analysis and the security note, and point to saved evidence for every claim. -->
-
-**Track:** 1 · Rafeeq in production / 2 · Your harness / 3 · Graph workflow
 **Author:** <name>
-**Model(s):** <e.g. google/gemma-4-31b-it:free via OpenRouter>, chosen because <benchmark evidence + your own eval>
+**Model(s):** <a free hosted open-weight model, or another>, chosen because <your own evaluation>
+**Harness:** <the course starter / your own>
 
 ## Problem
 
-<The workflow today, who does it, what goes wrong, and what "done" looks like. 5–8 lines.>
+What does the agent need to cover? Write 5 to 8 lines:
+
+- the questions it answers;
+- who asks them today, and how long they take;
+- what a correct answer must contain.
 
 ## How to run
 
 ```bash
-uv run <your_script>.py ask "<an example request>"
-uv run <your_script>.py eval tasks.jsonl --config A B
+uv run <your_script>.py ask "<an example question>"
+uv run <your_script>.py eval tasks.jsonl --config A B --trials 5
 ```
 
-Environment: `OPENROUTER_API_KEY` in `.env`. <Anything else.>
+Put the API key in `.env` as `OPENROUTER_API_KEY` (or another provider's key). No keys are committed.
 
-## Design across the ladder
+## Context and harness design
 
-| Rung | Your decision | Why |
+| Part | Your decision | Why |
 |---|---|---|
-| Prompt | <spec file, tool descriptions, output format> | |
-| Context | <retrieval / memory / skills, compaction or budget rule> | |
-| Harness | <permissions, approvals, hooks, budgets, sandbox> | |
-| Loop | <outer loop? stop conditions? or "not needed because …"> | |
-| Graph | <explicit workflow? checkpoints? or "not needed because …"> | |
+| Spec / context file | | |
+| Context rule (retrieval, offloading, compaction, skills) | | |
+| Tools and their errors | | |
+| Budgets (steps, cost) and stop rule | | |
+| Checks before the loop may stop | | |
+| Approvals | | |
 
-<An architecture diagram: boxes for the model, harness, tools, MCP server(s), data, and the human.>
+## Tools, permissions and operating limits
 
-## Tools
-
-| Tool | Read / write | Over MCP? | Approval? | Trifecta leg (private / untrusted / egress) |
+| Tool | Read or write | Over MCP? | Needs approval? | Leg (private data, untrusted content, exit path) |
 |---|---|---|---|---|
 | | | | | |
 
-## Evaluation
+**The agent never decides alone:** <list them>
 
-**Suite:** <N> tasks in `tasks.jsonl` (<categories>). Graders: <which types and why>.
+## Evaluation over trials
+
+**Suite:** <N ≥ 15> tasks in `tasks.jsonl`, graded by code: <which checks, and why>.
+
 **Configurations:** A = <baseline>; B = <the one change>.
 
-| Config | pass rate | pass^k (k = ) | avg requests | avg tokens |
+| Config | pass^5 | pass@5 | per trial | cost per completed task |
 |---|---|---|---|---|
 | A | | | | |
 | B | | | | |
 
 ### Error analysis
 
-| Root cause | Count (A) | Count (B) | Example task | Fix tried |
+| Cause | Runs (A) | Runs (B) | Example task and trial | What you changed |
 |---|---|---|---|---|
 | | | | | |
 
-<What flipped between A and B, in both directions. What you'd change next.>
+## Containment
 
-## Security note
+- **Legs:** which of the three your system has, and where they meet.
+- **Leg removed:** what you removed, and whether code enforces it or it depends on the model.
+- **Injection run:** the planted document, and the log file in which exfiltration fails.
+- **PDPL and classification:** what personal data any part of the system can read, and why that is the minimum.
+- **Residual risk:** what is still possible.
 
-- **Trifecta:** <which legs your system has, and where they meet>
-- **Attack tried:** <the input, and what happened without defences>
-- **Defence:** <what you added; is it enforced in code or does it depend on the model?>
-- **Residual risk:** <what is still possible, and who should know>
-- **Governance:** <PDPL / SDAIA AI principles considerations: data minimisation, human oversight, where data goes>
+## Evidence
 
-## Evidence of real runs
+Link the files that back every number above:
 
-<Link the files that back every claim above: eval CSVs for A and B, logs or traces, a transcript of a multi-step task with an approval, screenshots or a short screen recording.>
+- the per-run CSVs for A and B;
+- the injection log;
+- the audit log;
+- the agent transcripts with timestamps.
 
 ## AI assistance
 
-<Which AI coding assistants you used, and for what. You are responsible for every design decision, number and claim in this repository.>
+Which coding agents or assistants you used, and for what. You are answerable for every decision and number here.
 
-## Limitations and next steps
+## Limitations
 
-<Honest list: what doesn't work yet, what you'd need for production.>
+What does not work yet, and what production would need.

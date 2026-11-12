@@ -1,116 +1,113 @@
-# Capstone · Agentic AI Systems Engineering
+# Capstone · A research agent over the port's documents
 
-The capstone is an individual project: you build a working agent system that you designed, measured and secured, and
-submit it as a public GitHub repository before the Day 5 deadline. There is no live demo and no presentation: your
-`README.md` is the presentation. Pick a track on Day 4, build it that evening, and polish and submit on Day 5.
+The capstone is individual. You build a **research agent over Marsa Ports Authority's synthetic documents**, either on the
+starter in this folder or on your own harness. You publish it in a **public repository**. Its README reports
+success over repeated trials, cost per completed task and the containment design. Then you defend it in an
+**eight-minute live defence**: you run the agent on a task the assessor gives you and explain one failure from its trace.
 
-## Tracks
+## What the agent does
 
-| Track | You build | Good if you … |
-|---|---|---|
-| **1 · Rafeeq in production** | the Madar assistant as a complete service: MCP tools, memory, approvals, security, evals, API | want to go deep on one system with all the data ready |
-| **2 · Your harness** | a domain harness for a real workflow in your entity (coding, analysis, operations): context files, permissions, a loop, evals | have a workflow at work that an agent could take over |
-| **3 · Graph workflow** | a durable, human-in-the-loop process (procurement review, complaint handling, …) as a LangGraph graph with agents inside nodes | care most about reliability and control |
+It answers research questions that need more than one source. For example:
 
-Use synthetic or public data only. No personal data from your entity, no internal documents you aren't allowed to share.
+- Which circular applies, and is an older one superseded?
+- What does a vessel pay, given its tonnage, the days and its cargo?
+- What does a newly received circular say?
 
-## Rules
+It cites the circular or the tool behind each claim. It can write one thing, a brief for the tariff office, and only
+after a person approves. You choose the questions it is for and the tools it gets. You may add your own synthetic
+documents.
 
-1. **Individual work.** Each learner submits their own project. No pairs or groups.
-2. **Submission is a public GitHub repository** before the Day 5 deadline. No zips, no Drive folders, no private repositories.
-3. **AI coding assistants are allowed** for writing the code. You are responsible for every design decision, number and
-   claim in the repository, and anything the README claims must be backed by code or saved outputs.
-4. **No live demo and no presentation.** The README is the presentation (see below).
-5. **Show evidence of real runs** instead of a demo: the eval CSVs for both configurations, plus logs or traces, a
-   transcript, screenshots or a short screen recording.
+Use the course's synthetic data, or data you generate yourself. No personal data and no internal documents from your entity.
 
 ## Minimum requirements
 
-1. An agent that completes multi-step tasks with at least **three tools**, one of them exposed or consumed over **MCP**.
-2. Deliberate **context engineering**: a context file (AGENTS.md or system spec), one memory or retrieval mechanism,
-   and a compaction or budget rule.
-3. A **harness control**: a permission policy with human approval for at least one write action, and step/cost budgets.
-4. An **eval suite** of at least **15 tasks** with automatic graders, run on **two configurations**, plus an error analysis.
-5. A **security note**: the lethal-trifecta analysis of your system, one attack you tried and the defence that stopped it.
+1. **A working agent.** It completes multi-step research tasks with at least three tools, and at least one of them is reached over MCP.
+2. **Context and harness design.** It needs:
+   - a context file or spec;
+   - a deliberate context rule, such as retrieval, offloading, compaction or staged skills;
+   - step and cost budgets;
+   - a human approval on every write.
+3. **Evaluation over trials.** Run at least **15 tasks** with code graders, **five trials each**, on two configurations
+   that differ in one thing. Report:
+   - success in every trial (pass^5) and in any trial (pass@5);
+   - **cost per completed task**;
+   - an error analysis.
+4. **Containment.** Show the three legs of your system: private data, untrusted content and exit path. Show the leg
+   you removed, and **a logged injection run in which exfiltration fails**, using TC-09 or your own planted
+   document. Judge the design against the PDPL as well as security.
+5. **Reproducibility.** It runs from a clean clone with `uv run` and an API key. Every number in the README is backed by a
+   committed file.
 
 ## Rubric
 
-| Criterion | Weight |
+| Criterion | Points |
 |---|---|
-| Working system (code + saved run evidence) | 25% |
-| Context and harness engineering decisions | 25% |
-| Evaluation and error analysis | 20% |
-| Security, governance and operability | 20% |
-| Presentation and reproducibility (README.md) | 10% |
+| Working agent | 25 |
+| Context and harness design | 20 |
+| Evaluation over trials | 20 |
+| Containment | 20 |
+| Reproducibility | 15 |
 
-The evaluation and the presentation are judged from the README and the files it points to. The README must include the
-course name and link exactly as below; a README without it loses part of the presentation mark.
+The capstone repository counts for 60% of the course result, and you need at least 60% on this rubric. The live
+defence of one harness decision counts for 20%. The supervised entry and exit checks count for the other 20%: you
+read a trace and predict the next step, without AI assistance. The pass mark is 70% overall.
 
-```markdown
-[Advanced Agentic AI Systems Engineering - SDAIA Academy](https://github.com/sdaiaacademy/agentic-ai/)
-```
+**AI policy.** AI-full: coding agents are allowed. Keep the transcripts and run logs with timestamps. They are part of
+the evidence of authorship, together with the defence.
 
 ## Getting started
 
 ```bash
 cd labs
-uv run capstone/starter.py ask "What is the fee for an illuminated 3 m² sign?"
-uv run capstone/starter.py eval capstone/tasks.example.jsonl --config A B
+uv run capstone/starter.py ask "Which circular sets berth hire now, and what does Sahil Tide pay for 3 days with fuel?"
+uv run capstone/starter.py eval capstone/tasks.example.jsonl --config A B --trials 5
 ```
 
-`starter.py` already wires requirements 1–4 for Madar: local tools plus the MCP server's tools, a spec as the
-system prompt, a session history with compaction, a cap on tool results, allow/ask permissions, step and cost
-budgets, an audit log, and the Day 3 eval runner on two configurations. Search it for `CAPSTONE:` and replace those
-parts with your own. Tracks 2 and 3 can start from it, or from the lab that is closest:
+The starter already wires most of the plumbing:
+
+- **Tools.** The circulars come over the course's MCP server (`servers/marsa_mcp.py`). The port's read tools run in
+  the same process. There is a reader for newly received circulars, which are untrusted, and a `save_brief` write
+  action that asks a person first.
+- **Context.** A research spec serves as the system prompt, and tool results are capped in size.
+- **Harness.** Step and cost budgets, an audit log that records argument names and sizes but not values, and a
+  permission policy.
+- **Evaluation.** Repeated trials on fresh ports with code graders (`porttasks.grade`). It reports pass^k, pass@k and
+  cost per completed task, and writes a per-run CSV.
+
+Search the starter for `CAPSTONE:` and replace those parts with your own. The five example tasks show the format; you
+write at least fifteen.
+
+The labs closest to each part:
 
 | You need | Start from |
 |---|---|
-| an MCP server | `servers/madar_mcp.py` (Lab 2.4) |
-| memory or skills | Lab 2.3 (`Memory`, `load_skill`) |
-| a loop that works until checks pass | `loops/ralph.py` (Lab 3.3) |
-| an SDK with approvals and guardrails | Lab 3.2 (OpenAI Agents SDK) |
-| a graph with a human gate | Lab 4.1 (LangGraph) |
-| security defences and a red-team suite | Lab 4.3 |
-| an HTTP service with traces | `servers/rafeeq_api.py` (Lab 4.4) |
+| the loop and its stop rule | Lab 1.4, `agentkit.run_agent` |
+| retrieval over circulars | Lab 2.2 |
+| a context file and staged skills | Lab 2.3, `data/bosla/` |
+| an MCP server | Lab 2.4, `servers/marsa_mcp.py` |
+| a check before the loop may stop | Lab 3.3, `bosla.py` |
+| grading over trials | Lab 3.4 |
+| a graph with an approval gate | Lab 4.1 |
+| removing one leg, and the injection log | Lab 4.3 |
+| an API, spans and a CI gate | Lab 4.4, `ci/` |
 
-**Eval tasks** use the format of `data/eval/tasks.jsonl` (see `evals.py` for the grader types). For a domain without a
-Madar database, use `contains_any`, `not_contains`, `tool_called`, `tool_not_called` and `judge` graders, or give
-your agent an object with a `.sql()` method for `db` graders.
-
-**Free quota.** Two configurations × 15 tasks × ~3 requests ≈ 90 requests: more than the 50 free requests a day.
-Buy the 10 OpenRouter credits (1,000 free requests a day), or develop on 5 tasks and run the full suite once. The
-response cache makes re-runs of unchanged requests free.
+**Free quota.** Fifteen tasks × five trials × two configurations is 150 runs, at about four requests each. Free hosted
+models limit requests per day. Develop on three tasks and one trial, then run the full suite once. Keep the response
+cache off for the scored runs (the starter does this), because cached replies are not new trials.
 
 ## Timeline
 
 | When | What |
 |---|---|
-| Day 4, end of Session 4 | pick a track; write the one-paragraph pitch and three example tasks |
-| Day 4, evening | copy `TEMPLATE_README.md` to your project as `README.md`; fill in the problem, tools and trifecta; write 15 tasks; build; run the eval on configuration A; analyse failures; change one thing (B); re-run; try one attack |
-| Day 5, Sessions 1–4 | polish and submit: re-run both evals, save the run evidence, re-run the attack against the defended version, clean-clone test, finish the README, push the public repository before the deadline |
+| Day 4, after Session 4 | Choose the questions your agent is for. Write the pitch, three tasks and the three legs. |
+| Day 4, evening | Copy `TEMPLATE_README.md` as your README. Write fifteen tasks. Run configuration A over five trials. Read the failures. Change one thing (B). Plant one injection. |
+| Day 5 | Re-run both configurations and the injection. Test a clean clone. Finish the README, publish the repository, then defend it for eight minutes. |
 
-## The README is the presentation
+## The defence (eight minutes)
 
-It must explain, for a reader who has never seen your project:
+1. **Two minutes.** The problem, the design and the numbers.
+2. **Three minutes.** Run the agent on a task the assessor gives you.
+3. **Three minutes.** One failure from a trace: what the agent saw, what it did, and what in the harness would
+   prevent it.
 
-1. The problem and the user.
-2. Your design across the ladder: prompt, context, harness, loop, graph. Which rungs did you need and why?
-3. Eval results for A vs. B, and the error analysis: the biggest failure category and what flipped.
-4. The security note: your trifecta, the attack and the defence.
-
-## Evidence of real runs
-
-Commit proof that the system ran, not a promise that it does:
-
-- the eval CSVs for **both** configurations;
-- logs or traces (the audit log, OpenTelemetry output), a transcript of a multi-step task including an approval,
-  screenshots, or a short screen recording.
-
-Every number in the README must be reproducible from, or visible in, these files.
-
-## Submission
-
-A **public GitHub repository** (no zips, no Drive folders, no private repositories), submitted before the Day 5
-deadline, with: your `README.md` from the template (including the course link above), the code, `tasks.jsonl`, the
-eval CSVs for both configurations, and your run evidence. Everything must run with `uv run` (PEP 723) or `uv sync`,
-and an OpenRouter key. No keys in the repository.
+The assessor may ask about any decision in the README.
