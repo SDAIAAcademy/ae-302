@@ -2,10 +2,11 @@
   "$schema": "https://sdaiaacademy.github.io/engine/schemas/course.schema.json",
   "engine": "1",
   "id": "agentic-ai",
+  "code": "AE-302",
   "version": "2026.1.0",
   "lang": "en",
-  "title": "Agentic AI Systems Engineering",
-  "tagline": "هندسة أنظمة الذكاء الاصطناعي التوكيلي",
+  "title": "Agentic Systems Engineering: Loops, Context and Harnesses",
+  "tagline": "Build an agent as a model in a loop calling typed tools, with most of the engineering in the harness",
   "track": "ai-engineering",
   "audience": "Python developers and engineers. Day 1 starts from what a language model is and how it differs from ChatGPT, so no prior LLM, API or agent framework experience is needed.",
   "prerequisites": [
@@ -18,27 +19,39 @@
   "outcomes": [
     {
       "id": "LO1",
-      "text": "Call LLMs through the Chat Completions, Responses and Messages APIs, and write the agent loop over all three"
+      "text": "Implement a tool-calling agent loop without a framework, with typed tool schemas, a step budget and explicit completion criteria, given three synthetic port services and ten tasks",
+      "level": "Applied",
+      "evidence": "a loop that completes at least seven tasks, with a trace per run"
     },
     {
       "id": "LO2",
-      "text": "Design tools and context deliberately: budgets, compaction, retrieval, memory, skills and MCP"
+      "text": "Apply compaction, offloading of tool results and staged loading of skills, and measure the effect on tokens and success, given long tasks that overflow a fixed context budget",
+      "level": "Applied",
+      "evidence": "a before-and-after table of tokens, cost and success"
     },
     {
       "id": "LO3",
-      "text": "Take a harness apart (Pi, OpenClaw, Hermes, Mercury) and add permissions, hooks and budgets to their own"
+      "text": "Implement a protocol server over a document store and connect the agent to it through capability discovery, given the port's circulars and a provided test client",
+      "level": "Applied",
+      "evidence": "a server that passes the provided tests, with a trace of discovery and calls"
     },
     {
       "id": "LO4",
-      "text": "Choose between building on an SDK, a hosted agent runtime or their own loop"
+      "text": "Design a checkpointed state-graph agent with a human approval gate at a defined risk threshold, given booking changes, some of which affect safety or fees",
+      "level": "Performance",
+      "evidence": "a graph that pauses, resumes after approval and survives a restart, with a test per path"
     },
     {
       "id": "LO5",
-      "text": "Run agents in outer loops and as graphs with human gates, checkpoints and many agents"
+      "text": "Evaluate the agent over repeated trials, including runs against a seeded prompt injection, given 20 tasks with five trials each and a circular carrying planted instructions",
+      "level": "Performance",
+      "evidence": "success in every and in any trial, cost per completed task, and a logged injection run in which exfiltration fails"
     },
     {
       "id": "LO6",
-      "text": "Evaluate agents with graders, judges and pass^k, secure them against injection, and ship them as a traced service"
+      "text": "Deliver the agent as a traced API service gated by a smoke evaluation in continuous integration, given a repository with a pipeline and a trace collector",
+      "level": "Performance",
+      "evidence": "a run that passes on the baseline and fails on a seeded regression, and a README stating tools, permissions and operating limits"
     }
   ],
   "case_study": {
@@ -92,7 +105,10 @@
               }
             ],
             "stretch": "Check your shortlist on a fee question with a known answer"
-          }
+          },
+          "lo": [
+            "LO1"
+          ]
         },
         {
           "title": "Structured outputs and Responses",
@@ -132,7 +148,10 @@
               }
             ],
             "stretch": "Stateless replay vs. previous_response_id"
-          }
+          },
+          "lo": [
+            "LO1"
+          ]
         },
         {
           "title": "Tools and the Messages API",
@@ -167,7 +186,10 @@
               }
             ],
             "stretch": "Parallel tool calls in one round trip"
-          }
+          },
+          "lo": [
+            "LO1"
+          ]
         },
         {
           "title": "The agent loop",
@@ -202,7 +224,10 @@
               }
             ],
             "stretch": "Run parallel tool calls concurrently"
-          }
+          },
+          "lo": [
+            "LO1"
+          ]
         }
       ]
     },
@@ -245,7 +270,10 @@
               }
             ],
             "stretch": "Context editing: clear old tool results"
-          }
+          },
+          "lo": [
+            "LO2"
+          ]
         },
         {
           "title": "Retrieval for agents",
@@ -280,7 +308,10 @@
               }
             ],
             "stretch": "When the corpus fits, skip retrieval"
-          }
+          },
+          "lo": [
+            "LO2"
+          ]
         },
         {
           "title": "Memory, skills, context files",
@@ -315,7 +346,10 @@
               }
             ],
             "stretch": "A capped memory, Hermes-style"
-          }
+          },
+          "lo": [
+            "LO2"
+          ]
         },
         {
           "title": "Model Context Protocol",
@@ -350,7 +384,10 @@
               }
             ],
             "stretch": "Turn on the write tools, with approvals"
-          }
+          },
+          "lo": [
+            "LO3"
+          ]
         }
       ]
     },
@@ -393,7 +430,10 @@
               }
             ],
             "stretch": "Pi in read-only mode on a real bug"
-          }
+          },
+          "lo": [
+            "LO1"
+          ]
         },
         {
           "title": "Agent SDKs and hosted agents",
@@ -428,7 +468,10 @@
               }
             ],
             "stretch": "Streaming run-item events"
-          }
+          },
+          "lo": [
+            "LO1"
+          ]
         },
         {
           "title": "Loop engineering",
@@ -462,7 +505,10 @@
               }
             ],
             "stretch": "The same loop around Pi"
-          }
+          },
+          "lo": [
+            "LO1"
+          ]
         },
         {
           "title": "Evaluating agents",
@@ -497,7 +543,10 @@
               }
             ],
             "stretch": "Is the judge right? Label five answers yourself"
-          }
+          },
+          "lo": [
+            "LO5"
+          ]
         }
       ]
     },
@@ -540,7 +589,10 @@
               }
             ],
             "stretch": "Run the two checks in parallel"
-          }
+          },
+          "lo": [
+            "LO4"
+          ]
         },
         {
           "title": "Multi-agent systems",
@@ -574,7 +626,10 @@
               }
             ],
             "stretch": "Parallel fan-out with asyncio.gather"
-          }
+          },
+          "lo": [
+            "LO4"
+          ]
         },
         {
           "title": "Securing agents",
@@ -609,7 +664,10 @@
               }
             ],
             "stretch": "Quarantine the email (dual LLM)"
-          }
+          },
+          "lo": [
+            "LO5"
+          ]
         },
         {
           "title": "Agents in production",
@@ -647,7 +705,10 @@
                 "minutes": 2
               }
             ]
-          }
+          },
+          "lo": [
+            "LO6"
+          ]
         }
       ]
     },
