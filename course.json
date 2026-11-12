@@ -55,8 +55,8 @@
     }
   ],
   "case_study": {
-    "name": "Madar Municipal Services",
-    "summary": "Madar Municipal Services is a fictional municipality that issues building, renovation, signage, food-truck and event permits. Participants build Rafeeq (رفيق), its bilingual permit assistant, and the systems around it: tools over three API shapes, retrieval over ten bilingual policies, memory and skills, an MCP server, a harness with permissions, a Ralph loop that fixes code, an eval suite, a review graph with a human gate, an A2A worker, an attack and its defence, and an HTTP service with traces. All data is synthetic."
+    "name": "Marsa Ports Authority",
+    "summary": "Marsa Ports Authority is a fictional Red Sea port authority with three services: a berth schedule, bilingual tariff circulars and a booking service with write actions. Participants build Bosla, its booking assistant, as a model in a loop calling typed tools: the loop from scratch, a context budget, a context file, a tariff skill and an MCP server over the circulars, an SDK comparison, a check of every booking against the schedule, evaluation over repeated trials, a booking graph that pauses for the duty harbour master at a risk threshold, an injection attack and its containment, and an API service gated in CI. All data is synthetic and generated with a fixed seed."
   },
   "format": "intensive",
   "unit": "day",
