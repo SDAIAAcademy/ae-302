@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-ax="page" data-track="ai-engineering">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic Systems Engineering: Loops, Context and Harnesses · SDAIA Academy</title>
+<meta name="generator" content="SDAIA Academy engine 1.0.0">
+<meta name="description" content="Build an agent as a model in a loop calling typed tools, with most of the engineering in the harness">
+<link rel="icon" href="_engine/icon.svg">
+<link rel="alternate" type="text/markdown" href="index.md">
+<link rel="describedby" href="llms.txt">
+<link rel="stylesheet" href="_engine/academy.css">
+</head>
+<body>
+<header>
+<div class="wrap">
+<div class="top"><div class="logo" id="logo"></div><nav><a href="slides/day1.html">Slides</a><a href="practice.html">Practice</a><a href="index.md" type="text/markdown">Markdown</a></nav></div>
+<div class="kicker">AI Engineering Track · SDAIA Academy · AE-302</div>
+<h1>Agentic Systems Engineering: Loops, Context and Harnesses</h1>
+<p>Build an agent as a model in a loop calling typed tools, with most of the engineering in the harness</p>
+<div class="meta"><span class="track">AI Engineering Track</span><span>4 teaching days + capstone day</span><span>26 hours</span><span>Level 300</span><span>AE Associate badge</span></div>
+</div>
+</header>
+<main class="wrap">
+<h2>About the course</h2>
+<p>Participants build an agent as a model in a loop calling typed tools inside a sandbox, with most of the engineering in the harness. For a fictional ports authority they write the loop from scratch, budget the context, add a context file, a skill and a Model Context Protocol (MCP) server, compare an agent SDK with their own harness, gate bookings in a checkpointed state graph, and ship a traced, evaluated and contained agent behind an API.</p>
+<p><b>Who it is for:</b> Practitioners: developers and engineers who already build applications on language models and now need agents that are measured, contained and shipped.</p>
+<p><b>Format:</b> Intensive: 4 teaching days of four sessions and a capstone day, with guided pre-work and a tracked follow-up task</p>
+<h2>The case study</h2>
+<div class="note info"><b>Marsa Ports Authority.</b> Marsa Ports Authority is a fictional Red Sea port authority with three services: a berth schedule, bilingual tariff circulars and a booking service with write actions. Participants build Bosla, its booking assistant, as a model in a loop calling typed tools: the loop from scratch, a context budget, a context file, a tariff skill and an MCP server over the circulars, an SDK comparison, a check of every booking against the schedule, evaluation over repeated trials, a booking graph that pauses for the duty harbour master at a risk threshold, an injection attack and its containment, and an API service gated in CI. All data is synthetic and generated with a fixed seed.</div>
+<h2>The course</h2>
+<div class="day">
+<div class="day-head c-teal"><div><div class="t">Day 1 · 4 sessions · 4 labs</div><h3>From Model to Agent</h3></div><a class="btn" href="slides/day1.html">Open the slides</a></div>
+<div class="scroll"><table>
+<tr><th>Session</th><th>Topic</th><th>Lab</th></tr>
+<tr><td>1</td><td><b>Three API shapes</b><br>What a language model is, and one model called through Chat Completions, Responses and Messages<ul><li>Explain what a language model predicts and why its output varies</li><li>Call one open-weight model through three API shapes</li><li>Read stop reasons and token usage in each shape</li></ul></td><td><a href="labs/D1_1_three_shapes.ipynb">Lab 1.1 · One model, three API shapes</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D1_1_three_shapes.ipynb">Open in Colab</a></td></tr>
+<tr><td>2</td><td><b>Structured outputs</b><br>Turn free text into a typed object, and recover when the reply does not validate<ul><li>Define a schema whose constraints catch wrong values</li><li>Request output under a JSON Schema response format</li><li>Recover from malformed replies with validation and repair</li></ul></td><td><a href="labs/D1_2_structured_outputs.ipynb">Lab 1.2 · A berth request as a validated object</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D1_2_structured_outputs.ipynb">Open in Colab</a></td></tr>
+<tr><td>3</td><td><b>Tools</b><br>Typed tool schemas, and errors that tell the model what to send instead<ul><li>Describe a tool call as a request the application executes</li><li>Write typed argument schemas for schedule and booking tools</li><li>Return errors a model can act on</li></ul></td><td><a href="labs/D1_3_typed_tools.ipynb">Lab 1.3 · Typed tools with useful errors</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D1_3_typed_tools.ipynb">Open in Colab</a></td></tr>
+<tr><td>4</td><td><b>The agent loop from scratch</b><br>A model calling tools in a loop, with a step budget, a stop rule and a trace<ul><li>Write an agent loop without a framework or AI assistance</li><li>Bound it with a step budget and explicit stop rules</li><li>Grade it on ten tasks from their traces</li></ul></td><td><a href="labs/D1_4_agent_loop.ipynb">Lab 1.4 · The agent loop from scratch</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D1_4_agent_loop.ipynb">Open in Colab</a></td></tr>
+</table></div>
+</div>
+<div class="day">
+<div class="day-head c-cyan"><div><div class="t">Day 2 · 4 sessions · 4 labs</div><h3>Context Engineering</h3></div><a class="btn" href="slides/day2.html">Open the slides</a></div>
+<div class="scroll"><table>
+<tr><th>Session</th><th>Topic</th><th>Lab</th></tr>
+<tr><td>1</td><td><b>Context as a budget</b><br>Every call resends the history: measure it, then cut it with offloading and compaction<ul><li>Measure tokens per turn on a long agent task</li><li>Offload large tool results to files the agent can page through</li><li>Compact old turns into notes without losing what the answer needs</li></ul></td><td><a href="labs/D2_1_context_budget.ipynb">Lab 2.1 · Context as a budget</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D2_1_context_budget.ipynb">Open in Colab</a></td></tr>
+<tr><td>2</td><td><b>Retrieval for agents</b><br>Keyword and vector search over bilingual circulars, offered to the agent as tools<ul><li>Score retrieval on the top hit, not only the top three</li><li>Build keyword search with Arabic normalisation and a vector search</li><li>Read from a trace which search tool the agent chose</li></ul></td><td><a href="labs/D2_2_retrieval.ipynb">Lab 2.2 · Keyword and vector search over circulars</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D2_2_retrieval.ipynb">Open in Colab</a></td></tr>
+<tr><td>3</td><td><b>Memory, skills and context files</b><br>What every session needs, what only some tasks need, and loading it in stages<ul><li>Write a short context file for an agent</li><li>Package a procedure as a skill with an index line</li><li>Show staged loading of a skill in a trace</li></ul></td><td><a href="labs/D2_3_context_skills.ipynb">Lab 2.3 · A context file and a tariff skill</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D2_3_context_skills.ipynb">Open in Colab</a></td></tr>
+<tr><td>4</td><td><b>Model Context Protocol</b><br>A server over the circular store, discovered by the agent at run time<ul><li>Build an MCP server with tools and resources</li><li>Pass a provided test client in-process and over stdio</li><li>Connect an agent through capability discovery, with a trace</li></ul></td><td><a href="labs/D2_4_mcp.ipynb">Lab 2.4 · An MCP server over the circular store</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D2_4_mcp.ipynb">Open in Colab</a></td></tr>
+</table></div>
+</div>
+<div class="day">
+<div class="day-head c-coral"><div><div class="t">Day 3 · 4 sessions · 4 labs</div><h3>Harness and Loop</h3></div><a class="btn" href="slides/day3.html">Open the slides</a></div>
+<div class="scroll"><table>
+<tr><th>Session</th><th>Topic</th><th>Lab</th></tr>
+<tr><td>1</td><td><b>Anatomy of a harness</b><br>Tools, context, state and feedback around the model, and what each part protects<ul><li>Name the parts of an agent harness and what each protects</li><li>Remove one part from a working agent and measure the effect</li><li>Read from paired traces where two runs part ways</li></ul></td><td><a href="labs/D3_1_harness_teardown.ipynb">Lab 3.1 · Remove one harness part</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D3_1_harness_teardown.ipynb">Open in Colab</a></td></tr>
+<tr><td>2</td><td><b>Agent SDKs and hosted agents</b><br>What an SDK gives and takes away compared with your own loop<ul><li>Rebuild an agent on an agent SDK with a free model</li><li>Grade the SDK agent on the same tasks as the own loop</li><li>Compare code size, traces and control</li></ul></td><td><a href="labs/D3_2_agents_sdk.ipynb">Lab 3.2 · An agent SDK against your own loop</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D3_2_agents_sdk.ipynb">Open in Colab</a></td></tr>
+<tr><td>3</td><td><b>Loop engineering</b><br>Verification inside the loop: the agent may not stop while a check fails<ul><li>Write a check of agent actions against the rules</li><li>Keep the loop running while the check fails, within a budget</li><li>Compare outcomes with and without verification</li></ul></td><td><a href="labs/D3_3_loop_engineering.ipynb">Lab 3.3 · Verification inside the loop</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D3_3_loop_engineering.ipynb">Open in Colab</a></td></tr>
+<tr><td>4</td><td><b>Evaluating agents</b><br>Code and model graders, repeated trials, success in any and every trial, cost per completed task<ul><li>Grade agent runs with code and model graders</li><li>Compute success in any and in every trial</li><li>Compute cost per completed task</li></ul></td><td><a href="labs/D3_4_evals.ipynb">Lab 3.4 · Grading over five trials</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D3_4_evals.ipynb">Open in Colab</a></td></tr>
+</table></div>
+</div>
+<div class="day">
+<div class="day-head c-purple"><div><div class="t">Day 4 · 4 sessions · 4 labs</div><h3>Graph and Production</h3></div><a class="btn" href="slides/day4.html">Open the slides</a></div>
+<div class="scroll"><table>
+<tr><th>Session</th><th>Topic</th><th>Lab</th></tr>
+<tr><td>1</td><td><b>State graphs with checkpoints</b><br>Explicit steps, saved state, and a person at a defined risk threshold<ul><li>Model a booking flow as a state graph with checkpoints</li><li>Pause at an approval interrupt and resume after approval or rejection</li><li>Survive a restart without repeating work</li></ul></td><td><a href="labs/D4_1_booking_graph.ipynb">Lab 4.1 · A booking graph with an approval gate</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D4_1_booking_graph.ipynb">Open in Colab</a></td></tr>
+<tr><td>2</td><td><b>Several agents and agent-to-agent delegation</b><br>When a second agent pays, and what is lost at the handover<ul><li>Split a task between a researcher and a drafter</li><li>Compare quality and cost of two agents against one</li><li>Decide when delegation pays</li></ul></td><td><a href="labs/D4_2_multi_agent.ipynb">Lab 4.2 · Two agents or one?</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D4_2_multi_agent.ipynb">Open in Colab</a></td></tr>
+<tr><td>3</td><td><b>Securing agents</b><br>Private data, untrusted content, an exit path: remove one leg<ul><li>Map the three legs of an injection risk for every tool</li><li>Reproduce a seeded prompt injection that leaks Restricted data</li><li>Contain it by removing one leg, and log the failed attempt</li></ul></td><td><a href="labs/D4_3_security.ipynb">Lab 4.3 · A planted instruction, one leg removed</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D4_3_security.ipynb">Open in Colab</a></td></tr>
+<tr><td>4</td><td><b>Production</b><br>An API with a key and a budget, traces, and a smoke evaluation that gates a release<ul><li>Serve an agent behind an API with keys and budgets</li><li>Trace requests and tool calls with spans</li><li>Gate a release with a smoke evaluation that fails on a seeded regression</li></ul></td><td><a href="labs/D4_4_ship_it.ipynb">Lab 4.4 · Behind an API, traced, gated in CI</a> <span class="muted">(25 min)</span><br><a href="https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D4_4_ship_it.ipynb">Open in Colab</a></td></tr>
+</table></div>
+</div>
+<div class="day">
+<div class="day-head c-amber"><div><div class="t">Capstone</div><h3>Capstone: a research agent and its defence</h3></div><a class="btn" href="slides/day5.html">Open the slides</a></div>
+<div class="scroll"><table><tr><td>An individual research agent over the synthetic documents of Marsa Ports Authority, built on the course starter (labs/capstone/) or an own harness: at least three tools with one over MCP, a context rule, step and cost budgets, and a human approval on every write. It is evaluated on at least 15 tasks over five trials on two configurations, and contained by removing one leg of private data, untrusted content and exit path, with a logged injection run in which exfiltration fails.</td></tr></table></div>
+</div>
+<h2>Capstone</h2>
+<div class="two">
+<div><p>An individual research agent over the synthetic documents of Marsa Ports Authority, built on the course starter (labs/capstone/) or an own harness: at least three tools with one over MCP, a context rule, step and cost budgets, and a human approval on every write. It is evaluated on at least 15 tasks over five trials on two configurations, and contained by removing one leg of private data, untrusted content and exit path, with a logged injection run in which exfiltration fails.</p><p><b>What you submit:</b> A public repository whose README reports success over repeated trials (pass^5 and pass@5), cost per completed task and the containment design, with the per-run results, the injection log and timestamped agent transcripts committed. Then an eight-minute live defence: the participant runs the agent on a task the assessor supplies and explains one failure from its trace.</p><p><b>Format:</b> 8 min talk and demo</p></div>
+<div><h3>Rubric</h3><div class="bar c-teal"><span>Working agent<i style="--w:100%"></i></span><b>25%</b></div><div class="bar c-cyan"><span>Context and harness design<i style="--w:80%"></i></span><b>20%</b></div><div class="bar c-coral"><span>Evaluation over trials<i style="--w:80%"></i></span><b>20%</b></div><div class="bar c-purple"><span>Containment<i style="--w:80%"></i></span><b>20%</b></div><div class="bar c-amber"><span>Reproducibility<i style="--w:60%"></i></span><b>15%</b></div></div>
+</div>
+<h2>Outcomes</h2>
+<p>By the end of the course, participants can:</p>
+<div class="day"><div class="scroll"><table>
+<tr><th></th><th>Outcomes</th><th>Level</th><th>Evidence</th></tr>
+<tr><td><b>LO1</b></td><td>Implement a tool-calling agent loop without a framework, with typed tool schemas, a step budget and explicit completion criteria, given three synthetic port services and ten tasks</td><td>Applied</td><td>a loop that completes at least seven tasks, with a trace per run</td></tr>
+<tr><td><b>LO2</b></td><td>Apply compaction, offloading of tool results and staged loading of skills, and measure the effect on tokens and success, given long tasks that overflow a fixed context budget</td><td>Applied</td><td>a before-and-after table of tokens, cost and success</td></tr>
+<tr><td><b>LO3</b></td><td>Implement a protocol server over a document store and connect the agent to it through capability discovery, given the port's circulars and a provided test client</td><td>Applied</td><td>a server that passes the provided tests, with a trace of discovery and calls</td></tr>
+<tr><td><b>LO4</b></td><td>Design a checkpointed state-graph agent with a human approval gate at a defined risk threshold, given booking changes, some of which affect safety or fees</td><td>Performance</td><td>a graph that pauses, resumes after approval and survives a restart, with a test per path</td></tr>
+<tr><td><b>LO5</b></td><td>Evaluate the agent over repeated trials, including runs against a seeded prompt injection, given 20 tasks with five trials each and a circular carrying planted instructions</td><td>Performance</td><td>success in every and in any trial, cost per completed task, and a logged injection run in which exfiltration fails</td></tr>
+<tr><td><b>LO6</b></td><td>Deliver the agent as a traced API service gated by a smoke evaluation in continuous integration, given a repository with a pipeline and a trace collector</td><td>Performance</td><td>a run that passes on the baseline and fails on a seeded regression, and a README stating tools, permissions and operating limits</td></tr>
+</table></div></div>
+<h2>Tools</h2>
+<div class="grid">
+<div class="card c-teal"><h3>Language model access</h3><p>a locally served open-weight model · a free hosted open-weight model · any commercial API</p></div>
+<div class="card c-cyan"><h3>Agent framework with state graphs and checkpoints</h3><p>LangGraph · Pydantic AI with its graph library</p></div>
+<div class="card c-coral"><h3>Agent SDK for the comparison</h3><p>smolagents · OpenAI Agents SDK · Google Agent Development Kit</p></div>
+<div class="card c-purple"><h3>Protocol server SDK</h3><p>official Model Context Protocol Python SDK · FastMCP</p></div>
+<div class="card c-green"><h3>Tracing and evaluation</h3><p>OpenTelemetry with Langfuse · Arize Phoenix · Inspect</p></div>
+<div class="card c-teal"><h3>Execution sandbox</h3><p>Docker or Podman containers with no network by default · OpenSandbox</p></div>
+<div class="card c-cyan"><h3>API service and continuous integration</h3><p>FastAPI · GitLab CI · GitHub Actions</p></div>
+</div>
+<h2>Before you start</h2>
+<h3>Prerequisites</h3>
+<ul><li>AE-203 Building Applications on Language Models</li><li>Writes typed Python and calls a web API that returns JSON</li><li>Runs a container and reads its logs</li><li>Setup: a laptop CPU with uv, or Google Colab, and a key for a free hosted model (OpenRouter by default). Nothing downloads a model. Run 00_setup_check before Day 1; see labs/README.md.</li></ul>
+<div class="note tip">The labs are notebooks. Open each one in Google Colab from the table above, or clone the repository and run them locally.</div>
+<h2>Sources</h2>
+<h3>Agents, tools and context</h3>
+<ul><li><a href="https://www.anthropic.com/engineering/building-effective-agents">Anthropic: Building effective agents</a></li><li><a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Anthropic: Writing effective tools for agents</a></li><li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic: Effective context engineering for AI agents</a></li><li><a href="https://agents.md/">AGENTS.md, the context-file convention</a></li></ul>
+<h3>Harnesses, SDKs and evaluation</h3>
+<ul><li><a href="https://martinfowler.com/articles/harness-engineering.html">Birgitta Böckeler: Harness engineering</a></li><li><a href="https://openai.github.io/openai-agents-python/">OpenAI Agents SDK documentation</a></li><li><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic: Demystifying evals for AI agents</a></li></ul>
+<h3>Protocols and several agents</h3>
+<ul><li><a href="https://modelcontextprotocol.io/specification/versioning">Model Context Protocol: versioning</a></li><li><a href="https://py.sdk.modelcontextprotocol.io/v2/migration/">MCP Python SDK v2: migration guide</a></li><li><a href="https://a2a-protocol.org/">Agent2Agent (A2A) protocol</a></li><li><a href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic: How we built our multi-agent research system</a></li><li><a href="https://cognition.ai/blog/dont-build-multi-agents">Cognition: Don't build multi-agents</a></li></ul>
+<h3>Security and governance</h3>
+<ul><li><a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/">OWASP GenAI Security Project: Top 10 for Agentic Applications for 2026</a></li><li><a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/">Simon Willison: The lethal trifecta</a></li><li><a href="https://simonwillison.net/2023/Apr/25/dual-llm-pattern/">Simon Willison: The dual LLM pattern</a></li><li><a href="https://arxiv.org/abs/2503.18813">Debenedetti et al.: Defeating prompt injections by design (CaMeL)</a></li><li><a href="https://sdaia.gov.sa/">SDAIA: national data and AI regulations, including the PDPL</a></li></ul>
+<h2>Files and links</h2>
+<div class="files">
+<a href="practice.html"><b>practice.html</b><span>Practice questions with feedback</span></a>
+<a href="index.md"><b>index.md</b><span>This page as Markdown, for an AI assistant</span></a>
+<a href="llms.txt"><b>llms.txt</b><span>The course for AI assistants (llms.txt)</span></a>
+<a href="https://github.com/SDAIAAcademy/ae-302"><b>SDAIAAcademy/ae-302</b><span>The course repository</span></a>
+</div>
+</main>
+<footer><div class="wrap">SDAIA Academy · AI Engineering Track · Agentic Systems Engineering: Loops, Context and Harnesses<br><span class="muted">Course version 2027.1.0 · engine 1.0.0 · built 2026-11-15 · commit a296a9c</span></div></footer>
+<script type="application/json" id="academy-data">{"v":1,"engine":"1.0.0","build":{"at":"2026-11-15T03:18:49Z","version":"2027.1.0","commit":"a296a9c"},"course":{"id":"ae-302","code":"AE-302","title":"Agentic Systems Engineering: Loops, Context and Harnesses","track":"ai-engineering","lang":"en","dir":"ltr","url":"https://sdaiaacademy.github.io/ae-302/","repo":"SDAIAAcademy/ae-302","home":"index.html"},"ai":{"context":{"course":"context/course.md","courseJs":"context/course.js","day":null,"llms":"llms.txt"},"tasks":[],"tools":[]},"features":{},"strings":{}}</script>
+<script src="_engine/academy.js"></script>
+</body>
+</html>

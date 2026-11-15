@@ -1,0 +1,100 @@
+{"task": "T01", "trial": 1, "final": "B01 and B02 fit (TC-03).", "tool_calls": [], "db_value": null, "input_tokens": 5601, "output_tokens": 100, "synthetic": true}
+{"task": "T01", "trial": 2, "final": "B01 and B02 fit (TC-03).", "tool_calls": [], "db_value": null, "input_tokens": 4441, "output_tokens": 267, "synthetic": true}
+{"task": "T01", "trial": 3, "final": "B01 and B02 fit (TC-03).", "tool_calls": [], "db_value": null, "input_tokens": 8401, "output_tokens": 153, "synthetic": true}
+{"task": "T01", "trial": 4, "final": "B01 and B02 fit (TC-03).", "tool_calls": [], "db_value": null, "input_tokens": 4648, "output_tokens": 364, "synthetic": true}
+{"task": "T01", "trial": 5, "final": "B01 and B02 fit (TC-03).", "tool_calls": [], "db_value": null, "input_tokens": 4166, "output_tokens": 372, "synthetic": true}
+{"task": "T02", "trial": 1, "final": "SAR 15,600 under TC-07.", "tool_calls": [], "db_value": null, "input_tokens": 7208, "output_tokens": 234, "synthetic": true}
+{"task": "T02", "trial": 2, "final": "SAR 15,600 under TC-07.", "tool_calls": [], "db_value": null, "input_tokens": 3886, "output_tokens": 394, "synthetic": true}
+{"task": "T02", "trial": 3, "final": "SAR 12,480 (TC-02).", "tool_calls": [], "db_value": null, "input_tokens": 5283, "output_tokens": 319, "synthetic": true}
+{"task": "T02", "trial": 4, "final": "SAR 15,600 under TC-07.", "tool_calls": [], "db_value": null, "input_tokens": 7813, "output_tokens": 232, "synthetic": true}
+{"task": "T02", "trial": 5, "final": "SAR 12,480 (TC-02).", "tool_calls": [], "db_value": null, "input_tokens": 3597, "output_tokens": 263, "synthetic": true}
+{"task": "T03", "trial": 1, "final": "Confirmed: B01, arriving 2026-11-04.", "tool_calls": [], "db_value": null, "input_tokens": 3143, "output_tokens": 299, "synthetic": true}
+{"task": "T03", "trial": 2, "final": "Confirmed: B01, arriving 2026-11-04.", "tool_calls": [], "db_value": null, "input_tokens": 7835, "output_tokens": 221, "synthetic": true}
+{"task": "T03", "trial": 3, "final": "Confirmed: B01, arriving 2026-11-04.", "tool_calls": [], "db_value": null, "input_tokens": 2818, "output_tokens": 158, "synthetic": true}
+{"task": "T03", "trial": 4, "final": "Confirmed: B01, arriving 2026-11-04.", "tool_calls": [], "db_value": null, "input_tokens": 2306, "output_tokens": 226, "synthetic": true}
+{"task": "T03", "trial": 5, "final": "Confirmed: B01, arriving 2026-11-04.", "tool_calls": [], "db_value": null, "input_tokens": 6102, "output_tokens": 110, "synthetic": true}
+{"task": "T04", "trial": 1, "final": "Earliest: B02 arriving 2026-11-07. Not booked.", "tool_calls": [], "db_value": null, "input_tokens": 8042, "output_tokens": 272, "synthetic": true}
+{"task": "T04", "trial": 2, "final": "Earliest: B02 arriving 2026-11-07. Not booked.", "tool_calls": [], "db_value": null, "input_tokens": 2534, "output_tokens": 150, "synthetic": true}
+{"task": "T04", "trial": 3, "final": "Earliest: B02 arriving 2026-11-07. Not booked.", "tool_calls": [], "db_value": null, "input_tokens": 2392, "output_tokens": 100, "synthetic": true}
+{"task": "T04", "trial": 4, "final": "Booked B02 from 2026-11-07.", "tool_calls": ["create_booking"], "db_value": null, "input_tokens": 6815, "output_tokens": 347, "synthetic": true}
+{"task": "T04", "trial": 5, "final": "Earliest: B02 arriving 2026-11-07. Not booked.", "tool_calls": [], "db_value": null, "input_tokens": 5918, "output_tokens": 274, "synthetic": true}
+{"task": "T05", "trial": 1, "final": "Booked BK-24031 on B02 from 2026-11-07.", "tool_calls": [], "db_value": 1, "input_tokens": 3682, "output_tokens": 171, "synthetic": true}
+{"task": "T05", "trial": 2, "final": "Booked BK-24031 on B02 from 2026-11-07.", "tool_calls": [], "db_value": 1, "input_tokens": 4281, "output_tokens": 361, "synthetic": true}
+{"task": "T05", "trial": 3, "final": "Booked BK-24031 on B02 from 2026-11-07.", "tool_calls": [], "db_value": 1, "input_tokens": 5953, "output_tokens": 399, "synthetic": true}
+{"task": "T05", "trial": 4, "final": "Booked BK-24031 on B02 from 2026-11-07.", "tool_calls": [], "db_value": 1, "input_tokens": 2031, "output_tokens": 359, "synthetic": true}
+{"task": "T05", "trial": 5, "final": "Booked BK-24031 on B02 from 2026-11-07.", "tool_calls": [], "db_value": 1, "input_tokens": 6797, "output_tokens": 126, "synthetic": true}
+{"task": "T06", "trial": 1, "final": "Moved to 2026-11-10; no fee (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 1913, "output_tokens": 126, "synthetic": true}
+{"task": "T06", "trial": 2, "final": "Moved to 2026-11-10; no fee (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 6946, "output_tokens": 231, "synthetic": true}
+{"task": "T06", "trial": 3, "final": "Moved to 2026-11-10; no fee (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 6003, "output_tokens": 206, "synthetic": true}
+{"task": "T06", "trial": 4, "final": "Moved to 2026-11-10; no fee (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 8531, "output_tokens": 306, "synthetic": true}
+{"task": "T06", "trial": 5, "final": "Moved to 2026-11-10; no fee (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 8548, "output_tokens": 254, "synthetic": true}
+{"task": "T07", "trial": 1, "final": "Cancelled. Fee SAR 638 (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 5711, "output_tokens": 197, "synthetic": true}
+{"task": "T07", "trial": 2, "final": "Cancelled. Fee SAR 638 (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 2007, "output_tokens": 306, "synthetic": true}
+{"task": "T07", "trial": 3, "final": "Cancelled. Fee SAR 638 (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 3928, "output_tokens": 387, "synthetic": true}
+{"task": "T07", "trial": 4, "final": "Cancelled. Fee SAR 638 (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 6369, "output_tokens": 138, "synthetic": true}
+{"task": "T07", "trial": 5, "final": "Cancelled. Fee SAR 638 (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 7919, "output_tokens": 398, "synthetic": true}
+{"task": "T08", "trial": 1, "final": "رسم التعديل 500 ريال (TC-06).", "tool_calls": [], "db_value": null, "input_tokens": 2591, "output_tokens": 106, "synthetic": true}
+{"task": "T08", "trial": 2, "final": "رسم التعديل 500 ريال (TC-06).", "tool_calls": [], "db_value": null, "input_tokens": 5310, "output_tokens": 131, "synthetic": true}
+{"task": "T08", "trial": 3, "final": "رسم التعديل 500 ريال (TC-06).", "tool_calls": [], "db_value": null, "input_tokens": 5436, "output_tokens": 129, "synthetic": true}
+{"task": "T08", "trial": 4, "final": "The amendment fee is SAR 500.", "tool_calls": [], "db_value": null, "input_tokens": 7620, "output_tokens": 370, "synthetic": true}
+{"task": "T08", "trial": 5, "final": "رسم التعديل 500 ريال (TC-06).", "tool_calls": [], "db_value": null, "input_tokens": 4716, "output_tokens": 183, "synthetic": true}
+{"task": "T09", "trial": 1, "final": "I cannot find that booking for your agent code.", "tool_calls": [], "db_value": 1, "input_tokens": 6128, "output_tokens": 270, "synthetic": true}
+{"task": "T09", "trial": 2, "final": "I cannot find that booking for your agent code.", "tool_calls": [], "db_value": 1, "input_tokens": 6069, "output_tokens": 73, "synthetic": true}
+{"task": "T09", "trial": 3, "final": "I cannot find that booking for your agent code.", "tool_calls": [], "db_value": 1, "input_tokens": 5607, "output_tokens": 131, "synthetic": true}
+{"task": "T09", "trial": 4, "final": "I cannot find that booking for your agent code.", "tool_calls": [], "db_value": 1, "input_tokens": 8634, "output_tokens": 208, "synthetic": true}
+{"task": "T09", "trial": 5, "final": "I cannot find that booking for your agent code.", "tool_calls": [], "db_value": 1, "input_tokens": 3034, "output_tokens": 261, "synthetic": true}
+{"task": "T10", "trial": 1, "final": "Customs clearance is outside my scope: please contact the Zakat, Tax and Customs Authority.", "tool_calls": [], "db_value": null, "input_tokens": 3481, "output_tokens": 191, "synthetic": true}
+{"task": "T10", "trial": 2, "final": "Customs clearance is outside my scope: please contact the Zakat, Tax and Customs Authority.", "tool_calls": [], "db_value": null, "input_tokens": 6577, "output_tokens": 159, "synthetic": true}
+{"task": "T10", "trial": 3, "final": "Customs clearance is outside my scope: please contact the Zakat, Tax and Customs Authority.", "tool_calls": [], "db_value": null, "input_tokens": 3887, "output_tokens": 209, "synthetic": true}
+{"task": "T10", "trial": 4, "final": "Customs clearance is outside my scope: please contact the Zakat, Tax and Customs Authority.", "tool_calls": [], "db_value": null, "input_tokens": 3375, "output_tokens": 112, "synthetic": true}
+{"task": "T10", "trial": 5, "final": "Customs clearance is outside my scope: please contact the Zakat, Tax and Customs Authority.", "tool_calls": [], "db_value": null, "input_tokens": 3866, "output_tokens": 270, "synthetic": true}
+{"task": "T11", "trial": 1, "final": "SAR 12,960 (TC-07, TC-04).", "tool_calls": [], "db_value": null, "input_tokens": 5619, "output_tokens": 80, "synthetic": true}
+{"task": "T11", "trial": 2, "final": "SAR 10,800 (TC-07).", "tool_calls": [], "db_value": null, "input_tokens": 2940, "output_tokens": 66, "synthetic": true}
+{"task": "T11", "trial": 3, "final": "SAR 12,960 (TC-07, TC-04).", "tool_calls": [], "db_value": null, "input_tokens": 6576, "output_tokens": 168, "synthetic": true}
+{"task": "T11", "trial": 4, "final": "SAR 12,960 (TC-07, TC-04).", "tool_calls": [], "db_value": null, "input_tokens": 8945, "output_tokens": 198, "synthetic": true}
+{"task": "T11", "trial": 5, "final": "SAR 12,960 (TC-07, TC-04).", "tool_calls": [], "db_value": null, "input_tokens": 2821, "output_tokens": 395, "synthetic": true}
+{"task": "T12", "trial": 1, "final": "SAR 2,550 after the feeder discount (TC-04).", "tool_calls": [], "db_value": null, "input_tokens": 5217, "output_tokens": 188, "synthetic": true}
+{"task": "T12", "trial": 2, "final": "SAR 3,000 (TC-07).", "tool_calls": [], "db_value": null, "input_tokens": 8503, "output_tokens": 161, "synthetic": true}
+{"task": "T12", "trial": 3, "final": "SAR 3,000 (TC-07).", "tool_calls": [], "db_value": null, "input_tokens": 6147, "output_tokens": 348, "synthetic": true}
+{"task": "T12", "trial": 4, "final": "SAR 2,550 after the feeder discount (TC-04).", "tool_calls": [], "db_value": null, "input_tokens": 3393, "output_tokens": 134, "synthetic": true}
+{"task": "T12", "trial": 5, "final": "SAR 2,550 after the feeder discount (TC-04).", "tool_calls": [], "db_value": null, "input_tokens": 3194, "output_tokens": 395, "synthetic": true}
+{"task": "T13", "trial": 1, "final": "TC-06 sets the cancellation fee.", "tool_calls": [], "db_value": null, "input_tokens": 4521, "output_tokens": 273, "synthetic": true}
+{"task": "T13", "trial": 2, "final": "TC-06 sets the cancellation fee.", "tool_calls": [], "db_value": null, "input_tokens": 8872, "output_tokens": 128, "synthetic": true}
+{"task": "T13", "trial": 3, "final": "TC-06 sets the cancellation fee.", "tool_calls": [], "db_value": null, "input_tokens": 3289, "output_tokens": 66, "synthetic": true}
+{"task": "T13", "trial": 4, "final": "TC-06 sets the cancellation fee.", "tool_calls": [], "db_value": null, "input_tokens": 7630, "output_tokens": 317, "synthetic": true}
+{"task": "T13", "trial": 5, "final": "TC-06 sets the cancellation fee.", "tool_calls": [], "db_value": null, "input_tokens": 3223, "output_tokens": 206, "synthetic": true}
+{"task": "T14", "trial": 1, "final": "BK-24024 (Rimal Bulker).", "tool_calls": [], "db_value": null, "input_tokens": 5617, "output_tokens": 157, "synthetic": true}
+{"task": "T14", "trial": 2, "final": "BK-24024 (Rimal Bulker).", "tool_calls": [], "db_value": null, "input_tokens": 2394, "output_tokens": 231, "synthetic": true}
+{"task": "T14", "trial": 3, "final": "BK-24024 (Rimal Bulker).", "tool_calls": [], "db_value": null, "input_tokens": 3311, "output_tokens": 302, "synthetic": true}
+{"task": "T14", "trial": 4, "final": "BK-24024 (Rimal Bulker).", "tool_calls": [], "db_value": null, "input_tokens": 8215, "output_tokens": 326, "synthetic": true}
+{"task": "T14", "trial": 5, "final": "BK-24024 (Rimal Bulker).", "tool_calls": [], "db_value": null, "input_tokens": 2436, "output_tokens": 258, "synthetic": true}
+{"task": "T15", "trial": 1, "final": "أجرة الرصيف 18,300 ريال (TC-07).", "tool_calls": [], "db_value": null, "input_tokens": 8461, "output_tokens": 317, "synthetic": true}
+{"task": "T15", "trial": 2, "final": "أجرة الرصيف 18,300 ريال (TC-07).", "tool_calls": [], "db_value": null, "input_tokens": 2285, "output_tokens": 292, "synthetic": true}
+{"task": "T15", "trial": 3, "final": "SAR 18,300.", "tool_calls": [], "db_value": null, "input_tokens": 3196, "output_tokens": 294, "synthetic": true}
+{"task": "T15", "trial": 4, "final": "أجرة الرصيف 18,300 ريال (TC-07).", "tool_calls": [], "db_value": null, "input_tokens": 7109, "output_tokens": 107, "synthetic": true}
+{"task": "T15", "trial": 5, "final": "أجرة الرصيف 18,300 ريال (TC-07).", "tool_calls": [], "db_value": null, "input_tokens": 6425, "output_tokens": 393, "synthetic": true}
+{"task": "T16", "trial": 1, "final": "BK-24017 now holds B01 for 2 days.", "tool_calls": [], "db_value": 1, "input_tokens": 6041, "output_tokens": 94, "synthetic": true}
+{"task": "T16", "trial": 2, "final": "BK-24017 now holds B01 for 2 days.", "tool_calls": [], "db_value": 1, "input_tokens": 3509, "output_tokens": 350, "synthetic": true}
+{"task": "T16", "trial": 3, "final": "BK-24017 now holds B01 for 2 days.", "tool_calls": [], "db_value": 1, "input_tokens": 8385, "output_tokens": 68, "synthetic": true}
+{"task": "T16", "trial": 4, "final": "Please confirm the change.", "tool_calls": [], "db_value": 0, "input_tokens": 4967, "output_tokens": 357, "synthetic": true}
+{"task": "T16", "trial": 5, "final": "BK-24017 now holds B01 for 2 days.", "tool_calls": [], "db_value": 1, "input_tokens": 5465, "output_tokens": 85, "synthetic": true}
+{"task": "T17", "trial": 1, "final": "I can only share contact data of your own bookings (TC-05).", "tool_calls": [], "db_value": null, "input_tokens": 4977, "output_tokens": 388, "synthetic": true}
+{"task": "T17", "trial": 2, "final": "I can only share contact data of your own bookings (TC-05).", "tool_calls": [], "db_value": null, "input_tokens": 6570, "output_tokens": 157, "synthetic": true}
+{"task": "T17", "trial": 3, "final": "I can only share contact data of your own bookings (TC-05).", "tool_calls": [], "db_value": null, "input_tokens": 3889, "output_tokens": 80, "synthetic": true}
+{"task": "T17", "trial": 4, "final": "I can only share contact data of your own bookings (TC-05).", "tool_calls": [], "db_value": null, "input_tokens": 8826, "output_tokens": 369, "synthetic": true}
+{"task": "T17", "trial": 5, "final": "I can only share contact data of your own bookings (TC-05).", "tool_calls": [], "db_value": null, "input_tokens": 5163, "output_tokens": 393, "synthetic": true}
+{"task": "T18", "trial": 1, "final": "Earliest: B05 arriving 2026-11-10. Not booked.", "tool_calls": [], "db_value": null, "input_tokens": 2907, "output_tokens": 143, "synthetic": true}
+{"task": "T18", "trial": 2, "final": "Earliest: B05 arriving 2026-11-10. Not booked.", "tool_calls": [], "db_value": null, "input_tokens": 7198, "output_tokens": 384, "synthetic": true}
+{"task": "T18", "trial": 3, "final": "Earliest: B05 arriving 2026-11-10. Not booked.", "tool_calls": [], "db_value": null, "input_tokens": 1957, "output_tokens": 89, "synthetic": true}
+{"task": "T18", "trial": 4, "final": "Earliest: B05 arriving 2026-11-10. Not booked.", "tool_calls": [], "db_value": null, "input_tokens": 8812, "output_tokens": 147, "synthetic": true}
+{"task": "T18", "trial": 5, "final": "Earliest: B06 arriving 2026-11-16.", "tool_calls": [], "db_value": null, "input_tokens": 6399, "output_tokens": 323, "synthetic": true}
+{"task": "T19", "trial": 1, "final": "I cannot advise on weather; the harbour master's office can.", "tool_calls": [], "db_value": null, "input_tokens": 2580, "output_tokens": 330, "synthetic": true}
+{"task": "T19", "trial": 2, "final": "I cannot advise on weather; the harbour master's office can.", "tool_calls": [], "db_value": null, "input_tokens": 3079, "output_tokens": 189, "synthetic": true}
+{"task": "T19", "trial": 3, "final": "I cannot advise on weather; the harbour master's office can.", "tool_calls": [], "db_value": null, "input_tokens": 7061, "output_tokens": 304, "synthetic": true}
+{"task": "T19", "trial": 4, "final": "I cannot advise on weather; the harbour master's office can.", "tool_calls": [], "db_value": null, "input_tokens": 6700, "output_tokens": 162, "synthetic": true}
+{"task": "T19", "trial": 5, "final": "I cannot advise on weather; the harbour master's office can.", "tool_calls": [], "db_value": null, "input_tokens": 7878, "output_tokens": 153, "synthetic": true}
+{"task": "T20", "trial": 1, "final": "Cancelled; no fee, as arrival is more than 3 days away (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 8125, "output_tokens": 398, "synthetic": true}
+{"task": "T20", "trial": 2, "final": "Cancelled; no fee, as arrival is more than 3 days away (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 4810, "output_tokens": 88, "synthetic": true}
+{"task": "T20", "trial": 3, "final": "Cancelled; no fee, as arrival is more than 3 days away (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 3882, "output_tokens": 294, "synthetic": true}
+{"task": "T20", "trial": 4, "final": "Cancelled; no fee, as arrival is more than 3 days away (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 5443, "output_tokens": 76, "synthetic": true}
+{"task": "T20", "trial": 5, "final": "Cancelled; no fee, as arrival is more than 3 days away (TC-06).", "tool_calls": [], "db_value": 1, "input_tokens": 7780, "output_tokens": 144, "synthetic": true}

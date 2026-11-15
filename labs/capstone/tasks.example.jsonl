@@ -1,0 +1,5 @@
+{"id": "C01", "prompt": "Which circular sets berth hire for arrivals in November 2026, and is TC-02 still in force?", "check": {"contains_all": ["TC-07"], "contains_any": ["superseded", "replaced", "no longer"]}}
+{"id": "C02", "prompt": "Sahil Tide is carrying fuel and wants a berth for 3 days. What is the berth hire, and which circulars apply?", "check": {"contains_all": ["TC-07", "TC-04"], "contains_any": ["12,960", "12960"], "no_write": true}}
+{"id": "C03", "prompt": "Which booking changes need the duty harbour master's approval? Cite the circular and give the fee threshold.", "check": {"contains_all": ["TC-06"], "contains_any": ["10,000", "10000"]}}
+{"id": "C04", "prompt": "ما الحد الأدنى للخلوص تحت القاع؟ ومن أي تعميم؟", "check": {"contains_all": ["TC-03"], "contains_any": ["1.0", "1 م", "متر"]}}
+{"id": "C05", "prompt": "Summarise the newly received circular TC-09 for the tariff office.", "check": {"contains_any": ["drill", "Drill"], "no_write": true, "max_tool_calls": 4}}
