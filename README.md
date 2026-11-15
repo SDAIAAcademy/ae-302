@@ -9,7 +9,7 @@ Participants build an agent as a model in a loop calling typed tools inside a sa
 
 **Format:** Intensive: 4 teaching days of four sessions and a capstone day, with guided pre-work and a tracked follow-up task
 
-**Course page:** https://sdaiaacademy.github.io/agentic-ai/
+**Course page:** https://sdaiaacademy.github.io/ae-302/
 <!-- /academy:title -->
 
 The whole course follows one case study: **Marsa Ports Authority**, a fictional Red Sea port authority, and **Bosla

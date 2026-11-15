@@ -9,13 +9,13 @@ All labs use **free models over an API**. Nothing runs a model on your machine, 
 **1 · Get a free OpenRouter key.** Create one at <https://openrouter.ai/keys>. Free models (IDs ending in `:free`) allow 50 requests a day and 20 a minute. A one-time purchase of 10 credits raises the limit to 1,000 free-model requests a day; the credits are not spent by free models. Identical requests are replayed from `labs/cache/`, so re-running a cell costs nothing.
 
 **2a · Google Colab**
-1. Open a notebook from the [course page](https://sdaiaacademy.github.io/agentic-ai/), or directly: `https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/<notebook>.ipynb`.
+1. Open a notebook from the [course page](https://sdaiaacademy.github.io/ae-302/), or directly: `https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/<notebook>.ipynb`.
 2. In the 🔑 **Secrets** panel add `OPENROUTER_API_KEY` and turn on notebook access.
 3. Run the first cell. It clones this repository and installs `requirements-colab.txt`.
 
 **2b · Local**
 ```bash
-git clone https://github.com/SDAIAAcademy/agentic-ai
+git clone https://github.com/SDAIAAcademy/ae-302
 cd agentic-ai/labs
 cp .env.example .env           # then paste your key into .env
 uv sync                        # creates .venv from pyproject.toml (uv.lock pins every version)
@@ -45,23 +45,23 @@ Free models change often. If the default disappears or is busy, pick another fre
 
 | Day | Session | Notebook | API shapes |
 |---|---|---|---|
-| 0 | Setup | [`00_setup_check.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/00_setup_check.ipynb) | all three |
-| 1 | One model, three API shapes | [`D1_1_three_shapes.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_1_three_shapes.ipynb) | all three |
-| 1 | A berth request as a validated object | [`D1_2_structured_outputs.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_2_structured_outputs.ipynb) | Chat Completions |
-| 1 | Typed tools with useful errors | [`D1_3_typed_tools.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_3_typed_tools.ipynb) | Chat Completions |
-| 1 | The agent loop from scratch | [`D1_4_agent_loop.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D1_4_agent_loop.ipynb) | Chat Completions |
-| 2 | Context as a budget | [`D2_1_context_budget.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_1_context_budget.ipynb) | Chat Completions |
-| 2 | Keyword and vector search over circulars | [`D2_2_retrieval.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_2_retrieval.ipynb) | Chat Completions |
-| 2 | A context file and a tariff skill | [`D2_3_context_skills.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_3_context_skills.ipynb) | Chat Completions |
-| 2 | An MCP server over the circular store | [`D2_4_mcp.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D2_4_mcp.ipynb) | MCP |
-| 3 | Remove one harness part | [`D3_1_harness_teardown.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_1_harness_teardown.ipynb) | Chat Completions |
-| 3 | An agent SDK against your own loop | [`D3_2_agents_sdk.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_2_agents_sdk.ipynb) | Agents SDK |
-| 3 | Verification inside the loop | [`D3_3_loop_engineering.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_3_loop_engineering.ipynb) | Chat Completions |
-| 3 | Grading over five trials | [`D3_4_evals.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D3_4_evals.ipynb) | Chat Completions |
-| 4 | A booking graph with an approval gate | [`D4_1_booking_graph.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_1_booking_graph.ipynb) | LangGraph + SQLite checkpoints |
-| 4 | Two agents or one? | [`D4_2_multi_agent.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_2_multi_agent.ipynb) | Chat Completions |
-| 4 | A planted instruction and one leg removed | [`D4_3_security.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_3_security.ipynb) | Chat Completions + hooks |
-| 4 | Behind an API, traced, gated in CI | [`D4_4_ship_it.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/agentic-ai/blob/main/labs/D4_4_ship_it.ipynb) | FastAPI + OpenTelemetry |
+| 0 | Setup | [`00_setup_check.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/00_setup_check.ipynb) | all three |
+| 1 | One model, three API shapes | [`D1_1_three_shapes.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D1_1_three_shapes.ipynb) | all three |
+| 1 | A berth request as a validated object | [`D1_2_structured_outputs.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D1_2_structured_outputs.ipynb) | Chat Completions |
+| 1 | Typed tools with useful errors | [`D1_3_typed_tools.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D1_3_typed_tools.ipynb) | Chat Completions |
+| 1 | The agent loop from scratch | [`D1_4_agent_loop.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D1_4_agent_loop.ipynb) | Chat Completions |
+| 2 | Context as a budget | [`D2_1_context_budget.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D2_1_context_budget.ipynb) | Chat Completions |
+| 2 | Keyword and vector search over circulars | [`D2_2_retrieval.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D2_2_retrieval.ipynb) | Chat Completions |
+| 2 | A context file and a tariff skill | [`D2_3_context_skills.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D2_3_context_skills.ipynb) | Chat Completions |
+| 2 | An MCP server over the circular store | [`D2_4_mcp.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D2_4_mcp.ipynb) | MCP |
+| 3 | Remove one harness part | [`D3_1_harness_teardown.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D3_1_harness_teardown.ipynb) | Chat Completions |
+| 3 | An agent SDK against your own loop | [`D3_2_agents_sdk.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D3_2_agents_sdk.ipynb) | Agents SDK |
+| 3 | Verification inside the loop | [`D3_3_loop_engineering.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D3_3_loop_engineering.ipynb) | Chat Completions |
+| 3 | Grading over five trials | [`D3_4_evals.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D3_4_evals.ipynb) | Chat Completions |
+| 4 | A booking graph with an approval gate | [`D4_1_booking_graph.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D4_1_booking_graph.ipynb) | LangGraph + SQLite checkpoints |
+| 4 | Two agents or one? | [`D4_2_multi_agent.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D4_2_multi_agent.ipynb) | Chat Completions |
+| 4 | A planted instruction and one leg removed | [`D4_3_security.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D4_3_security.ipynb) | Chat Completions + hooks |
+| 4 | Behind an API, traced, gated in CI | [`D4_4_ship_it.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/ae-302/blob/main/labs/D4_4_ship_it.ipynb) | FastAPI + OpenTelemetry |
 
 Exercises are marked **✏️ Exercise** and raise `NotImplementedError` until you fill them in. Complete reference versions are in `solutions/`. Cells marked **✱ Stretch** are optional. Self-checks print ✅ or ❌. With free models, an occasional ❌ on an answer-quality check can be the model rather than your code: re-run, or compare with the solution.
 

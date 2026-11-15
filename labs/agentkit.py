@@ -101,7 +101,7 @@ def headers(provider: str | None = None) -> dict:
     """OpenRouter app attribution headers (optional; they name the app on openrouter.ai)."""
     if (provider or PROVIDER) != "openrouter":
         return {}
-    return {"HTTP-Referer": "https://sdaiaacademy.github.io/agentic-ai/", "X-OpenRouter-Title": "SDAIA Academy Agentic AI labs"}
+    return {"HTTP-Referer": "https://sdaiaacademy.github.io/ae-302/", "X-OpenRouter-Title": "SDAIA Academy Agentic AI labs"}
 
 
 def client(provider: str | None = None, **kw):
