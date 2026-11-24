@@ -105,8 +105,8 @@ def ablation():
 def main():
     REF.mkdir(parents=True, exist_ok=True)
     r_rows = routing()
-    (REF / "routing_log.jsonl").write_text("".join(json.dumps(r) + "\n" for r in r_rows), encoding="utf-8", newline="
-")
+    (REF / "routing_log.jsonl").write_text("".join(json.dumps(r) + "\n" for r in r_rows), encoding="utf-8",
+                                           newline="\n")
     print("Tool routing, 40 labelled requests (synthetic)")
     errors = {}
     for cfg in ("before", "after"):
@@ -118,8 +118,8 @@ def main():
         print(f"    routing errors: {errors[cfg]} of {len(r_rows)} = {errors[cfg] / len(r_rows):.0%}")
 
     a_rows = ablation()
-    (REF / "position_ablation.jsonl").write_text("".join(json.dumps(r) + "\n" for r in a_rows), encoding="utf-8", newline="
-")
+    (REF / "position_ablation.jsonl").write_text("".join(json.dumps(r) + "\n" for r in a_rows), encoding="utf-8",
+                                                 newline="\n")
     print("Position ablation, 10 questions x 5 trials per position (synthetic)")
     print(f"  retrieval: right section retrieved in 10 of 10, first in {sum(HIT_AT_1)} of 10")
     acc = {}
