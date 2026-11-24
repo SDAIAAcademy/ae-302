@@ -1,7 +1,7 @@
 ---
 course: "Agentic Systems Engineering: Loops, Context and Harnesses"
 code: "AE-302"
-version: "2027.1.0"
+version: "2027.2.0"
 scope: "course"
 language: "en"
 view: "trainee"
@@ -467,7 +467,51 @@ class BookingArgs(BaseModel):
 - **Enums for closed sets**: the model reads the eight berths in the schema itself.
 - **Formats and ranges**: dates as dates, days 1 to 14.
 - **An example in each description**: `"V-110"`, `"NJM-4417"`.
-- **One job per tool**, named for what it does.
+
+#### [day1#overlapping-tool-descriptions] Two descriptions that say the same thing send calls to the wrong tool
+
+*A second Marsa desk · pilotage*
+
+Prompt for find_pilot_slots:
+
+```text
+Find pilot availability for a vessel.
+```
+
+Prompt for pilot_roster:
+
+```text
+Show the pilots and when they are available.
+```
+
+| Request needs | First call: slots | First call: roster |
+| --- | --- | --- |
+| `find_pilot_slots` (20) | 14 | 6 |
+| `pilot_roster` (20) | 8 | 12 |
+
+> **Read the off-diagonal cells.** 14 of 40 requests went to the other tool, in both directions. "Availability" and "available" are all that tells the two apart.
+
+#### [day1#measure-tool-routing] Say when to use each tool and when to use the other, then count again
+
+*Disambiguate, then measure*
+
+Prompt for find_pilot_slots:
+
+```text
+Free pilotage slots for one vessel movement, by vessel ID and date. Use it to plan an arrival or departure. Not for questions about named pilots: use pilot_roster.
+```
+
+Prompt for pilot_roster:
+
+```text
+Named pilots, their licence class and duty days. Use it for questions about a person. Not for slot planning: use find_pilot_slots.
+```
+
+**14 → 2** routing errors on the same 40 labelled requests
+
+- Label each request with the tool it needs.
+- Grade the first tool call in each trace against the label.
+- Rerun the same set after every change to a description.
 
 #### [day1#useful-errors] A useful error says what was sent and what to send instead
 
@@ -906,6 +950,34 @@ def normalise(text):
 | Vector, character n-grams | 1.00 |
 
 > **No model download.** The vectors are TF-IDF weights of character 3- to 5-grams, computed on the laptop. Production systems use learned embeddings from a hosted API; the tool contract is the same.
+
+#### [day2#answer-ignores-middle] Retrieval found the section; the answer still ignored it
+
+*A second Marsa desk · the pilotage handbook*
+
+- search: 20 sections returned; the right one, `PH-14`, ranked first
+- prompt: 20 sections packed in handbook order: `PH-14` is passage 10 of 20
+- answer: quotes a neighbouring section, not `PH-14`
+
+- Retrieval is healthy: the right section is retrieved for 10 of 10 questions, first for 9.
+- The fact was in the context on every failed run.
+- Suspect where it sat, not whether it was found.
+
+#### [day2#position-ablation] Keep the 20 sections, move only the right one, count correct answers
+
+*Diagnose with a position ablation*
+
+| Right section at | Correct, 10 questions × 5 trials |
+| --- | --- |
+| position 1 of 20 | 44 of 50 |
+| position 5 of 20 | 41 of 50 |
+| position 10 of 20 | 24 of 50 |
+| position 15 of 20 | 30 of 50 |
+| position 20 of 20 | 42 of 50 |
+| best 5, best first | 46 of 50 |
+
+- **The diagnosis.** Same content, same question: only the position changed, and accuracy fell in the middle. The cause is position.
+- **The fix.** Keep the ranking when packing: best first, fewer passages. Then run the ablation again.
 
 #### [day2#which-tool-it-picks] Give the agent both searches, then read which it picks
 

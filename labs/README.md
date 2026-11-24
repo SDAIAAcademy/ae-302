@@ -77,7 +77,7 @@ Synthetic and deterministic, dated around **1 November 2026** (the labs' "today"
 | Tariff circulars | `data/circulars/TC-01 … TC-08` | bilingual Markdown: scope, berth hire (TC-02 superseded by TC-07), berth fit, dangerous goods, contact data, amendments and approval, lead times |
 | A planted circular | `data/circulars_untrusted/TC-09` | received by email, carries an instruction for "automated assistants" (Lab 4.3 only) |
 | Tasks | `data/tasks/` | ten Day 1 tasks, twenty evaluation tasks (five with a rubric), twelve retrieval questions |
-| Reference states | `data/reference/` | a long-task history (Lab 2.1) and 100 recorded runs (Lab 3.4; **synthetic**, written by `_tools/make_reference.py`) |
+| Reference states | `data/reference/` | a long-task history (Lab 2.1) and 100 recorded runs (Lab 3.4; **synthetic**, written by `_tools/make_reference.py`), and two logs behind the Day 1 and Day 2 slides on a second desk, pilotage: a tool-routing log and a position ablation (**synthetic**, written by `_tools/make_diagnostics.py`) |
 | Context file and skills | `data/bosla/` | Bosla's AGENTS.md and two skills, `tariff-quote` and `booking-change` (Lab 2.3) |
 | Berth requests | `data/berth_requests.jsonl` | six requests in English and Arabic with correct answers (Lab 1.2) |
 

@@ -1,7 +1,7 @@
 ---
 course: "Agentic Systems Engineering: Loops, Context and Harnesses"
 code: "AE-302"
-version: "2027.1.0"
+version: "2027.2.0"
 deck: "day1"
 day: 1
 language: "en"
@@ -451,7 +451,51 @@ class BookingArgs(BaseModel):
 - **Enums for closed sets**: the model reads the eight berths in the schema itself.
 - **Formats and ranges**: dates as dates, days 1 to 14.
 - **An example in each description**: `"V-110"`, `"NJM-4417"`.
-- **One job per tool**, named for what it does.
+
+#### [day1#overlapping-tool-descriptions] Two descriptions that say the same thing send calls to the wrong tool
+
+*A second Marsa desk · pilotage*
+
+Prompt for find_pilot_slots:
+
+```text
+Find pilot availability for a vessel.
+```
+
+Prompt for pilot_roster:
+
+```text
+Show the pilots and when they are available.
+```
+
+| Request needs | First call: slots | First call: roster |
+| --- | --- | --- |
+| `find_pilot_slots` (20) | 14 | 6 |
+| `pilot_roster` (20) | 8 | 12 |
+
+> **Read the off-diagonal cells.** 14 of 40 requests went to the other tool, in both directions. "Availability" and "available" are all that tells the two apart.
+
+#### [day1#measure-tool-routing] Say when to use each tool and when to use the other, then count again
+
+*Disambiguate, then measure*
+
+Prompt for find_pilot_slots:
+
+```text
+Free pilotage slots for one vessel movement, by vessel ID and date. Use it to plan an arrival or departure. Not for questions about named pilots: use pilot_roster.
+```
+
+Prompt for pilot_roster:
+
+```text
+Named pilots, their licence class and duty days. Use it for questions about a person. Not for slot planning: use find_pilot_slots.
+```
+
+**14 → 2** routing errors on the same 40 labelled requests
+
+- Label each request with the tool it needs.
+- Grade the first tool call in each trace against the label.
+- Rerun the same set after every change to a description.
 
 #### [day1#useful-errors] A useful error says what was sent and what to send instead
 

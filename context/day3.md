@@ -1,7 +1,7 @@
 ---
 course: "Agentic Systems Engineering: Loops, Context and Harnesses"
 code: "AE-302"
-version: "2027.1.0"
+version: "2027.2.0"
 deck: "day3"
 day: 3
 language: "en"

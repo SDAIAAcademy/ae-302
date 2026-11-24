@@ -63,8 +63,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 16
     },
     {
@@ -99,8 +99,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 25
     },
     {
@@ -135,9 +135,9 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
-      "slide": 35
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
+      "slide": 37
     },
     {
       "id": "checkpoint-4-q1",
@@ -171,9 +171,9 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
-      "slide": 46
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
+      "slide": 48
     },
     {
       "id": "checkpoint-1-q1",
@@ -207,8 +207,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 10
     },
     {
@@ -243,9 +243,9 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
-      "slide": 18
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
+      "slide": 20
     },
     {
       "id": "checkpoint-3-q1",
@@ -279,9 +279,9 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
-      "slide": 26
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
+      "slide": 28
     },
     {
       "id": "checkpoint-4-q1",
@@ -315,9 +315,9 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
-      "slide": 34
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
+      "slide": 36
     },
     {
       "id": "checkpoint-1-q1",
@@ -351,8 +351,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 9
     },
     {
@@ -387,8 +387,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 16
     },
     {
@@ -423,8 +423,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 23
     },
     {
@@ -459,8 +459,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 30
     },
     {
@@ -495,8 +495,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 9
     },
     {
@@ -531,8 +531,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 15
     },
     {
@@ -567,8 +567,8 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 22
     },
     {
@@ -603,9 +603,81 @@
       "liveContext": false,
       "basis": "best",
       "confidence": true,
-      "createdAt": 1794712729000,
-      "updatedAt": 1794712729000,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
       "slide": 30
+    },
+    {
+      "id": "q-tool-routing-01",
+      "type": "single",
+      "prompt": "A Marsa assistant has two read tools: vessel_eta, described as \"Get vessel information.\", and vessel_particulars, described as \"Get information about a vessel.\" Of 50 requests labelled with the tool each one needs, 13 made their first call to the other tool. No call raised an error. Which change, checked in which way, fixes the routing?",
+      "options": [
+        "Swap the order of the two tools, then check five new requests by hand",
+        "Retry with the other tool whenever the first call raises an error",
+        "Say in each description what it returns and when to use the other, then rerun the 50 requests",
+        "Add \"choose the right tool carefully\" to the system prompt and keep both descriptions"
+      ],
+      "key": {
+        "indices": [
+          2
+        ]
+      },
+      "lo": [
+        "LO1"
+      ],
+      "weight": 1,
+      "scored": true,
+      "timer": 90,
+      "displayMode": "full",
+      "explanation": "The descriptions do not tell the two tools apart, so the fix is in the descriptions, and the same labelled set measures whether the wrong-first-call count fell.",
+      "misconceptions": [
+        "Believes tool order is the cause, and trusts a few unlabelled requests as a measure",
+        "Expects a wrong read tool to fail loudly: here no call raised an error",
+        "",
+        "Trusts a general request in the prompt to fix descriptions that say the same thing"
+      ],
+      "liveContext": false,
+      "basis": "best",
+      "confidence": true,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
+      "slide": 33
+    },
+    {
+      "id": "q-position-ablation-01",
+      "type": "single",
+      "prompt": "An assistant answers from Marsa's port safety manual. Search returns 30 passages and the right one is among them for every eval question. Answers are still wrong on a third of the questions, and the logs show the right passage sat between passages 12 and 19 on most failed runs. What should you run next to find the cause?",
+      "options": [
+        "Replace the embedding model and re-embed every passage of the manual",
+        "The same questions and passages, moving only the right one to the start, middle and end",
+        "The same questions with 40 passages instead of 30, so the right one is never missed",
+        "The same questions on a model with a larger context window"
+      ],
+      "key": {
+        "indices": [
+          1
+        ]
+      },
+      "lo": [
+        "LO2"
+      ],
+      "weight": 1,
+      "scored": true,
+      "timer": 90,
+      "displayMode": "full",
+      "explanation": "Retrieval already finds the passage, so the test that isolates its position keeps everything else fixed and moves only the right passage; a drop in the middle points at position.",
+      "misconceptions": [
+        "Blames retrieval although the right passage is retrieved for every question",
+        "",
+        "Adds more passages to a context that already held the fact, which pushes it further from the ends",
+        "Treats the window size as the limit, although every run fitted in the window"
+      ],
+      "liveContext": false,
+      "basis": "best",
+      "confidence": true,
+      "createdAt": 1795536236000,
+      "updatedAt": 1795536236000,
+      "slide": 18
     }
   ]
 }

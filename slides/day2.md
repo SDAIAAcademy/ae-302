@@ -1,7 +1,7 @@
 ---
 course: "Agentic Systems Engineering: Loops, Context and Harnesses"
 code: "AE-302"
-version: "2027.1.0"
+version: "2027.2.0"
 deck: "day2"
 day: 2
 language: "en"
@@ -208,6 +208,34 @@ def normalise(text):
 | Vector, character n-grams | 1.00 |
 
 > **No model download.** The vectors are TF-IDF weights of character 3- to 5-grams, computed on the laptop. Production systems use learned embeddings from a hosted API; the tool contract is the same.
+
+#### [day2#answer-ignores-middle] Retrieval found the section; the answer still ignored it
+
+*A second Marsa desk · the pilotage handbook*
+
+- search: 20 sections returned; the right one, `PH-14`, ranked first
+- prompt: 20 sections packed in handbook order: `PH-14` is passage 10 of 20
+- answer: quotes a neighbouring section, not `PH-14`
+
+- Retrieval is healthy: the right section is retrieved for 10 of 10 questions, first for 9.
+- The fact was in the context on every failed run.
+- Suspect where it sat, not whether it was found.
+
+#### [day2#position-ablation] Keep the 20 sections, move only the right one, count correct answers
+
+*Diagnose with a position ablation*
+
+| Right section at | Correct, 10 questions × 5 trials |
+| --- | --- |
+| position 1 of 20 | 44 of 50 |
+| position 5 of 20 | 41 of 50 |
+| position 10 of 20 | 24 of 50 |
+| position 15 of 20 | 30 of 50 |
+| position 20 of 20 | 42 of 50 |
+| best 5, best first | 46 of 50 |
+
+- **The diagnosis.** Same content, same question: only the position changed, and accuracy fell in the middle. The cause is position.
+- **The fix.** Keep the ranking when packing: best first, fewer passages. Then run the ablation again.
 
 #### [day2#which-tool-it-picks] Give the agent both searches, then read which it picks
 

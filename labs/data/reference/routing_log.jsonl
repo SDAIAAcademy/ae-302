@@ -1,0 +1,40 @@
+{"request": "R01", "text": "V-200: when can a pilot bring her in on 2026-12-01?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R02", "text": "Is there a pilot for V-201 leaving on 2026-12-02?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R03", "text": "V-202: when can a pilot bring her in on 2026-12-03?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R04", "text": "Is there a pilot for V-203 leaving on 2026-12-04?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R05", "text": "V-204: when can a pilot bring her in on 2026-12-05?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R06", "text": "Is there a pilot for V-205 leaving on 2026-12-06?", "expected": "find_pilot_slots", "first_call_before": "pilot_roster", "first_call_after": "find_pilot_slots"}
+{"request": "R07", "text": "V-206: when can a pilot bring her in on 2026-12-07?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R08", "text": "Is there a pilot for V-207 leaving on 2026-12-08?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R09", "text": "V-208: when can a pilot bring her in on 2026-12-09?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R10", "text": "Is there a pilot for V-209 leaving on 2026-12-10?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R11", "text": "V-210: when can a pilot bring her in on 2026-12-11?", "expected": "find_pilot_slots", "first_call_before": "pilot_roster", "first_call_after": "find_pilot_slots"}
+{"request": "R12", "text": "Is there a pilot for V-211 leaving on 2026-12-12?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R13", "text": "V-212: when can a pilot bring her in on 2026-12-13?", "expected": "find_pilot_slots", "first_call_before": "pilot_roster", "first_call_after": "find_pilot_slots"}
+{"request": "R14", "text": "Is there a pilot for V-213 leaving on 2026-12-14?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R15", "text": "V-214: when can a pilot bring her in on 2026-12-15?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R16", "text": "Is there a pilot for V-215 leaving on 2026-12-16?", "expected": "find_pilot_slots", "first_call_before": "pilot_roster", "first_call_after": "find_pilot_slots"}
+{"request": "R17", "text": "V-216: when can a pilot bring her in on 2026-12-17?", "expected": "find_pilot_slots", "first_call_before": "pilot_roster", "first_call_after": "find_pilot_slots"}
+{"request": "R18", "text": "Is there a pilot for V-217 leaving on 2026-12-18?", "expected": "find_pilot_slots", "first_call_before": "pilot_roster", "first_call_after": "find_pilot_slots"}
+{"request": "R19", "text": "V-218: when can a pilot bring her in on 2026-12-19?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R20", "text": "Is there a pilot for V-219 leaving on 2026-12-20?", "expected": "find_pilot_slots", "first_call_before": "find_pilot_slots", "first_call_after": "find_pilot_slots"}
+{"request": "R21", "text": "Which pilots hold the class A licence on duty 2026-12-01? (ref V-200)", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "find_pilot_slots"}
+{"request": "R22", "text": "Is pilot P-201 on duty on 2026-12-02?", "expected": "pilot_roster", "first_call_before": "find_pilot_slots", "first_call_after": "pilot_roster"}
+{"request": "R23", "text": "Which pilots hold the class A licence on duty 2026-12-03? (ref V-202)", "expected": "pilot_roster", "first_call_before": "find_pilot_slots", "first_call_after": "pilot_roster"}
+{"request": "R24", "text": "Is pilot P-203 on duty on 2026-12-04?", "expected": "pilot_roster", "first_call_before": "find_pilot_slots", "first_call_after": "pilot_roster"}
+{"request": "R25", "text": "Which pilots hold the class A licence on duty 2026-12-05? (ref V-204)", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R26", "text": "Is pilot P-205 on duty on 2026-12-06?", "expected": "pilot_roster", "first_call_before": "find_pilot_slots", "first_call_after": "pilot_roster"}
+{"request": "R27", "text": "Which pilots hold the class A licence on duty 2026-12-07? (ref V-206)", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R28", "text": "Is pilot P-207 on duty on 2026-12-08?", "expected": "pilot_roster", "first_call_before": "find_pilot_slots", "first_call_after": "pilot_roster"}
+{"request": "R29", "text": "Which pilots hold the class A licence on duty 2026-12-09? (ref V-208)", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R30", "text": "Is pilot P-209 on duty on 2026-12-10?", "expected": "pilot_roster", "first_call_before": "find_pilot_slots", "first_call_after": "pilot_roster"}
+{"request": "R31", "text": "Which pilots hold the class A licence on duty 2026-12-11? (ref V-210)", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R32", "text": "Is pilot P-211 on duty on 2026-12-12?", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R33", "text": "Which pilots hold the class A licence on duty 2026-12-13? (ref V-212)", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "find_pilot_slots"}
+{"request": "R34", "text": "Is pilot P-213 on duty on 2026-12-14?", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R35", "text": "Which pilots hold the class A licence on duty 2026-12-15? (ref V-214)", "expected": "pilot_roster", "first_call_before": "find_pilot_slots", "first_call_after": "pilot_roster"}
+{"request": "R36", "text": "Is pilot P-215 on duty on 2026-12-16?", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R37", "text": "Which pilots hold the class A licence on duty 2026-12-17? (ref V-216)", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R38", "text": "Is pilot P-217 on duty on 2026-12-18?", "expected": "pilot_roster", "first_call_before": "find_pilot_slots", "first_call_after": "pilot_roster"}
+{"request": "R39", "text": "Which pilots hold the class A licence on duty 2026-12-19? (ref V-218)", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}
+{"request": "R40", "text": "Is pilot P-219 on duty on 2026-12-20?", "expected": "pilot_roster", "first_call_before": "pilot_roster", "first_call_after": "pilot_roster"}

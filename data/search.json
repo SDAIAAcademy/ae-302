@@ -2,9 +2,9 @@
   "v": 1,
   "engine": "1.0.0",
   "build": {
-    "at": "2026-11-15T03:18:49Z",
-    "version": "2027.1.0",
-    "commit": "a296a9c"
+    "at": "2026-11-24T16:03:56Z",
+    "version": "2027.2.0",
+    "commit": "3d7c7b6"
   },
   "lang": "en",
   "dir": "ltr",
@@ -285,13 +285,31 @@
       "n": 31,
       "session": 3,
       "title": "Typed arguments turn guesses into enums and ranges",
-      "text": "Tightening the contract Typed arguments turn guesses into enums and ranges class BookingArgs(BaseModel): vessel_id: str = Field(pattern=r\"^V-\\d{3}$\") berth_id: Literal[\"B01\", \"B02\", ..., \"B08\"] arrival: date days: int = Field(ge=1, le=14) agent_code: str = Field( pattern=r\"^[A-Z]{3}-\\d{4}$\") dangerous_goods: bool = False Enums for closed sets : the model reads the eight berths in the schema itself. Formats and ranges : dates as dates, days 1 to 14. An example in each description : \"V-110\", \"NJM-4417\". One job per tool , named for what it does.",
+      "text": "Tightening the contract Typed arguments turn guesses into enums and ranges class BookingArgs(BaseModel): vessel_id: str = Field(pattern=r\"^V-\\d{3}$\") berth_id: Literal[\"B01\", \"B02\", ..., \"B08\"] arrival: date days: int = Field(ge=1, le=14) agent_code: str = Field( pattern=r\"^[A-Z]{3}-\\d{4}$\") dangerous_goods: bool = False Enums for closed sets : the model reads the eight berths in the schema itself. Formats and ranges : dates as dates, days 1 to 14. An example in each description : \"V-110\", \"NJM-4417\".",
       "href": "../slides/day1.html#typed-arguments"
     },
     {
       "deck": "day1",
-      "id": "useful-errors",
+      "id": "overlapping-tool-descriptions",
       "n": 32,
+      "session": 3,
+      "title": "Two descriptions that say the same thing send calls to the wrong tool",
+      "text": "A second Marsa desk · pilotage Two descriptions that say the same thing send calls to the wrong tool Find pilot availability for a vessel. Show the pilots and when they are available. Request needs First call: slots First call: roster find_pilot_slots (20) 14 6 pilot_roster (20) 8 12 Read the off-diagonal cells. 14 of 40 requests went to the other tool, in both directions. \"Availability\" and \"available\" are all that tells the two apart.",
+      "href": "../slides/day1.html#overlapping-tool-descriptions"
+    },
+    {
+      "deck": "day1",
+      "id": "measure-tool-routing",
+      "n": 33,
+      "session": 3,
+      "title": "Say when to use each tool and when to use the other, then count again",
+      "text": "Disambiguate, then measure Say when to use each tool and when to use the other, then count again Free pilotage slots for one vessel movement, by vessel ID and date. Use it to plan an arrival or departure. Not for questions about named pilots: use pilot_roster. Named pilots, their licence class and duty days. Use it for questions about a person. Not for slot planning: use find_pilot_slots. 14 → 2 routing errors on the same 40 labelled requests Label each request with the tool it needs. Grade the first tool call in each trace against the label. Rerun the same set after every change to a description.",
+      "href": "../slides/day1.html#measure-tool-routing"
+    },
+    {
+      "deck": "day1",
+      "id": "useful-errors",
+      "n": 34,
       "session": 3,
       "title": "A useful error says what was sent and what to send instead",
       "text": "Errors the model can act on A useful error says what was sent and what to send instead call create_booking({\"berth_id\": \"berth 2\", \"arrival\": \"7 Nov 2026\", ...}) raw No berth 'berth 2'. Berths are B01 to B08. (and the date is never reached) typed berth_id: Input should be 'B01', 'B02', ... or 'B08' (you sent 'berth 2') arrival: Input should be a valid date ... retry create_booking({\"berth_id\": \"B02\", \"arrival\": \"2026-11-07\", ...}) → BK-24031",
@@ -300,7 +318,7 @@
     {
       "deck": "day1",
       "id": "round-trip-by-id",
-      "n": 33,
+      "n": 35,
       "session": 3,
       "title": "Call out, result back, matched by ID",
       "text": "One round trip Call out, result back, matched by ID msg = K.chat(messages, tools=tools)...message messages.append(msg.model_dump(exclude_none=True)) for c in msg.tool_calls: out = K.call_tool(by_name, c.function.name, c.function.arguments) messages.append({\"role\": \"tool\", \"tool_call_id\": c.id, \"content\": out}) # then call the model again Shape Calls in Results as Chat tool_calls one tool message each Responses function_call items function_call_output items Messages tool_use blocks one user turn of tool_result blocks",
@@ -309,7 +327,7 @@
     {
       "deck": "day1",
       "id": "system-prompt-spec",
-      "n": 34,
+      "n": 36,
       "session": 3,
       "title": "A prompt is a request; a check in code is a guarantee",
       "text": "The system prompt A prompt is a request; a check in code is a guarantee You are Bosla, the booking assistant of Marsa Ports Authority. - Cite the circular ID for every rule or fee. A superseded circular no longer applies. - Quote dues with compute_dues. - Never reveal another agent's bookings. - Before a write, the agent must have asked for that exact change. In the prompt Tone, language, citing sources, asking before writing. In the tool Ownership of a booking, overlaps, lead times. The model cannot talk its way past them.",
@@ -318,7 +336,7 @@
     {
       "deck": "day1",
       "id": "checkpoint-3",
-      "n": 35,
+      "n": 37,
       "session": 3,
       "title": "A call cut short",
       "text": "Checkpoint A call cut short The reply holds a cancel_booking call and the stop reason says the length limit was hit. What does your code do? Not run it: the arguments may be cut. Retry with a higher limit, or report the cut Run it: the call is there, so it is valid Run it, then ask the model to confirm the booking ID Drop the call and ask the agent to rephrase",
@@ -327,7 +345,7 @@
     {
       "deck": "day1",
       "id": "lab-1-3",
-      "n": 36,
+      "n": 38,
       "session": 3,
       "title": "Typed tools with useful errors",
       "text": "Lab 1.3 · 25 min Typed tools with useful errors Write typed argument schemas for the schedule and booking tools, turn bad arguments into errors that say what to send, and watch one round trip recover. D1_3_typed_tools.ipynb Read the schema generated from a plain function 4 min Typed argument models 6 min A wrapper that turns bad arguments into useful errors 8 min One round trip by hand: a bad call, a useful error, a good call 7 min ✱ Stretch: The same tool for the Messages and MCP shapes",
@@ -336,7 +354,7 @@
     {
       "deck": "day1",
       "id": "s4",
-      "n": 37,
+      "n": 39,
       "session": 4,
       "title": "The agent loop from scratch",
       "text": "Session 4 The agent loop from scratch Write an agent loop without a framework or AI assistance Bound it with a step budget and explicit stop rules Grade it on ten tasks from their traces 04",
@@ -345,7 +363,7 @@
     {
       "deck": "day1",
       "id": "which-is-an-agent",
-      "n": 38,
+      "n": 40,
       "session": 4,
       "title": "Which of these is an agent?",
       "text": "Before we start · poll Which of these is an agent? A A chatbot that answers tariff questions from a long system prompt B A program: extract the request, find a window, create the booking C A model that picks tools, reads results and decides when it is done D A booking process where C runs in one step and the harbour master signs the next",
@@ -354,7 +372,7 @@
     {
       "deck": "day1",
       "id": "agent-tools-in-loop",
-      "n": 39,
+      "n": 41,
       "session": 4,
       "title": "An agent is a model using tools in a loop",
       "text": "Definitions An agent is a model using tools in a loop Workflows : models and tools orchestrated through predefined code paths. Agents: models dynamically direct their own processes and tool usage. Who picks the next step? Your code: a workflow. The model: an agent. Who says it is done? The model proposes; your stop rules decide. Start simple One call if it works, a workflow if the path is known, an agent only when it is not.",
@@ -363,7 +381,7 @@
     {
       "deck": "day1",
       "id": "loop-on-one-slide",
-      "n": 40,
+      "n": 42,
       "session": 4,
       "title": "The loop fits on one slide",
       "text": "The core of every agent The loop fits on one slide for step in range(1, max_steps + 1): msg = K.chat(messages, tools=tools)...message messages.append(msg.model_dump(exclude_none=True)) if not msg.tool_calls: return done(msg.content) # model: done this = [(c.function.name, c.function.arguments) for c in msg.tool_calls] if this == last: return stop(\"repeat\") # no progress last = this for c in msg.tool_calls: out = K.call_tool(by_name, ...) messages.append({\"role\": \"tool\", ...}) return stop(\"max_steps\") # budget spent Three exits The model stops calling tools; the same calls repeat; the step budget runs out. The history is the memory Every step resends everything, so input grows each step. Tools never raise into the loop Errors come back as results.",
@@ -372,7 +390,7 @@
     {
       "deck": "day1",
       "id": "completion-criteria",
-      "n": 41,
+      "n": 43,
       "session": 4,
       "title": "Decide in advance what \"done\" means, and what \"stuck\" means",
       "text": "Explicit completion criteria Decide in advance what \"done\" means, and what \"stuck\" means Exit Decided by Returned as No tool calls in the reply the model stopped: \"done\" and the answer The same calls as the last turn the loop stopped: \"repeat\", no answer Step budget spent the loop stopped: \"max_steps\", no answer Cost budget spent the loop (Day 3) stopped: \"max_cost\" A stop is not a success. \"done\" means the model stopped; whether the task was done is the grader's call.",
@@ -381,7 +399,7 @@
     {
       "deck": "day1",
       "id": "trace-of-a-booking",
-      "n": 42,
+      "n": 44,
       "session": 4,
       "title": "A trace: the evidence of what the agent did",
       "text": "What a run leaves behind A trace: the evidence of what the agent did user \"Agent code NJM-4417. Please book Najm Falcon (V-110) for 2 days at the earliest free window arriving between 2026-11-05 and 2026-11-12. I confirm.\" call find_windows({\"vessel_id\": \"V-110\", \"days\": 2, \"date_from\": \"2026-11-05\", \"date_to\": \"2026-11-12\"}) result [{\"berth_id\": \"B02\", \"arrival\": \"2026-11-07\", \"under_keel_m\": 2.1}] call create_booking({\"vessel_id\": \"V-110\", \"berth_id\": \"B02\", \"arrival\": \"2026-11-07\", ...}) result {\"booking_id\": \"BK-24031\", ..., \"berth_hire_sar\": 7800}",
@@ -390,7 +408,7 @@
     {
       "deck": "day1",
       "id": "ten-tasks",
-      "n": 43,
+      "n": 45,
       "session": 4,
       "title": "Ten tasks across the three services, graded by code",
       "text": "Lab 1.4 · step 3 Ten tasks across the three services, graded by code Task Checked by T01 to T04 · berths, dues, a booking, a window strings in the answer T05 to T07 · book, amend, cancel the database after the run T08 · an Arabic tariff question 500 in the answer T09 · Najm's code on Sahil's booking the booking is still confirmed T10 · customs clearance no write, at most two tool calls 7 / 10 the outcome's bar, with a trace per run A fresh port per task One task's booking must not change the next task's world.",
@@ -399,7 +417,7 @@
     {
       "deck": "day1",
       "id": "tool-that-never-finishes",
-      "n": 44,
+      "n": 46,
       "session": 4,
       "title": "A tool that never finishes, and the rule that stops it",
       "text": "Why stop rules exist A tool that never finishes, and the rule that stops it step 1 vessel_position({\"vessel_id\": \"V-110\"}) result \"Position not yet received. Call vessel_position again.\" step 2 vessel_position({\"vessel_id\": \"V-110\"}) stop repeat: same calls as the previous turn The loop's fix The repeat rule and the step budget bound the run. The tool's fix A result that says what to do: \"positions arrive about every 6 hours; tell the agent to ask later\".",
@@ -408,7 +426,7 @@
     {
       "deck": "day1",
       "id": "harness-around-loop",
-      "n": 45,
+      "n": 47,
       "session": 4,
       "title": "A harness is the loop plus everything around it",
       "text": "The map for the week A harness is the loop plus everything around it Around the loop What it does Day Context management keeps the input within budget: compaction, offloading, retrieval, skills 2 Permissions, hooks, verification allow, ask or deny per tool; checks before the loop may stop 3 Evaluation and tracing repeated trials, graders, spans 3, 4 Graphs, approvals, containment checkpoints, a human at a risk threshold, one leg removed 4",
@@ -417,7 +435,7 @@
     {
       "deck": "day1",
       "id": "checkpoint-4",
-      "n": 46,
+      "n": 48,
       "session": 4,
       "title": "A tool refuses",
       "text": "Checkpoint A tool refuses cancel_booking raises because the agent code does not own the booking. What should the loop do? Raise, so the developer sees the bug Retry the same call until it succeeds Return the error to the model as the tool result, so it can tell the agent to check the code Tell the agent the booking belongs to someone else",
@@ -426,7 +444,7 @@
     {
       "deck": "day1",
       "id": "lab-1-4",
-      "n": 47,
+      "n": 49,
       "session": 4,
       "title": "The agent loop from scratch",
       "text": "Lab 1.4 · 25 min The agent loop from scratch Write the loop without AI assistance, with a step budget and stop rules, save a trace per run, and run it on ten port tasks graded by code. D1_4_agent_loop.ipynb Write my_loop() with a step budget and a stop rule 8 min A trace per run 5 min Ten tasks, graded by code 8 min Break it: a tool that never finishes 4 min ✱ Stretch: Run one turn's tool calls in parallel",
@@ -435,7 +453,7 @@
     {
       "deck": "day1",
       "id": "day-1-recap",
-      "n": 48,
+      "n": 50,
       "session": 4,
       "title": "From a next-token predictor to a loop with stop rules",
       "text": "Day 1 recap From a next-token predictor to a loop with stop rules A model is stateless; your code keeps the history. Three API shapes , one idea; read the stop signal first. Structured outputs : ask for the schema, validate always, repair a bounded number of times. Typed tools with errors that say what to send instead. The loop: a step budget, explicit exits, a trace per run. Stopping is not succeeding: grade by code.",
@@ -444,7 +462,7 @@
     {
       "deck": "day1",
       "id": "tomorrow-context",
-      "n": 49,
+      "n": 51,
       "session": 4,
       "title": "Context engineering: what the model sees, and what it costs",
       "text": "Tomorrow · Day 2 Context engineering: what the model sees, and what it costs Long tasks overflow the window. Tomorrow you measure tokens per turn, cut them with compaction and offloading, search the circulars, load a tariff skill on demand, and serve the circulars over the Model Context Protocol.",
@@ -596,8 +614,26 @@
     },
     {
       "deck": "day2",
-      "id": "which-tool-it-picks",
+      "id": "answer-ignores-middle",
       "n": 17,
+      "session": 2,
+      "title": "Retrieval found the section; the answer still ignored it",
+      "text": "A second Marsa desk · the pilotage handbook Retrieval found the section; the answer still ignored it search 20 sections returned; the right one, PH-14, ranked first prompt 20 sections packed in handbook order: PH-14 is passage 10 of 20 answer quotes a neighbouring section, not PH-14 Retrieval is healthy: the right section is retrieved for 10 of 10 questions, first for 9. The fact was in the context on every failed run. Suspect where it sat, not whether it was found.",
+      "href": "../slides/day2.html#answer-ignores-middle"
+    },
+    {
+      "deck": "day2",
+      "id": "position-ablation",
+      "n": 18,
+      "session": 2,
+      "title": "Keep the 20 sections, move only the right one, count correct answers",
+      "text": "Diagnose with a position ablation Keep the 20 sections, move only the right one, count correct answers Right section at Correct, 10 questions × 5 trials position 1 of 20 44 of 50 position 5 of 20 41 of 50 position 10 of 20 24 of 50 position 15 of 20 30 of 50 position 20 of 20 42 of 50 best 5, best first 46 of 50 The diagnosis Same content, same question: only the position changed, and accuracy fell in the middle. The cause is position. The fix Keep the ranking when packing: best first, fewer passages. Then run the ablation again.",
+      "href": "../slides/day2.html#position-ablation"
+    },
+    {
+      "deck": "day2",
+      "id": "which-tool-it-picks",
+      "n": 19,
       "session": 2,
       "title": "Give the agent both searches, then read which it picks",
       "text": "Lab 2.2 · step 4 Give the agent both searches, then read which it picks Best for exact terms, IDs and numbers. English or Arabic. Best for paraphrases and questions in other words. English or Arabic. Record per run: tools called, in order, and whether the answer cites the right circular. Swap the order of the two tools and run again. If the picks follow the order, the descriptions are not doing their job.",
@@ -606,7 +642,7 @@
     {
       "deck": "day2",
       "id": "checkpoint-2",
-      "n": 18,
+      "n": 20,
       "session": 2,
       "title": "Where should the superseded rule live?",
       "text": "Checkpoint Where should the superseded rule live? Bosla sometimes quotes TC-02, which TC-07 replaced. Which fix is the most reliable? Add \"never quote TC-02\" to the system prompt and nothing else Delete TC-02 from the repository Return each circular's status with the result and rank superseded ones lower, then keep the prompt rule too Switch to a larger model that knows the tariff",
@@ -615,7 +651,7 @@
     {
       "deck": "day2",
       "id": "lab-2-2",
-      "n": 19,
+      "n": 21,
       "session": 2,
       "title": "Keyword and vector search over circulars",
       "text": "Lab 2.2 · 25 min Keyword and vector search over circulars Score retrieval on twelve bilingual questions, build BM25 with Arabic normalisation and a character n-gram vector search, give both to the agent as tools and trace which it picks. D2_2_retrieval.ipynb The eval and the baseline 4 min BM25 with Arabic normalisation 7 min Vector search with character n-grams 6 min Both as tools: which does the agent pick? 8 min ✱ Stretch: When the corpus fits, skip retrieval",
@@ -624,7 +660,7 @@
     {
       "deck": "day2",
       "id": "s3",
-      "n": 20,
+      "n": 22,
       "session": 3,
       "title": "Memory, skills and context files",
       "text": "Session 3 Memory, skills and context files Write a short context file for an agent Package a procedure as a skill with an index line Show staged loading of a skill in a trace 03",
@@ -633,7 +669,7 @@
     {
       "deck": "day2",
       "id": "three-kinds-of-context",
-      "n": 21,
+      "n": 23,
       "session": 3,
       "title": "Context file, skills, memory: three stores, three lifetimes",
       "text": "What goes where Context file, skills, memory: three stores, three lifetimes Context file Every session needs it: the port, how to work, what never to do. Short. Always loaded. Skill Some tasks need it: how to quote a tariff, how to change a booking. A one-line index entry; the body on demand. Memory Learned in one session, needed in another: \"Faisal prefers Arabic\". Written by the agent, capped.",
@@ -642,7 +678,7 @@
     {
       "deck": "day2",
       "id": "bosla-context-file",
-      "n": 22,
+      "n": 24,
       "session": 3,
       "title": "A context file is short on purpose",
       "text": "data/bosla/AGENTS.md A context file is short on purpose ## How to work - Look up before you answer. - For any price, load the skill tariff-quote. - For any amendment or cancellation, load the skill booking-change. - TC-02 is superseded by TC-07. ## Never - Reveal another agent's bookings (TC-05). - Write without an explicit request. Pointers, not procedures It says when to load a skill; the skill says how. Paid on every call Every line is in every request, for the whole session.",
@@ -651,7 +687,7 @@
     {
       "deck": "day2",
       "id": "skill-anatomy",
-      "n": 23,
+      "n": 25,
       "session": 3,
       "title": "Front matter for the index, a body for the procedure",
       "text": "A skill is a folder Front matter for the index, a body for the procedure --- name: tariff-quote description: Quote berth hire for a vessel and a number of days, with the feeder discount and the dangerous goods surcharge, citing the circulars in force. --- 1. Find the gross tonnage with get_vessel. 2. Dangerous goods? Ask or read the request. 3. Call compute_dues. No arithmetic. 4. Cite TC-07 and TC-04. 5. Need the working? Read reference.md. The description is a trigger It is all the model sees until it loads the skill. Write when to use it, not what it is.",
@@ -660,7 +696,7 @@
     {
       "deck": "day2",
       "id": "staged-loading",
-      "n": 24,
+      "n": 26,
       "session": 3,
       "title": "Index always, body on demand, files only when asked",
       "text": "Three stages Index always, body on demand, files only when asked 1 · Index one line per skill, in the prompt → 2 · Body load_skill(\"tariff-quote\") → 3 · File read_skill_file(..., \"reference.md\") 75 tokens for the index of two skills 508 tokens for every body and file in the prompt",
@@ -669,7 +705,7 @@
     {
       "deck": "day2",
       "id": "skill-in-trace",
-      "n": 25,
+      "n": 27,
       "session": 3,
       "title": "The trace shows the skill loaded before the tariff was computed",
       "text": "The evidence The trace shows the skill loaded before the tariff was computed user \"Agent code SHL-2290. Berth hire for Sahil Tide for 3 days? It carries fuel, dangerous goods.\" call load_skill({\"name\": \"tariff-quote\"}) call get_vessel({\"vessel\": \"Sahil Tide\"}) → 36,000 GT call compute_dues({\"gross_tonnage\": 36000, \"days\": 3, \"dangerous_goods\": true}) final \"SAR 12,960 (TC-07, TC-04).\"",
@@ -678,7 +714,7 @@
     {
       "deck": "day2",
       "id": "checkpoint-3",
-      "n": 26,
+      "n": 28,
       "session": 3,
       "title": "Where does the new rule go?",
       "text": "Checkpoint Where does the new rule go? Reem issues a circular: amendments to bookings with dangerous goods now need a form. Only booking changes need this. Where does it go? In the booking-change skill, with a pointer in the circular store In the context file, so every session sees it In the agent's memory file In the description of every tool",
@@ -687,7 +723,7 @@
     {
       "deck": "day2",
       "id": "lab-2-3",
-      "n": 27,
+      "n": 29,
       "session": 3,
       "title": "A context file and a tariff skill",
       "text": "Lab 2.3 · 25 min A context file and a tariff skill Write the context file into Bosla's prompt, parse two skills into an index, load a skill and its reference file on demand, and show the staged loading in a trace. D2_3_context_skills.ipynb The context file in the system prompt 5 min Parse the skills and build the index 6 min Staged loading: load_skill and read_skill_file 6 min Show it in a trace 8 min ✱ Stretch: A memory file per agent",
@@ -696,7 +732,7 @@
     {
       "deck": "day2",
       "id": "s4",
-      "n": 28,
+      "n": 30,
       "session": 4,
       "title": "Model Context Protocol",
       "text": "Session 4 Model Context Protocol Build an MCP server with tools and resources Pass a provided test client in-process and over stdio Connect an agent through capability discovery, with a trace 04",
@@ -705,7 +741,7 @@
     {
       "deck": "day2",
       "id": "why-a-protocol",
-      "n": 29,
+      "n": 31,
       "session": 4,
       "title": "A protocol lets any host discover tools it was not written with",
       "text": "Model Context Protocol A protocol lets any host discover tools it was not written with Without it Every host imports every tool: Bosla's code, an IDE's plugin and a desktop app each wrap the circulars their own way. With it One server over the circulars. Each host connects, asks what is there, and calls it. A server offers Example tools search_circulars, get_circular resources circulars://index, circular://TC-07 instructions \"A superseded circular no longer applies.\"",
@@ -714,7 +750,7 @@
     {
       "deck": "day2",
       "id": "server-in-code",
-      "n": 30,
+      "n": 32,
       "session": 4,
       "title": "A server is decorated functions",
       "text": "Lab 2.4 · step 2 A server is decorated functions server = MCPServer(\"marsa-circulars\", instructions=\"...\") @server.tool() def get_circular(circular_id: str) -> dict: \"\"\"Read one whole circular by ID (TC-01 to TC-08).\"\"\" try: return p.get_circular(circular_id) except port.ToolError as e: raise ToolError(str(e)) from e # the model reads it @server.resource(\"circular://{circular_id}\") def circular(circular_id: str) -> str: ...",
@@ -723,7 +759,7 @@
     {
       "deck": "day2",
       "id": "provided-test-client",
-      "n": 31,
+      "n": 33,
       "session": 4,
       "title": "The provided test client speaks only the protocol",
       "text": "The outcome's evidence The provided test client speaks only the protocol Discovers both tools, each with a description and a typed schema TC-07 returns the rate in force; TC-99 is an error result An Arabic query finds TC-06; results carry each circular's status The index resource lists eight circulars; a circular reads by ID 8 / 8 checks passed by the reference server, in-process and over stdio",
@@ -732,7 +768,7 @@
     {
       "deck": "day2",
       "id": "discovery-trace",
-      "n": 32,
+      "n": 34,
       "session": 4,
       "title": "Bosla learns the tools at run time: discovery, then calls",
       "text": "Lab 2.4 · step 4 Bosla learns the tools at run time: discovery, then calls discover search_circulars(k, query) discover get_circular(circular_id) call search_circulars({\"query\": \"cancellation fee\", \"k\": 3}) result {\"circular_id\": \"TC-06\", \"status\": \"in force\", ...} final \"25% of berth hire when less than 3 days before arrival (TC-06).\"",
@@ -741,7 +777,7 @@
     {
       "deck": "day2",
       "id": "agent-to-agent-concept",
-      "n": 33,
+      "n": 35,
       "session": 4,
       "title": "Agent-to-agent: delegate a task, not a function call",
       "text": "A concept for Day 4 Agent-to-agent: delegate a task, not a function call MCP Agent-to-agent Other side a server of tools and documents another agent with its own model and tools You send a tool call with arguments a task in words You get a result, at once a result, possibly later, with status The A2A protocol describes an agent with a card (what it can do) and a task lifecycle. Day 4 splits research and drafting between two agents and asks when that pays.",
@@ -750,7 +786,7 @@
     {
       "deck": "day2",
       "id": "checkpoint-4",
-      "n": 34,
+      "n": 36,
       "session": 4,
       "title": "How did Bosla learn the tool names?",
       "text": "Checkpoint How did Bosla learn the tool names? In Lab 2.4 Bosla calls search_circulars on the MCP server. Where did it get that tool's name and arguments? From an import of the server's Python module From the model's training data From the server's instructions text From the server's tool list, asked for at connection (discovery)",
@@ -759,7 +795,7 @@
     {
       "deck": "day2",
       "id": "lab-2-4",
-      "n": 35,
+      "n": 37,
       "session": 4,
       "title": "An MCP server over the circular store",
       "text": "Lab 2.4 · 25 min An MCP server over the circular store Build an MCP server over the circulars, pass the provided test client, and connect Bosla to it through discovery with a trace of discovery and calls. D2_4_mcp.ipynb Read the shape of a server 3 min Build the server 8 min Pass the provided tests, in-process and over stdio 6 min Bosla discovers the server and uses it, with a trace 8 min ✱ Stretch: Speak the protocol by hand over HTTP",
@@ -768,7 +804,7 @@
     {
       "deck": "day2",
       "id": "day-2-recap",
-      "n": 36,
+      "n": 38,
       "session": 4,
       "title": "Context is a budget you spend on purpose",
       "text": "Day 2 recap Context is a budget you spend on purpose Measure tokens per turn; tool results grow fastest. Offload moves information; compaction can lose it. Judge both on success. Retrieval : score the top hit; protect against superseded text in the ranking. Context file always, skills on demand, memory capped. MCP : tools and resources discovered at run time, tested through the protocol.",
@@ -777,7 +813,7 @@
     {
       "deck": "day2",
       "id": "tomorrow-harness",
-      "n": 37,
+      "n": 39,
       "session": 4,
       "title": "Harness and loop: the parts around the model, and proof they work",
       "text": "Tomorrow · Day 3 Harness and loop: the parts around the model, and proof they work Remove one harness part and watch what breaks, rebuild Bosla on an agent SDK, check every booking against the schedule before the loop may stop, and grade twenty tasks over five trials.",

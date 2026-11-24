@@ -1,7 +1,7 @@
 ---
 course: "Agentic Systems Engineering: Loops, Context and Harnesses"
 code: "AE-302"
-version: "2027.1.0"
+version: "2027.2.0"
 language: "en"
 view: "trainee"
 source: "https://sdaiaacademy.github.io/ae-302/index.html"
@@ -177,6 +177,7 @@ An individual research agent over the synthetic documents of Marsa Ports Authori
 - [Anthropic: Writing effective tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
 - [Anthropic: Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 - [AGENTS.md, the context-file convention](https://agents.md/)
+- [Liu et al.: Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172)
 
 ### Harnesses, SDKs and evaluation
 
@@ -204,4 +205,4 @@ An individual research agent over the synthetic documents of Marsa Ports Authori
 
 SDAIA Academy · AI Engineering Track · Agentic Systems Engineering: Loops, Context and Harnesses
 
-Course version 2027.1.0 · engine 1.0.0 · built 2026-11-15 · commit a296a9c
+Course version 2027.2.0 · engine 1.0.0 · built 2026-11-24 · commit 3d7c7b6
