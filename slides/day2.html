@@ -193,7 +193,46 @@
     </table>
     <div class="callout tip small"><b>No model download.</b> The vectors are TF-IDF weights of character 3- to 5-grams, computed on the laptop. Production systems use learned embeddings from a hosted API; the tool contract is the same.</div>
   </div>
-  <aside class="notes"><p>Deterministic numbers from the course's run of Lab 2.2 steps 1 to 3. Twelve questions is a small eval: one question is 0.08 of the score, so do not over-read the gap between 0.92 and 1.00. The lesson is the method: an eval set first, then compare.</p></aside>
+  <aside class="notes"><p>Deterministic numbers from the course's run of Lab 2.2 steps 1 to 3. Twelve questions is a small eval: one question is 0.08 of the score, so do not over-read the gap between 0.92 and 1.00. The lesson is the method: an eval set first, then compare. Keep this slide to a minute to make room for the next two.</p></aside>
+</section>
+
+<section class="slide" data-label="Lost in the middle" id="answer-ignores-middle" data-lo="LO2">
+  <div class="kicker">A second Marsa desk · the pilotage handbook</div>
+  <h2>Retrieval found the section; the answer still ignored it</h2>
+  <div class="cols cols-2">
+    <div class="trace s">
+      <div class="ev call"><b>search</b><span>20 sections returned; the right one, <code>PH-14</code>, ranked first</span></div>
+      <div class="ev model"><b>prompt</b><span>20 sections packed in handbook order: <code>PH-14</code> is passage 10 of 20</span></div>
+      <div class="ev error"><b>answer</b><span>quotes a neighbouring section, not <code>PH-14</code></span></div>
+    </div>
+    <ul class="bullets small">
+      <li>Retrieval is healthy: the right section is retrieved for 10 of 10 questions, first for 9.</li>
+      <li>The fact was in the context on every failed run.</li>
+      <li>Suspect where it sat, not whether it was found.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>A parallel case, not Lab 2.2: a pilotage handbook of numbered sections (PH-xx), synthetic. Retrieval scores like the ones on the last slides say nothing about what the model does with a long packed context. Models tend to use the start and the end of a long input better than the middle (Liu et al.). The packer here throws away the ranking by sorting passages into handbook order. Ask: what experiment would prove that position, and not the content, is the cause? Sources: Liu et al., Lost in the Middle.</p></aside>
+</section>
+
+<section class="slide" data-label="Position ablation" id="position-ablation" data-lo="LO2">
+  <div class="kicker">Diagnose with a position ablation</div>
+  <h2>Keep the 20 sections, move only the right one, count correct answers</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>Right section at</th><th>Correct, 10 questions × 5 trials</th></tr>
+      <tr><td>position 1 of 20</td><td>44 of 50</td></tr>
+      <tr><td>position 5 of 20</td><td>41 of 50</td></tr>
+      <tr><td>position 10 of 20</td><td>24 of 50</td></tr>
+      <tr><td>position 15 of 20</td><td>30 of 50</td></tr>
+      <tr><td>position 20 of 20</td><td>42 of 50</td></tr>
+      <tr><td>best 5, best first</td><td>46 of 50</td></tr>
+    </table>
+    <div class="stack">
+      <div class="card c-coral flat"><h4>The diagnosis</h4><p class="small mb0">Same content, same question: only the position changed, and accuracy fell in the middle. The cause is position.</p></div>
+      <div class="card c-teal flat"><h4>The fix</h4><p class="small mb0">Keep the ranking when packing: best first, fewer passages. Then run the ablation again.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Synthetic numbers, written with a fixed seed by labs/_tools/make_diagnostics.py (data/reference/position_ablation.jsonl); they illustrate the method, they are not a model run. The ablation changes one variable: every run has the same 20 sections, and only the right one moves. A U shape (high at the ends, low in the middle) points at position; a flat low line would point at the passage itself or the question. Five trials per cell, because one run per position is noise. A bigger context window is not the fix: the window was never full. Sources: Liu et al., Lost in the Middle.</p></aside>
 </section>
 
 <section class="slide" data-label="Two tools" id="which-tool-it-picks" data-lo="LO2">

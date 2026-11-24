@@ -3,7 +3,7 @@
   "engine": "1",
   "id": "ae-302",
   "code": "AE-302",
-  "version": "2027.1.0",
+  "version": "2027.2.0",
   "lang": "en",
   "title": "Agentic Systems Engineering: Loops, Context and Harnesses",
   "tagline": "Build an agent as a model in a loop calling typed tools, with most of the engineering in the harness",
@@ -835,6 +835,10 @@
         {
           "title": "AGENTS.md, the context-file convention",
           "url": "https://agents.md/"
+        },
+        {
+          "title": "Liu et al.: Lost in the Middle: How Language Models Use Long Contexts",
+          "url": "https://arxiv.org/abs/2307.03172"
         }
       ]
     },

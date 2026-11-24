@@ -431,10 +431,47 @@ req = BerthRequest.model_validate_json(text)</code></pre>
       <li><b>Enums for closed sets</b>: the model reads the eight berths in the schema itself.</li>
       <li><b>Formats and ranges</b>: dates as dates, days 1 to 14.</li>
       <li><b>An example in each description</b>: <code>"V-110"</code>, <code>"NJM-4417"</code>.</li>
-      <li><b>One job per tool</b>, named for what it does.</li>
     </ul>
   </div>
-  <aside class="notes"><p>The schema of BookingArgs replaces the generated one through a __tool_schema__ attribute. Fewer, well-typed tools beat many thin wrappers: every definition costs tokens on every call. A type is checked before the service is touched; a description is only a request.</p></aside>
+  <aside class="notes"><p>The schema of BookingArgs replaces the generated one through a __tool_schema__ attribute. Fewer, well-typed tools beat many thin wrappers: every definition costs tokens on every call. A type is checked before the service is touched; a description is only a request. The next two slides are about that request: which tool the model picks.</p></aside>
+</section>
+
+<section class="slide" data-label="Overlap" id="overlapping-tool-descriptions" data-lo="LO1">
+  <div class="kicker">A second Marsa desk · pilotage</div>
+  <h2>Two descriptions that say the same thing send calls to the wrong tool</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="prompt s" data-tool="find_pilot_slots">Find pilot availability for a vessel.</div>
+      <div class="prompt s" data-tool="pilot_roster">Show the pilots and when they are available.</div>
+    </div>
+    <table class="t small">
+      <tr><th>Request needs</th><th>First call: slots</th><th>First call: roster</th></tr>
+      <tr><td><code>find_pilot_slots</code> (20)</td><td>14</td><td>6</td></tr>
+      <tr><td><code>pilot_roster</code> (20)</td><td>8</td><td>12</td></tr>
+    </table>
+  </div>
+  <div class="callout warn small mt-s"><b>Read the off-diagonal cells.</b> 14 of 40 requests went to the other tool, in both directions. "Availability" and "available" are all that tells the two apart.</div>
+  <aside class="notes"><p>A synthetic routing log, written with a fixed seed by labs/_tools/make_diagnostics.py (data/reference/routing_log.jsonl): 40 requests, each labelled with the tool it needs, and the first tool the agent called. It is not a model run; it is a log to read. Ask the room: which request would you send to which tool after reading only these two lines? Most cannot tell either. A wrong read tool raises no error: it returns a plausible answer to another question, so this failure is invisible unless you label requests and count. Keep this pair of slides to about four minutes; Lab 1.3 step 4 does the round trip by hand, so the round-trip slide can go quickly. Sources: Anthropic, Writing effective tools for agents.</p></aside>
+</section>
+
+<section class="slide" data-label="Routing errors" id="measure-tool-routing" data-lo="LO1">
+  <div class="kicker">Disambiguate, then measure</div>
+  <h2>Say when to use each tool and when to use the other, then count again</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="prompt s" data-tool="find_pilot_slots">Free pilotage slots for one vessel movement, by vessel ID and date. Use it to plan an arrival or departure. Not for questions about named pilots: use pilot_roster.</div>
+      <div class="prompt s" data-tool="pilot_roster">Named pilots, their licence class and duty days. Use it for questions about a person. Not for slot planning: use find_pilot_slots.</div>
+    </div>
+    <div class="stack">
+      <div class="stat"><div class="big">14 → 2</div><div class="lbl">routing errors on the same 40 labelled requests</div></div>
+      <ul class="bullets small">
+        <li>Label each request with the tool it needs.</li>
+        <li>Grade the first tool call in each trace against the label.</li>
+        <li>Rerun the same set after every change to a description.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes"><p>Same synthetic log, second configuration. The rewrite gives each tool a distinct object (a movement against a person), its key argument, and a pointer to the other tool. The routing error rate is wrong first calls divided by labelled requests: 35% before, 5% after. The two remaining errors are worth reading in the log (R21, R33): both are roster questions that mention a vessel ID. When two tools still overlap after the rewrite, merging them into one tool with a parameter is the other fix. Swapping the order of tools in the list is not a fix: it moves the errors.</p></aside>
 </section>
 
 <section class="slide" data-label="Useful errors" id="useful-errors" data-lo="LO1">

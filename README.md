@@ -104,6 +104,7 @@ Each line is a capability; the examples are interchangeable.
 - [Anthropic: Writing effective tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
 - [Anthropic: Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 - [AGENTS.md, the context-file convention](https://agents.md/)
+- [Liu et al.: Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172)
 
 ### Harnesses, SDKs and evaluation
 
